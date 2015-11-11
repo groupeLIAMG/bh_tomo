@@ -1,0 +1,40 @@
+function new = db1todb2(old)
+% function mogs_v2 = db1todb2(mogs_v1)
+%
+%
+
+new.nom = old.nom;
+new.data = old.data;
+new.av = old.av;
+new.ap = old.ap;
+new.Tx = old.Tx;
+new.Rx = old.Rx;
+new.tt = old.tt;
+new.et = old.et;
+new.tt_fait = old.tt_fait;
+new.amp_tmin = old.amp_tmin;
+new.amp_tmax = old.amp_tmax;
+new.amp_fait = old.amp_fait;
+new.App = old.App;
+new.fcentroid = old.fcentroid;
+new.scentroid = old.scentroid;
+new.tauApp = old.tau;
+new.tauApp_et = old.tau_et;
+new.tauFce = -1*ones(size(old.tau));
+new.tauFce_et = -1*ones(size(old.tau_et));
+new.tauHyb = -1*ones(size(old.tau));
+new.tauHyb_et = -1*ones(size(old.tau_et));
+new.fw = old.fw;
+new.f_et = old.f_et;
+new.amp_nom_Ldc = old.amp_nom_Ldc;
+new.type = old.type;
+new.Tx_z_orig = old.Tx_z_orig;
+new.Rx_z_orig = old.Rx_z_orig;
+new.no_traces = old.no_traces;
+tau_params.A0 = old.A0;
+tau_params.f0 = nan;
+tau_params.f = 80e6;
+tau_params.poids_fc = 0.5;
+tau_params.poids_App = 0.5;
+tau_params.att_app = -1;
+new.tau_params = tau_params;

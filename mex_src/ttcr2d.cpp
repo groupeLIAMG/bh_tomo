@@ -283,7 +283,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		}
 		
 		if ( nlhs >= 2 ) {
-			if ( grid.raytrace(vTx[nv], t0, vRx, tt[nv], l_data[nv], r_data[nv], omp_get_thread_num()) == 1 ) {
+			if ( grid.raytrace(vTx[nv], t0, vRx, tt[nv], r_data[nv], l_data[nv], omp_get_thread_num()) == 1 ) {
 				mexErrMsgTxt("Problem while raytracing.");
 			}
 		}

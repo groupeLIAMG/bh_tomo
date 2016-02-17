@@ -143,16 +143,16 @@ public:
                  const std::vector<T1>& t0, 
                  const std::vector<sxz<T1> >& Rx,
                  std::vector<T1>& traveltimes,
-                 std::vector<std::vector<siv<double> > >& l_data,
                  std::vector<std::vector<sxz<double> > >& r_data,
+                 std::vector<std::vector<siv<double> > >& l_data,
 				 const int threadNo=0) const;
     
     int raytrace(const std::vector<sxz<T1> >& Tx,
                  const std::vector<T1>& t0, 
                  const std::vector<sxz<T1> >& Rx,
                  std::vector<T1>& traveltimes,
-                 std::vector<std::vector<siv2<double> > >& l_data,
                  std::vector<std::vector<sxz<double> > >& r_data,
+                 std::vector<std::vector<siv2<double> > >& l_data,
 				 const int threadNo=0) const;
     
     int raytrace(const txPar<T1>& Tx,
@@ -164,16 +164,16 @@ public:
                  const rxPar<T1>& Rx,
                  std::vector<T1>& traveltimes,
                  std::vector<T1>& tt_corr,
+                 std::vector<std::vector<sxz<double> > >& r_data,
                  std::vector<std::vector<siv<double> > >& l_data,
-                 std::vector<std::vector<sxz<double> > >& r_data,
 				 const int threadNo=0) const;
     
     int raytrace(const txPar<T1>& Tx,
                  const rxPar<T1>& Rx,
                  std::vector<T1>& traveltimes,
                  std::vector<T1>& tt_corr,
-                 std::vector<std::vector<siv2<double> > >& l_data,
                  std::vector<std::vector<sxz<double> > >& r_data,
+                 std::vector<std::vector<siv2<double> > >& l_data,
 				 const int threadNo=0) const;
     
     int buildAntCorr(const char *antenna ) {
@@ -593,8 +593,8 @@ int Grid2Dc<T1,T2>::raytrace(const std::vector<sxz<T1> >& Tx,
                         const std::vector<T1>& t0, 
                         const std::vector<sxz<T1> >& Rx,
                         std::vector<T1>& traveltimes,
-                        std::vector<std::vector<siv<double> > >& l_data,
                         std::vector<std::vector<sxz<double> > >& r_data,
+                        std::vector<std::vector<siv<double> > >& l_data,
 						const int threadNo) const {
     
     if ( check_pts(Tx) == 1 ) return 1;
@@ -705,7 +705,7 @@ int Grid2Dc<T1,T2>::raytrace(const std::vector<sxz<T1> >& Tx,
 		r_tmp.push_back( child );
 		
         //  must be sorted to build matrix L
-        sort(l_data[n].begin(), l_data[n].end(), CompareSiv<T1>());
+        sort(l_data[n].begin(), l_data[n].end(), CompareSiv_i<T1>());
         
         // the order should be from Tx to Rx, so we reorder...
         iParent = r_tmp.size();
@@ -723,8 +723,8 @@ int Grid2Dc<T1,T2>::raytrace(const std::vector<sxz<T1> >& Tx,
                         const std::vector<T1>& t0, 
                         const std::vector<sxz<T1> >& Rx,
                         std::vector<T1>& traveltimes,
-                        std::vector<std::vector<siv2<double> > >& l_data,
                         std::vector<std::vector<sxz<double> > >& r_data,
+                        std::vector<std::vector<siv2<double> > >& l_data,
 						const int threadNo) const {
     
     if ( check_pts(Tx) == 1 ) return 1;
@@ -839,7 +839,7 @@ int Grid2Dc<T1,T2>::raytrace(const std::vector<sxz<T1> >& Tx,
 		r_tmp.push_back( child );
 
 		//  must be sorted to build matrix L
-        sort(l_data[n].begin(), l_data[n].end(), CompareSiv2<T1>());
+        sort(l_data[n].begin(), l_data[n].end(), CompareSiv2_i<T1>());
         
         // the order should be from Tx to Rx, so we reorder...
         iParent = r_tmp.size();
@@ -915,8 +915,8 @@ int Grid2Dc<T1,T2>::raytrace(const txPar<T1>& Tx,
                         const rxPar<T1>& Rx,
                         std::vector<T1>& traveltimes,
                         std::vector<T1>& tt_corr,
-                        std::vector<std::vector<siv<double> > >& l_data,
                         std::vector<std::vector<sxz<double> > >& r_data,
+                        std::vector<std::vector<siv<double> > >& l_data,
 						const int threadNo) const {//,
 //                        const char *basename) const {
     
@@ -1223,7 +1223,7 @@ int Grid2Dc<T1,T2>::raytrace(const txPar<T1>& Tx,
             r_data[nr][nn].z = r_tmp[ iParent-1-nn ].z;
         }
         
-        sort(l_tmp.begin(), l_tmp.end(), CompareSiv<T1>());
+        sort(l_tmp.begin(), l_tmp.end(), CompareSiv_i<T1>());
         
         l_data[nr].push_back( l_tmp[0] );
         for ( size_t n1=1; n1<l_tmp.size(); ++n1 ) {
@@ -1281,8 +1281,8 @@ int Grid2Dc<T1,T2>::raytrace(const txPar<T1>& Tx,
                         const rxPar<T1>& Rx,
                         std::vector<T1>& traveltimes,
                         std::vector<T1>& tt_corr,
-                        std::vector<std::vector<siv2<double> > >& l_data,
                         std::vector<std::vector<sxz<double> > >& r_data,
+                        std::vector<std::vector<siv2<double> > >& l_data,
 						const int threadNo) const {	
 	
     for ( size_t n=0; n<nodes.size(); ++n ) {
@@ -1569,7 +1569,7 @@ int Grid2Dc<T1,T2>::raytrace(const txPar<T1>& Tx,
             r_data[nr][nn].z = r_tmp[ iParent-1-nn ].z;
         }
         
-        sort(l_tmp.begin(), l_tmp.end(), CompareSiv2<T1>());
+        sort(l_tmp.begin(), l_tmp.end(), CompareSiv2_i<T1>());
         
         l_data[nr].push_back( l_tmp[0] );
         for ( size_t n1=1; n1<l_tmp.size(); ++n1 ) {

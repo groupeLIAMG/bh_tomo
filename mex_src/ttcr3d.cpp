@@ -17,7 +17,7 @@
 
 #include "mex.h"
 
-#include "Grid3Dc.h"
+#include "Grid3Drcsp.h"
 
 using namespace std;
 
@@ -194,10 +194,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	omp_set_num_threads( nThreads );
 #endif
 
-  Grid3Dc<double,uint32_t> grid(gp.nx, gp.ny, gp.nz,
-																gp.dx, gp.dy, gp.dz,
-																gp.xmin, gp.ymin, gp.zmin,
-																gp.nsx, gp.nsy, gp.nsz, nThreads);
+  Grid3Drcsp<double,uint32_t> grid(gp.nx, gp.ny, gp.nz,
+          gp.dx, gp.dy, gp.dz,
+          gp.xmin, gp.ymin, gp.zmin,
+          gp.nsx, gp.nsy, gp.nsz, nThreads);
 
   if ( grid.setSlowness( slowness, nSlowness ) == 1 ) {
 		mexErrMsgTxt("Problem with slowness assignement.");
@@ -265,14 +265,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		}
 		
 		if ( nlhs >= 2 ) {
-			if ( grid.raytrace(vTx[nv], t0, vRx, tt[nv], l_data[nv], r_data[nv]
-												 , omp_get_thread_num()) == 1 ) {
+			if ( grid.raytrace(vTx[nv], t0, vRx, tt[nv], r_data[nv], l_data[nv],
+                    omp_get_thread_num()) == 1 ) {
 				mexErrMsgTxt("Problem while raytracing.");
 			}
 		}
 		else {
 			if ( grid.raytrace(vTx[nv], t0, vRx, tt[nv],
-												 omp_get_thread_num()) == 1 ) {
+                    omp_get_thread_num()) == 1 ) {
 				mexErrMsgTxt("Problem while raytracing.");
 			}
 		}

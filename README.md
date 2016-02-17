@@ -43,7 +43,6 @@ mex -O ttcr2d.cpp
 mex -O ttcr3d.cpp 
 mex -O ttcr2da.cpp 
 mex -O ttcr2daa.cpp 
-mex -O ttcr2d_ant.cpp AntennaCorrection.cpp
 mex -O read_segy_b_header.c
 mex -O read_segy_tr_headers.c
 mex -O read_segy_data.c

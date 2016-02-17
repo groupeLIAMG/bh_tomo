@@ -825,7 +825,7 @@ if get(hObject,'Value')==1
     set(handles.uipanel_cont_surf,'Visible','off')
     set(handles.uipanel_variance_cont,'Visible','off')
     set(handles.pushbutton_save,'Visible','off')
-    set(handles.uipanel_aniso,'Visible','off');   %%%YH
+    set(handles.uipanel_aniso,'Visible','off');
     h.change_plot = true;
     setappdata(handles.fig_bh_cont, 'h', h)
 end
@@ -835,7 +835,7 @@ update_fig(handles)
 function pushbutton_importer_Callback(hObject, eventdata, handles)
 str = getappdata(handles.fig_bh_cont, 'str');
 [file, rep, index] = uigetfile('*.con',str.s252);
-if file==0 | index==0
+if file==0 || index==0
     return
 end
 h = getappdata(handles.fig_bh_cont, 'h');
@@ -881,7 +881,7 @@ set(handles.pushbutton_quit,'String',str.s193)
 set(handles.pushbutton_annuler,'String',str.s91)
 set(handles.pushbutton_importer,'String',[str.s215,' ...'])
 set(handles.uipanel_cont_surf,'Title',str.s212)
-set(handles.uipanel_prop,'Title',str.s222)
+set(handles.uibuttongroup1,'Title',str.s222)
 set(handles.checkbox_contSurf,'String',str.s213)
 set(handles.checkbox_c_infer,'String',str.s214)
 set(handles.text_c_infer,'String',str.s219)
@@ -890,7 +890,6 @@ set(handles.text_no_f,'String',str.s221)
 set(handles.radiobutton_vel,'String',str.s121)
 set(handles.radiobutton_att,'String',str.s177)
 %%%%YH
-set(handles.uipanel_prop,'Title',str.s298)
 set(handles.radiobutton_vel,'String',str.s299)
 set(handles.pushbutton_var_cont,'String',str.s302)
 set(handles.text_variance_cont,'String',str.s303)

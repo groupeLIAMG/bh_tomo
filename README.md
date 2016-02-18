@@ -36,23 +36,34 @@ You might need to compile three mex files if not already available for
 your platform.  To do so, follow the steps:
 
 cd /path/to/bh_tomo/mex_src    ( where the source code is )
+
 mex -O Lsr2d.c
+
 mex -O Lsr3d.c
+
 mex -O Lsr2da.c
+
 mex -O ttcr2d.cpp 
+
 mex -O ttcr3d.cpp 
+
 mex -O ttcr2da.cpp 
+
 mex -O ttcr2daa.cpp 
+
 mex -O read_segy_b_header.c
+
 mex -O read_segy_tr_headers.c
+
 mex -O read_segy_data.c
+
 mv *.mex* ..   % (to put the mex files in the main directory of bh_tomo)
 
 
 Invocation of the command mex can be performed in matlab, at the
 command prompt.
 
-!!! Important: you need a compiler that supports the C++11 standard to
+**Important**: you need a compiler that supports the C++11 standard to
     compile most of the mex functions.  This has to be enabled in your
     mex setup.
 

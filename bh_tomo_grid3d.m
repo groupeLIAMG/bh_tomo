@@ -676,7 +676,7 @@ nx = length(g.grx);
 ny = length(g.gry);
 nz = length(g.grz);
 texte = {'';
-    [str.s34,': ',num2str(nx*nz)];
+    [str.s34,': ',num2str(nx*ny*nz)];
     [str.s130,': ',num2str(size(data.Tx,1))]};
 set(handles.text_info,'String',texte)
 set(handles.edit_dx,'String',num2str(g.grx(2)-g.grx(1)))

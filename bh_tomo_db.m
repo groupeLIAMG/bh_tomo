@@ -2927,15 +2927,13 @@ if nn==1
 else
     ii=find(model3d(no).boreholes==mogs(no_mog).Tx,1);
     if isempty(ii) %#ok<ALIGN>
-		str = getappdata(handles.fig_bh_tomo_db,'str');
-		uiwait(errordlg(str.s181))
-		return
+		% append to list
+        model3d(no).boreholes = [model3d(no).boreholes mogs(no_mog).Tx];
 	end
     ii=find(model3d(no).boreholes==mogs(no_mog).Rx,1);
     if isempty(ii) %#ok<ALIGN>
-		str = getappdata(handles.fig_bh_tomo_db,'str');
-		uiwait(errordlg(str.s181))
-		return
+		% append to list
+        model3d(no).boreholes = [model3d(no).boreholes mogs(no_mog).Rx];
 	end
 end
 model3d(no).mogs(nn) = no_mog;
@@ -2946,8 +2944,6 @@ str = cell(1,length(model3d(no).mogs));
 for n=1:length(model3d(no).mogs)
 	str{n} = char( names_mog{model3d(no).mogs(n) } );
 end
-set(handles.listbox_CDM_Panneaux,'Value',1)
-set(handles.listbox_CDM_Panneaux,'String',str)
 set(handles.listbox_CDM_model3d,'String',str)
 set(handles.listbox_CDM_model3d,'Value',nn)
 setappdata(handles.fig_bh_tomo_db,'model3d',model3d);

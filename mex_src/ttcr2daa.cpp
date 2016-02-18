@@ -328,7 +328,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		}
 
 		if ( nlhs >= 2 ) {
-			rValue = grid.raytrace(vTx[nv], t0, vRx, tt, l_data, r_data);
+			rValue = grid.raytrace(vTx[nv], t0, vRx, tt, r_data, l_data);
 		}
 		else {
 			rValue = grid.raytrace(vTx[nv], t0, vRx, tt);

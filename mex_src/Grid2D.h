@@ -1,11 +1,9 @@
-// Grid3D is the class template of an object containing the 3D grid and the function
-// to perform raytracing
 //
-//  Grid.h
+//  Grid2D.h
 //  ttcr_u
 //
-//  Created by Bernard Giroux on 2013-01-10.
-//  Copyright (c) 2013 Bernard Giroux. All rights reserved.
+//  Created by Bernard Giroux on 2014-01-21.
+//  Copyright (c) 2014 Bernard Giroux. All rights reserved.
 //
 
 /*
@@ -24,51 +22,53 @@
  *
  */
 
-#ifndef ttcr_u_Grid3D_h
-#define ttcr_u_Grid3D_h
+
+#ifndef ttcr_u_Grid2D_h
+#define ttcr_u_Grid2D_h
 
 #include "ttcr_t.h"
 
-template<typename T1, typename T2>
-class Grid3D {
+template<typename T1, typename T2, typename S>
+class Grid2D {
 public:
 
-	virtual ~Grid3D() {}
+	virtual ~Grid2D() {}
 
-    virtual int raytrace(const std::vector<sxyz<T1>>& Tx,
+    virtual int raytrace(const std::vector<S>& Tx,
                          const std::vector<T1>& t0,
-                         const std::vector<sxyz<T1>>& Rx,
+                         const std::vector<S>& Rx,
                          std::vector<T1>& traveltimes,
-                         const size_t threadNo=0) const { return 0; }
-	
-	virtual int raytrace(const std::vector<sxyz<T1>>& Tx,
-						 const std::vector<T1>& t0,
-						 const std::vector<const std::vector<sxyz<T1>>*>& Rx,
-						 std::vector<std::vector<T1>*>& traveltimes,
-						 const size_t=0) const { return 0; }
-	
-    virtual int raytrace(const std::vector<sxyz<T1>>& Tx,
-                         const std::vector<T1>& t0,
-                         const std::vector<sxyz<T1>>& Rx,
-                         std::vector<T1>& traveltimes,
-                         std::vector<std::vector<sxyz<T1>>>& r_data,
                          const size_t threadNo=0) const { return 0; }
     
-    virtual int raytrace(const std::vector<sxyz<T1>>& Tx,
-						 const std::vector<T1>& t0,
-						 const std::vector<const std::vector<sxyz<T1>>*>& Rx,
-						 std::vector<std::vector<T1>*>& traveltimes,
-						 std::vector<std::vector<std::vector<sxyz<T1>>>*>& r_data,
-						 const size_t=0) const { return 0; }
+    virtual int raytrace(const std::vector<S>& Tx,
+                         const std::vector<T1>& t0,
+                         const std::vector<const std::vector<S>*>& Rx,
+                         std::vector<std::vector<T1>*>& traveltimes,
+                         const size_t threadNo=0) const { return 0; }
+    
+    virtual int raytrace(const std::vector<S>& Tx,
+                         const std::vector<T1>& t0,
+                         const std::vector<S>& Rx,
+                         std::vector<T1>& traveltimes,
+                         std::vector<std::vector<S>>& r_data,
+                         const size_t threadNo=0) const { return 0; }
+    
+    virtual int raytrace(const std::vector<S>& Tx,
+                         const std::vector<T1>& t0,
+                         const std::vector<const std::vector<S>*>& Rx,
+                         std::vector<std::vector<T1>*>& traveltimes,
+                         std::vector<std::vector<std::vector<S>>*>& r_data,
+                         const size_t threadNo=0) const { return 0; }
 	
     virtual int setSlowness(const std::vector<T1>& s) { return 0; }
-	
-	virtual void setSourceRadius(const double) {}
     
     virtual size_t getNumberOfNodes() const { return 0; }
-	
-	virtual void saveTT(const std::string &, const int, const size_t nt=0,
-						const bool vtkFormat=0) const {}
+    
+    virtual void saveTT(const std::string &, const int, const size_t nt=0,
+                        const bool vtkFormat=0) const {}
+    
+    virtual void saveTTgrad(const std::string &, const size_t nt=0,
+                            const bool vtkFormat=0) const {}
 	
 	virtual const T1 getXmin() const { return 0; }
 	virtual const T1 getXmax() const { return 0; }
@@ -76,19 +76,19 @@ public:
 	virtual const T1 getYmax() const { return 0; }
 	virtual const T1 getZmin() const { return 0; }
 	virtual const T1 getZmax() const { return 0; }
-
+    
     virtual const int get_niter() const { return 0; }
     virtual const int get_niterw() const { return 0; }
-    
+
     virtual const size_t getNthreads() const { return 0; }
 
 #ifdef VTK
-	virtual void saveModelVTU(const std::string &, const bool saveSlowness=true,
+    virtual void saveModelVTU(const std::string &, const bool saveSlowness=true,
 							  const bool savePhysicalEntity=false) const {}
 	virtual void saveModelVTR(const std::string &, const double*,
-							  const bool saveSlowness=true,
-							  const int verbose=0) const {}
+							  const bool saveSlowness=true) const {}
 #endif
 };
+
 
 #endif

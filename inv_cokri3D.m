@@ -58,9 +58,8 @@ gp.dz = grille.grz(2)-grille.grz(1);
 gp.nx = length(grille.grx)-1;
 gp.ny = length(grille.gry)-1;
 gp.nz = length(grille.grz)-1;
-gp.nsx = 5;
-gp.nsy = 5;
-gp.nsz = 5;
+
+g3d = grid3d(gp);
 
 cont = [];
 if param.tomo_amp==0
@@ -277,7 +276,8 @@ for noIter=1:param.nbreitrd+param.nbreitrc
 										str.s229])
 			drawnow
 		end
-		[tt, tomo.rays, L] = ttcr3d(s, gp, data(:,[1 2 3]), data(:,[4 5 6]));         
+        [~, tomo.rays, L] = g3d.raytrace(s, data(:,[1 2 3]), data(:,[4 5 6]));
+        tt = L*s;  % for some reason, L*s more accurate
 	end
 	
 	if param.saveInvData == 1

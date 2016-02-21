@@ -87,7 +87,7 @@ end
 
 if isempty(L)
 	[L,gridx,gridy,gridz] = Lsr3d(data(:,[1 2 3]),data(:,[4 5 6]),grille.grx,...
-																grille.gry,grille.grz);
+								  grille.gry,grille.grz);
 else
 	%Calcul des vecteurs position des centres des blocs
 	gridx = 0.5*(grille.grx(1:end-1)+grille.grx(2:end));
@@ -107,10 +107,8 @@ gp.dz = grille.grz(2)-grille.grz(1);
 gp.nx = length(grille.grx)-1;
 gp.ny = length(grille.gry)-1;
 gp.nz = length(grille.grz)-1;
-gp.nsx = 5;
-gp.nsy = 5;
-gp.nsz = 5;
 
+g3d = grid3d(gp);
 
 cont = [];
 if param.use_cont == true
@@ -228,13 +226,14 @@ for noIter=1:param.nbreitrc+param.nbreitrd
 		% RADAR : si on a des points ou la vitesse > 0.2998 m/ns
 		if param.radar == true
 			s(s<3.3356) = 3.3356;
-		end
+        end
 
-%        if param.use_cont == true
-%            s = appliqueCont(s, cont, gp);
-%        end
-[tt, tomo.rays, L] = ttcr3d(s, gp, data(:,[1 2 3]), data(:,[4 5 6]));       		tomo.L=sparse(L);
-
+        %        if param.use_cont == true
+        %            s = appliqueCont(s, cont, gp);
+        %        end
+        [~, tomo.rays, L] = g3d.raytrace(s, data(:,[1 2 3]), data(:,[4 5 6]));
+        tt = L*s;  % for some reason, L*s more accurate
+        
 	end
 	if param.saveInvData == 1
 		if noIter < param.nbreitrd || param.tomo_amp==1 || ...

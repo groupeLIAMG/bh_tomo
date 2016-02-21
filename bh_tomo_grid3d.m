@@ -69,9 +69,7 @@ g.Rx = [];
 g.TxCosDir = [];
 g.RxCosDir = [];
 g.x0 = [];
-g.borehole_x0 = [];
 g.bord = [1 1 1 1];  % [nxm nxp nzm nzp]
-g.flip = 0;
 g.Tx_Z_water = [];
 g.Rx_Z_water = [];
 g.in = [];
@@ -107,31 +105,23 @@ setappdata(handles.fig_bh_grid3d,'str',str)
 set_String_locale(handles, str)
 
 if ~isempty(data)
-    tmp = cell(1,length(data.boreholes));
-    for n=1:length(data.boreholes)
-        tmp{n} = char( data.boreholes(n).name );
-    end
-    set(handles.popupmenu_origine,'String',tmp)
-    if ~isempty(g.borehole_x0)
-        set(handles.popupmenu_origine,'Value',g.borehole_x0)
-    end
     if isempty(g.x0)
-        set(handles.edit_x0,'String',num2str(data.boreholes(1).X))
-        set(handles.edit_y0,'String',num2str(data.boreholes(1).Y))
-        set(handles.edit_z0,'String',num2str(data.boreholes(1).Z))
-		g.borehole_x0 = 1;
-		g.x0 = [data.boreholes(1).X data.boreholes(1).Y data.boreholes(1).Z];
+        xmin = min([data.Tx(data.in,1);data.Rx(data.in,1)]);
+        ymin = min([data.Tx(data.in,2);data.Rx(data.in,2)]);
+        zmin = min([data.Tx(data.in,3);data.Rx(data.in,3)]);
+        
+        set(handles.edit_x0,'String',num2str(xmin))
+        set(handles.edit_y0,'String',num2str(ymin))
+        set(handles.edit_z0,'String',num2str(zmin))
+		g.x0 = [xmin ymin zmin];
         setappdata(handles.fig_bh_grid3d,'g',g)
     else
         set(handles.edit_x0,'String',num2str(g.x0(1)))
         set(handles.edit_y0,'String',num2str(g.x0(2)))
         set(handles.edit_z0,'String',num2str(g.x0(3)))
     end
-    trouve_plan(handles)
     if isempty(g.grx)
-        update_proj(handles)
-%     else
-%         plot_proj(handles)
+        init_grid(handles)
     end
     update_info(handles)
 end
@@ -154,6 +144,47 @@ if isfield(handles, 'fig_bh_grid3d')
 else
     varargout{2} = [];
 end
+
+
+function init_grid(handles)
+data = getappdata(handles.fig_bh_grid3d,'data');
+g.Tx = data.Tx;
+g.Rx = data.Rx;
+g.in = data.in;
+
+xmin = str2double(get(handles.edit_x0,'String'));
+xmax = max([g.Tx(g.in,1);g.Rx(g.in,1)]);
+ymin = str2double(get(handles.edit_y0,'String'));
+ymax = max([g.Tx(g.in,2);g.Rx(g.in,2)]);
+zmin = str2double(get(handles.edit_z0,'String'));
+zmax = max([g.Tx(g.in,3);g.Rx(g.in,3)]);
+
+nx = str2double(get(handles.edit_nx,'String'));
+ny = str2double(get(handles.edit_ny,'String'));
+nz = str2double(get(handles.edit_nz,'String'));
+
+dx = (xmax-xmin)/nx;
+dy = (ymax-ymin)/ny;
+dz = (zmax-zmin)/nz;
+
+nxm = str2double(get(handles.edit_nxm,'String'));
+nxp = str2double(get(handles.edit_nxp,'String'));
+g.grx = xmin+dx*((0-nxm):(nx+nxp));
+g.grx = g.grx';
+
+nym = str2double(get(handles.edit_nym,'String'));
+nyp = str2double(get(handles.edit_nyp,'String'));
+g.gry = ymin+dy*((0-nym):(ny+nyp));
+g.gry = g.gry';
+
+nzm = str2double(get(handles.edit_nzm,'String'));
+nzp = str2double(get(handles.edit_nzp,'String'));
+g.grz = zmin+dz*((0-nzm):(nz+nzp));
+g.grz = g.grz';
+
+setappdata(handles.fig_bh_grid3d,'g',g)
+
+
 
 function update_plot3D(handles)
 data = getappdata(handles.fig_bh_grid3d,'data');
@@ -208,7 +239,6 @@ set(handles.pushbutton_contraintes,   'String', str.s190)
 set(handles.pushbutton_quitter,       'String', str.s193)
 set(handles.text_cell_p,              'String', [str.s191,' +'])
 set(handles.text_cell_m,              'String', [str.s191,' -'])
-set(handles.text_f_origine,           'String', str.s192)
 set(handles.text_origine,             'String', str.s194)
 
 load rotate
@@ -218,38 +248,25 @@ set(handles.togglebutton_zoom,'CData',zoomCData)
 clear cdata zoomCData
 
 
-function popupmenu_origine_Callback(hObject, eventdata, handles)
-data = getappdata(handles.fig_bh_grid3d,'data');
-g = getappdata(handles.fig_bh_grid3d,'g');
-no = get(hObject,'Value');
-g.x0(1) = data.boreholes(no).X;
-g.x0(2) = data.boreholes(no).Y;
-g.x0(3) = data.boreholes(no).Z;
-g.borehole_x0 = no;
-set(handles.edit_x0,'String',num2str(data.boreholes(no).X))
-set(handles.edit_y0,'String',num2str(data.boreholes(no).Y))
-set(handles.edit_z0,'String',num2str(data.boreholes(no).Z))
-setappdata(handles.fig_bh_grid3d,'g',g)
-update_proj(handles)
-update_info(handles)
-
-function popupmenu_origine_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
 
 function edit_nxm_Callback(hObject, eventdata, handles)
-val = str2double(get(hObject,'string'));
-if isnan(val)
+nxm = str2double(get(hObject,'string'));
+if isnan(nxm)
     str = getappdata(handles.fig_bh_grid3d,'str');
     errordlg(str.s54,str.s45,'modal')
     return
 end
 g = getappdata(handles.fig_bh_grid3d,'g');
-g.bord(1) = val;
+g.bord(1) = nxm;
+
+nxp = str2double(get(handles.edit_nxp,'String'));
+xmin = str2double(get(handles.edit_x0,'String'));
+nx = str2double(get(handles.edit_nx,'String'));
+dx = str2double(get(handles.edit_dx,'String'));
+g.grx = xmin+dx*((0-nxm):(nx+nxp));
+g.grx = g.grx';
+
 setappdata(handles.fig_bh_grid3d,'g',g)
-update_proj(handles)
 update_info(handles)
 
 function edit_nxm_CreateFcn(hObject, eventdata, handles)
@@ -259,16 +276,23 @@ end
 
 
 function edit_nxp_Callback(hObject, eventdata, handles)
-val = str2double(get(hObject,'string'));
-if isnan(val)
+nxp = str2double(get(hObject,'string'));
+if isnan(nxp)
     str = getappdata(handles.fig_bh_grid3d,'str');
     errordlg(str.s54,str.s45,'modal')
     return
 end
 g = getappdata(handles.fig_bh_grid3d,'g');
-g.bord(2) = val;
+g.bord(2) = nxp;
+
+nxm = str2double(get(handles.edit_nxm,'String'));
+xmin = str2double(get(handles.edit_x0,'String'));
+nx = str2double(get(handles.edit_nx,'String'));
+dx = str2double(get(handles.edit_dx,'String'));
+g.grx = xmin+dx*((0-nxm):(nx+nxp));
+g.grx = g.grx';
+
 setappdata(handles.fig_bh_grid3d,'g',g)
-update_proj(handles)
 update_info(handles)
 
 function edit_nxp_CreateFcn(hObject, eventdata, handles)
@@ -285,7 +309,7 @@ if isnan(dx)
     return
 end
 g = getappdata(handles.fig_bh_grid3d,'g');
-xmin = min([g.Tx(g.in,1);g.Rx(g.in,1)]) - 0.5*dx;
+xmin = str2double(get(handles.edit_x0,'String'));
 xmax = max([g.Tx(g.in,1);g.Rx(g.in,1)]) + 0.5*dx;
 nx = ceil((xmax-xmin)/dx);
 set(handles.edit_nx,'String',num2str(nx))
@@ -295,7 +319,6 @@ nxp = str2double(get(handles.edit_nxp,'String'));
 g.grx = xmin+dx*((0-nxm):(nx+nxp));
 g.grx = g.grx';
 setappdata(handles.fig_bh_grid3d,'g',g)
-%plot_proj(handles)
 update_info(handles)
 
 function edit_dx_CreateFcn(hObject, eventdata, handles)
@@ -305,16 +328,23 @@ end
 
 
 function edit_nym_Callback(hObject, eventdata, handles)
-val = str2double(get(hObject,'string'));
-if isnan(val)
+nym = str2double(get(hObject,'string'));
+if isnan(nym)
     str = getappdata(handles.fig_bh_grid3d,'str');
     errordlg(str.s54,str.s45,'modal')
     return
 end
 g = getappdata(handles.fig_bh_grid3d,'g');
-g.bord(3) = val;
+g.bord(3) = nym;
+
+nyp = str2double(get(handles.edit_nyp,'String'));
+ymin = str2double(get(handles.edit_y0,'String'));
+ny = str2double(get(handles.edit_ny,'String'));
+dy = str2double(get(handles.edit_dy,'String'));
+g.gry = ymin+dy*((0-nym):(ny+nyp));
+g.gry = g.gry';
+
 setappdata(handles.fig_bh_grid3d,'g',g)
-update_proj(handles)
 update_info(handles)
 
 function edit_nym_CreateFcn(hObject, eventdata, handles)
@@ -324,16 +354,23 @@ end
 
 
 function edit_nyp_Callback(hObject, eventdata, handles)
-val = str2double(get(hObject,'string'));
-if isnan(val)
+nyp = str2double(get(hObject,'string'));
+if isnan(nyp)
     str = getappdata(handles.fig_bh_grid3d,'str');
     errordlg(str.s54,str.s45,'modal')
     return
 end
 g = getappdata(handles.fig_bh_grid3d,'g');
-g.bord(4) = val;
+g.bord(4) = nyp;
+
+nym = str2double(get(handles.edit_nym,'String'));
+ymin = str2double(get(handles.edit_y0,'String'));
+ny = str2double(get(handles.edit_ny,'String'));
+dy = str2double(get(handles.edit_dy,'String'));
+g.gry = ymin+dy*((0-nym):(ny+nyp));
+g.gry = g.gry';
+
 setappdata(handles.fig_bh_grid3d,'g',g)
-update_proj(handles)
 update_info(handles)
 
 function edit_nyp_CreateFcn(hObject, eventdata, handles)
@@ -350,8 +387,8 @@ if isnan(dy)
     return
 end
 g = getappdata(handles.fig_bh_grid3d,'g');
-ymin = min([g.Tx(g.in,1);g.Rx(g.in,1)]) - 0.5*dy;
-ymax = max([g.Tx(g.in,1);g.Rx(g.in,1)]) + 0.5*dy;
+ymin = str2double(get(handles.edit_y0,'String'));
+ymax = max([g.Tx(g.in,2);g.Rx(g.in,2)]) + 0.5*dy;
 ny = ceil((ymax-ymin)/dy);
 set(handles.edit_ny,'String',num2str(ny))
 
@@ -360,7 +397,6 @@ nyp = str2double(get(handles.edit_nyp,'String'));
 g.gry = ymin+dy*((0-nym):(ny+nyp));
 g.gry = g.gry';
 setappdata(handles.fig_bh_grid3d,'g',g)
-%plot_proj(handles)
 update_info(handles)
 
 function edit_dy_CreateFcn(hObject, eventdata, handles)
@@ -369,16 +405,23 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 function edit_nzm_Callback(hObject, eventdata, handles)
-val = str2double(get(hObject,'string'));
-if isnan(val)
+nzm = str2double(get(hObject,'string'));
+if isnan(nzm)
     str = getappdata(handles.fig_bh_grid3d,'str');
     errordlg(str.s54,str.s45,'modal')
     return
 end
 g = getappdata(handles.fig_bh_grid3d,'g');
-g.bord(3) = val;
+g.bord(3) = nzm;
+
+nzp = str2double(get(handles.edit_nzp,'String'));
+zmin = str2double(get(handles.edit_z0,'String'));
+nz = str2double(get(handles.edit_nz,'String'));
+dz = str2double(get(handles.edit_dz,'String'));
+g.grz = zmin+dz*((0-nzm):(nz+nzp));
+g.grz = g.grz';
+
 setappdata(handles.fig_bh_grid3d,'g',g)
-update_proj(handles)
 update_info(handles)
 
 
@@ -390,16 +433,23 @@ end
 
 
 function edit_nzp_Callback(hObject, eventdata, handles)
-val = str2double(get(hObject,'string'));
-if isnan(val)
+nzp = str2double(get(hObject,'string'));
+if isnan(nzp)
     str = getappdata(handles.fig_bh_grid3d,'str');
     errordlg(str.s54,str.s45,'modal')
     return
 end
 g = getappdata(handles.fig_bh_grid3d,'g');
-g.bord(4) = val;
+g.bord(4) = nzp;
+
+nzm = str2double(get(handles.edit_nzm,'String'));
+zmin = str2double(get(handles.edit_z0,'String'));
+nz = str2double(get(handles.edit_nz,'String'));
+dz = str2double(get(handles.edit_dz,'String'));
+g.grz = zmin+dz*((0-nzm):(nz+nzp));
+g.grz = g.grz';
+
 setappdata(handles.fig_bh_grid3d,'g',g)
-update_proj(handles)
 update_info(handles)
 
 
@@ -417,7 +467,7 @@ if isnan(dz)
     return
 end
 g = getappdata(handles.fig_bh_grid3d,'g');
-zmin = min([g.Tx(g.in,3);g.Rx(g.in,3)]) - 0.5*dz;
+zmin = str2double(get(handles.edit_z0,'String'));
 zmax = max([g.Tx(g.in,3);g.Rx(g.in,3)]) + 0.5*dz;
 nz = ceil((zmax-zmin)/dz);
 set(handles.edit_nz,'String',num2str(nz))
@@ -427,7 +477,6 @@ nzp = str2double(get(handles.edit_nzp,'String'));
 g.grz = zmin+dz*((0-nzm):(nz+nzp));
 g.grz=g.grz';
 setappdata(handles.fig_bh_grid3d,'g',g)
-%plot_proj(handles)
 update_info(handles)
 
 function edit_dz_CreateFcn(hObject, eventdata, handles)
@@ -436,158 +485,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-function trouve_plan(handles)
-data = getappdata(handles.fig_bh_grid3d,'data');
-if isempty(data)
-    return
-end
-% X = [data.boreholes(1).X data.boreholes(1).Y data.boreholes(1).Z;
-%     data.boreholes(1).Xmax data.boreholes(1).Ymax data.boreholes(1).Zmax;
-%     data.boreholes(2).X data.boreholes(2).Y data.boreholes(2).Z;
-%     data.boreholes(2).Xmax data.boreholes(2).Ymax data.boreholes(2).Zmax];
 
-%X = [data.boreholes(1).fdata; data.boreholes(2).fdata];
-
-% trouve le plan qui passe par les points
-uTx = unique(data.Tx(data.in,:), 'rows');
-uRx = unique(data.Rx(data.in,:), 'rows');
-%[h.x0, h.a]=lsplane([data.boreholes(1).fdata; data.boreholes(2).fdata]);
-
-[h.x0,h.a]=lsplane([uTx; uRx]);
-h.x0 = h.x0';  % Centroid of the data = point on the best-fit plane
-h.a = h.a';    % Direction cosines of the normal to the best-fit plane
-if h.a(3)<0, h.a=-h.a; end
-
-% on projète les positions des Tx et Rx
-h.Tx = proj_plan(data.Tx, h.x0, h.a);
-h.Rx = proj_plan(data.Rx, h.x0, h.a);
-
-% figure
-% plot3(data.Tx(:,1),data.Tx(:,2),data.Tx(:,3), 'g+')
-% hold on
-% plot3(data.Rx(:,1),data.Rx(:,2),data.Rx(:,3), '+')
-% plot3(h.Tx(:,1),h.Tx(:,2),h.Tx(:,3), 'go')
-% plot3(h.Rx(:,1),h.Rx(:,2),h.Rx(:,3), 'o')
-% hold off
-
-setappdata(handles.fig_bh_grid3d,'h',h)
-
-function update_proj(handles)
-h = getappdata(handles.fig_bh_grid3d,'h');
-g = getappdata(handles.fig_bh_grid3d,'g');
-data = getappdata(handles.fig_bh_grid3d,'data');
-% origine(1) = str2double(get(handles.edit_x0,'String'));
-% origine(2) = str2double(get(handles.edit_y0,'String'));
-% origine(3) = str2double(get(handles.edit_z0,'String'));
-% [az,dip] = calcul_azimuth_dip(handles);
-
-g.Tx = h.Tx;%transl_rotat(h.Tx, origine, az, dip);
-g.Rx = h.Rx;%transl_rotat(h.Rx, origine, az, dip);
-% g.TxCosDir = transl_rotat(data.TxCosDir, [0 0 0], az, dip);
-% g.RxCosDir = transl_rotat(data.RxCosDir, [0 0 0], az, dip);
-% if ~isnan(data.Tx_Z_water(1,1))
-%     g.Tx_Z_water = transl_rotat(data.Tx_Z_water, origine, az, dip);
-% end
-% if ~isnan(data.Rx_Z_water(1,1))
-%     g.Rx_Z_water = transl_rotat(data.Rx_Z_water, origine, az, dip);
-% end
-g.in = data.in;
-% figure
-% plot3(g.Tx(:,1), g.Tx(:,2), g.Tx(:,3), 'o', g.Rx(:,1), g.Rx(:,2), g.Rx(:,3), '*')
-% set(gca,'DataAspectRatio',[1 1 1])
-
-dx = str2double(get(handles.edit_dx,'String'));
-dy = str2double(get(handles.edit_dy,'String'));
-dz = str2double(get(handles.edit_dz,'String'));
-
-if isnan(dx)
-	xmin = min([g.Tx(g.in,1);g.Rx(g.in,1)]);
-	xmax = max([g.Tx(g.in,1);g.Rx(g.in,1)]);
-	nx = str2double(get(handles.edit_nx,'String'));
-	dx = (xmax-xmin)/nx;
-	xmin = xmin - 0.5*dx;
-	xmax = xmax + 0.5*dx;
-	dx = (xmax-xmin)/nx;
-	set(handles.edit_dx,'String',num2str(dx))
-else
-	xmin = min([g.Tx(g.in,1);g.Rx(g.in,1)]) - 0.5*dx;
-	xmax = max([g.Tx(g.in,1);g.Rx(g.in,1)]) + 0.5*dx;
-	nx = ceil((xmax-xmin)/dx);
-end
-if isnan(dy)
-	ymin = min([g.Tx(g.in,1);g.Rx(g.in,1)]);
-	ymax = max([g.Tx(g.in,1);g.Rx(g.in,1)]);
-	ny = str2double(get(handles.edit_nx,'String'));
-	dy = (ymax-ymin)/ny;
-	ymin = ymin - 0.5*dy;
-	ymax = ymax + 0.5*dy;
-	dy = (xmax-xmin)/nx;
-	set(handles.edit_dy,'String',num2str(dy))
-else
-	ymin = min([g.Tx(g.in,1);g.Rx(g.in,1)]) - 0.5*dy;
-	ymax = max([g.Tx(g.in,1);g.Rx(g.in,1)]) + 0.5*dy;
-	ny = ceil((ymax-ymin)/dy);
-end
-if isnan(dz)
-	zmin = min([g.Tx(g.in,3);g.Rx(g.in,3)]);
-	zmax = max([g.Tx(g.in,3);g.Rx(g.in,3)]);
-	nz = str2double(get(handles.edit_nz,'String'));
-	dz = (zmax-zmin)/nz;
-	zmin = zmin - 0.5*dz;
-	zmax = zmax + 0.5*dz;
-	dz = (zmax-zmin)/nz;
-	set(handles.edit_dz,'String',num2str(dz))
-else
-	zmin = min([g.Tx(g.in,3);g.Rx(g.in,3)]) - 0.5*dz;
-	zmax = max([g.Tx(g.in,3);g.Rx(g.in,3)]) + 0.5*dz;
-	nz = ceil((zmax-zmin)/dz);
-end
-nxm = str2double(get(handles.edit_nxm,'String'));
-nxp = str2double(get(handles.edit_nxp,'String'));
-nym = str2double(get(handles.edit_nym,'String'));
-nyp = str2double(get(handles.edit_nyp,'String'));
-nzm = str2double(get(handles.edit_nzm,'String'));
-nzp = str2double(get(handles.edit_nzp,'String'));
-g.grx = xmin+dx*((0-nxm):(nx+nxp));
-g.gry = ymin+dy*((0-nym):(ny+nyp));
-g.grz = zmin+dz*((0-nzm):(nz+nzp));
-g.grx = g.grx';
-g.gry = g.gry';
-g.grz = g.grz';
-setappdata(handles.fig_bh_grid3d,'g',g)
-%plot_proj(handles)
-
-function plot_proj(handles)
-g = getappdata(handles.fig_bh_grid3d,'g');
-
-xlim = [min(g.grx) max(g.grx)];
-zlim = [min(g.grz) max(g.grz)];
-xx1 = repmat(g.grx(:).',3,1) ;
-zz1 = repmat([zlim(:) ; nan],1,numel(g.grx)) ;
-xx2 = repmat([xlim(:) ; nan],1,numel(g.grz)) ;
-zz2 = repmat(g.grz(:).',3,1) ;
-xx1 = [xx1 xx2] ;
-zz1 = [zz1 zz2] ;
-
-%aa=[min(g.grx)*ones(length(g.grz),1) max(g.grx)*ones(length(g.grz),1);g.grx g.grx];
-%bb=[g.grz g.grz; min(g.grz)*ones(length(g.grx),1) max(g.grz)*ones(length(g.grx),1)];
-
-axes(handles.axes_proj);
-%plot(aa',bb','Color',[0.5 0.5 0.5])
-%plot3(Tx(:,1),Tx(:,2),Tx(:,3),'b.')
-plot(xx1, zz1,'Color',[0.5 0.5 0.5])
-hold on
-plot(g.Tx(g.in,1),g.Tx(g.in,3),'b.')
-%plot3(Rx(:,1),Rx(:,2),Rx(:,3),'g.')
-plot(g.Rx(g.in,1),g.Rx(g.in,3),'g.')
-
-hold off
-axis equal
-axis tight
-xlabel('X')
-zlabel('Z')
-%ylabel('Y')
-%set(handles.axes_proj,'ZDir','reverse')
 
 function edit_x0_Callback(hObject, eventdata, handles)
 val = str2double(get(hObject,'string'));
@@ -595,7 +493,21 @@ if isnan(val)
     errordlg(str.s54,str.s45,'modal')
     return
 end
-update_proj(handles)
+xmin = min([g.Tx(g.in,1);g.Rx(g.in,1)]);
+if val>xmin
+    errordlg('Value larger than borehole x min',str.s45,'modal')
+    set(hobject,'String',num2str(xmin))
+end
+
+xmax = max([g.Tx(g.in,1);g.Rx(g.in,1)]) + 0.5*dx;
+nx = ceil((xmax-xmin)/dx);
+set(handles.edit_nx,'String',num2str(nx))
+
+nxm = str2double(get(handles.edit_nxm,'String'));
+nxp = str2double(get(handles.edit_nxp,'String'));
+g.grx = xmin+dx*((0-nxm):(nx+nxp));
+g.grx = g.grx';
+setappdata(handles.fig_bh_grid3d,'g',g)
 update_info(handles)
 
 
@@ -611,7 +523,21 @@ if isnan(val)
     errordlg(str.s54,str.s45,'modal')
     return
 end
-update_proj(handles)
+ymin = min([g.Tx(g.in,2);g.Rx(g.in,2)]);
+if val>ymin
+    errordlg('Value larger than borehole y min',str.s45,'modal')
+    set(hobject,'String',num2str(ymin))
+end
+
+ymax = max([g.Tx(g.in,2);g.Rx(g.in,2)]) + 0.5*dy;
+ny = ceil((ymax-ymin)/dy);
+set(handles.edit_ny,'String',num2str(ny))
+
+nym = str2double(get(handles.edit_nym,'String'));
+nyp = str2double(get(handles.edit_nyp,'String'));
+g.gry = ymin+dy*((0-nym):(ny+nyp));
+g.gry = g.gry';
+setappdata(handles.fig_bh_grid3d,'g',g)
 update_info(handles)
 
 
@@ -627,7 +553,21 @@ if isnan(val)
     errordlg(str.s54,str.s45,'modal')
     return
 end
-update_proj(handles)
+zmin = min([g.Tx(g.in,3);g.Rx(g.in,3)]);
+if val>zmin
+    errordlg('Value larger than borehole z min',str.s45,'modal')
+    set(hobject,'String',num2str(zmin))
+end
+
+zmax = max([g.Tx(g.in,3);g.Rx(g.in,3)]) + 0.5*dz;
+nz = ceil((zmax-zmin)/dz);
+set(handles.edit_nz,'String',num2str(nz))
+
+nzm = str2double(get(handles.edit_nzm,'String'));
+nzp = str2double(get(handles.edit_nzp,'String'));
+g.grz = zmin+dz*((0-nzm):(nz+nzp));
+g.grz=g.grz';
+setappdata(handles.fig_bh_grid3d,'g',g)
 update_info(handles)
 
 
@@ -637,34 +577,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-function [az,dip] = calcul_azimuth_dip(handles)
-h = getappdata(handles.fig_bh_grid3d,'h');
-% az p/r a l'axe des x
-% dip est l'angle p/r a l'horizontal
-
-
-%
-% forme normale de l'équation du plan
-%
-%   x*a(1) + y*a(2) + z*a(3) = d
-%
-%   avec d la distance de l'origine au plan
-%
-
-d = sum( h.x0 .* h.a );
-x = d/h.a(1);
-y = d/h.a(2);
-az = atan2(y,x);
-%a=h.a;
-% rotation p/r azimuth
-%if abs(az) > (pi/720)  % si plus grand que 1/4 degre
-%    rot = [cos(az) -sin(az); sin(az) cos(az)];
-%    a(1:2) = a(1:2)*rot';
-%end
-dip = asin(h.a(3));
-%if a(2)<0; dip=-dip; end
-g = getappdata(handles.fig_bh_grid3d,'g');
-az = az + g.flip*pi;
 
 
 function update_info(handles)
@@ -689,53 +601,53 @@ set(handles.edit_nz,'String',num2str(nz))
 
 function pushbutton_contraintes_Callback(hObject, eventdata, handles)
 data = getappdata(handles.fig_bh_grid3d,'data');
-g = getappdata(handles.fig_bh_grid3d,'g');
-h = getappdata(handles.fig_bh_grid3d,'h');
-grx = [g.grx(1) g.grx(2)-g.grx(1) g.grx(length(g.grx))];
-gry = [g.gry(1) g.gry(2)-g.gry(1) g.gry(length(g.gry))];
-grz = [g.grz(1) g.grz(2)-g.grz(1) g.grz(length(g.grz))];
-no = get(handles.popupmenu_origine,'Value');
-tmp = 1:2;
-no2 = tmp(no~=tmp);
-
-f1(1) = data.boreholes(no).X;
-f1(2) = data.boreholes(no).Y;
-f1(3) = data.boreholes(no).Z_surf;
-f2(1) = data.boreholes(no2).X;
-f2(2) = data.boreholes(no2).Y;
-f2(3) = data.boreholes(no2).Z_surf;
-
-f1 = proj_plan(f1, h.x0, h.a);
-f2 = proj_plan(f2, h.x0, h.a);
-origine(1) = str2double(get(handles.edit_x0,'String'));
-origine(2) = str2double(get(handles.edit_y0,'String'));
-origine(3) = str2double(get(handles.edit_z0,'String'));
-[az,dip] = calcul_azimuth_dip(handles);
-
-f1 = transl_rotat(f1, origine, az, dip);
-f2 = transl_rotat(f2, origine, az, dip);
-
-tmp = [f1(1) f1(3) f2(1) f2(3)]; %  [xTx zTx xRx zRx]
-for n=[no no2]
-	if isfield( data.boreholes(n), 'scont' )
-		g.cont.slowness = ajouteContraintesBH(g.cont.slowness, ...
-			data.boreholes(n).scont, h.x0, h.a, origine, az, dip);
-	end
-	if isfield( data.boreholes(n), 'acont' )
-		g.cont.attenuation = ajouteContraintesBH(g.cont.attenuation, ...
-			data.boreholes(n).acont, h.x0, h.a, origine, az, dip);
-	end
-end
-
-plan.x0      = h.x0;
-plan.a       = h.a;
-plan.origine = origine;
-plan.az      = az;
-plan.dip     = dip;
-	
-[hh, g.cont] = bh_tomo_contraintes3d(grx, gry, grz, tmp, g.cont, plan);
-if ishandle(hh), close(hh); end
-setappdata(handles.fig_bh_grid3d,'g',g)
+% g = getappdata(handles.fig_bh_grid3d,'g');
+% h = getappdata(handles.fig_bh_grid3d,'h');
+% grx = [g.grx(1) g.grx(2)-g.grx(1) g.grx(length(g.grx))];
+% gry = [g.gry(1) g.gry(2)-g.gry(1) g.gry(length(g.gry))];
+% grz = [g.grz(1) g.grz(2)-g.grz(1) g.grz(length(g.grz))];
+% no = get(handles.popupmenu_origine,'Value');
+% tmp = 1:2;
+% no2 = tmp(no~=tmp);
+% 
+% f1(1) = data.boreholes(no).X;
+% f1(2) = data.boreholes(no).Y;
+% f1(3) = data.boreholes(no).Z_surf;
+% f2(1) = data.boreholes(no2).X;
+% f2(2) = data.boreholes(no2).Y;
+% f2(3) = data.boreholes(no2).Z_surf;
+% 
+% f1 = proj_plan(f1, h.x0, h.a);
+% f2 = proj_plan(f2, h.x0, h.a);
+% origine(1) = str2double(get(handles.edit_x0,'String'));
+% origine(2) = str2double(get(handles.edit_y0,'String'));
+% origine(3) = str2double(get(handles.edit_z0,'String'));
+% [az,dip] = calcul_azimuth_dip(handles);
+% 
+% f1 = transl_rotat(f1, origine, az, dip);
+% f2 = transl_rotat(f2, origine, az, dip);
+% 
+% tmp = [f1(1) f1(3) f2(1) f2(3)]; %  [xTx zTx xRx zRx]
+% for n=[no no2]
+% 	if isfield( data.boreholes(n), 'scont' )
+% 		g.cont.slowness = ajouteContraintesBH(g.cont.slowness, ...
+% 			data.boreholes(n).scont, h.x0, h.a, origine, az, dip);
+% 	end
+% 	if isfield( data.boreholes(n), 'acont' )
+% 		g.cont.attenuation = ajouteContraintesBH(g.cont.attenuation, ...
+% 			data.boreholes(n).acont, h.x0, h.a, origine, az, dip);
+% 	end
+% end
+% 
+% plan.x0      = h.x0;
+% plan.a       = h.a;
+% plan.origine = origine;
+% plan.az      = az;
+% plan.dip     = dip;
+% 	
+% [hh, g.cont] = bh_tomo_contraintes3d(grx, gry, grz, tmp, g.cont, plan);
+% if ishandle(hh), close(hh); end
+% setappdata(handles.fig_bh_grid3d,'g',g)
 
 
 function pushbutton_quitter_Callback(hObject, eventdata, handles)
@@ -750,56 +662,6 @@ uiresume(handles.fig_bh_grid3d);
 
 
 
-function pushbutton_qualite_Callback(hObject, eventdata, handles)
-h = getappdata(handles.fig_bh_grid3d,'h');
-g = getappdata(handles.fig_bh_grid3d,'g');
-data = getappdata(handles.fig_bh_grid3d,'data');
-
-figure
-
-% distance entre les pts originaux et les pts projetÃ©s dans le plan
-
-dTx = sqrt( sum( (data.Tx-h.Tx).^2, 2) );
-
-subplot(321)
-plot(dTx,'o')
-title('Distance between original and projected Tx')
-
-dRx = sqrt( sum( (data.Rx-h.Rx).^2, 2) );
-
-subplot(322)
-plot(dRx,'o')
-title('Distance between original and projected Rx')
-
-l_orig = sqrt( sum( (data.Tx-data.Rx).^2,2 ) );
-l_new = sqrt( sum( (h.Tx-h.Rx).^2,2 ) );
-
-% Cosinus directeurs des antennes après rotation
-
-subplot(323)
-plot(g.TxCosDir(:,1),'b')
-hold on
-plot(g.TxCosDir(:,2),'r')
-plot(g.TxCosDir(:,3),'g')
-hold off
-title('Tx direction cosines after rotation')
-
-subplot(324)
-plot(g.RxCosDir(:,1),'b')
-hold on
-plot(g.RxCosDir(:,2),'r')
-plot(g.RxCosDir(:,3),'g')
-hold off
-title('Rx direction cosines after rotation')
-
-
-% Erreur relative sur la longueur des rais aprÃ¨s projection
-diff = 100*(l_orig - l_new)./l_orig;
-subplot(325)
-plot(diff)
-str = getappdata(handles.fig_bh_grid3d,'str');
-title(str.s196)
-
 
 function edit_nx_Callback(hObject, eventdata, handles)
 nx = str2double(get(hObject,'String'));
@@ -809,10 +671,9 @@ if isnan(nx)
     return
 end
 g = getappdata(handles.fig_bh_grid3d,'g');
-xmin = min([g.Tx(g.in,1);g.Rx(g.in,1)]);
+xmin = str2double(get(handles.edit_x0,'String'));
 xmax = max([g.Tx(g.in,1);g.Rx(g.in,1)]);
 dx = (xmax-xmin)/nx;
-xmin = xmin-0.5*dx;
 xmax = xmax+0.5*dx;
 dx = (xmax-xmin)/nx;
 set(handles.edit_dx,'String',num2str(dx))
@@ -822,7 +683,6 @@ nxp = str2double(get(handles.edit_nxp,'String'));
 g.grx = xmin+dx*((0-nxm):(nx+nxp));
 g.grx=g.grx';
 setappdata(handles.fig_bh_grid3d,'g',g)
-%plot_proj(handles)
 update_info(handles)
 
 function edit_nx_CreateFcn(hObject, eventdata, handles)
@@ -838,10 +698,9 @@ if isnan(ny)
     return
 end
 g = getappdata(handles.fig_bh_grid3d,'g');
-ymin = min([g.Tx(g.in,1);g.Rx(g.in,1)]);
-ymax = max([g.Tx(g.in,1);g.Rx(g.in,1)]);
+ymin = str2double(get(handles.edit_y0,'String'));
+ymax = max([g.Tx(g.in,2);g.Rx(g.in,2)]);
 dy = (ymax-ymin)/ny;
-ymin = ymin-0.5*dy;
 ymax = ymax+0.5*dy;
 dy = (ymax-ymin)/ny;
 set(handles.edit_dy,'String',num2str(dy))
@@ -851,7 +710,6 @@ nyp = str2double(get(handles.edit_nyp,'String'));
 g.gry = ymin+dy*((0-nym):(ny+nyp));
 g.gry=g.gry';
 setappdata(handles.fig_bh_grid3d,'g',g)
-%plot_proj(handles)
 update_info(handles)
 
 
@@ -868,10 +726,9 @@ if isnan(nz)
     return
 end
 g = getappdata(handles.fig_bh_grid3d,'g');
-zmin = min([g.Tx(g.in,3);g.Rx(g.in,3)]);
+zmin = str2double(get(handles.edit_z0,'String'));
 zmax = max([g.Tx(g.in,3);g.Rx(g.in,3)]);
 dz = (zmax-zmin)/nz;
-zmin = zmin - 0.5*dz;
 zmax = zmax + 0.5*dz;
 dz = (zmax-zmin)/nz;
 set(handles.edit_dz,'String',num2str(dz))

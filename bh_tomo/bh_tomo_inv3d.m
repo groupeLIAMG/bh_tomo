@@ -39,7 +39,7 @@ function varargout = bh_tomo_inv3d(varargin)
 
 % Edit the above text to modify the response to help bh_tomo_inv3d
 
-% Last Modified by GUIDE v2.5 25-Feb-2013 17:11:36
+% Last Modified by GUIDE v2.5 22-Feb-2016 19:53:21
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -106,7 +106,6 @@ h = getappdata(handles.fig_bh_inv, 'h');
 val = get(hObject,'Value');
 if val==1 % cokri
 	set(handles.uipanel_lsqr,'Visible','off')
-	set(handles.uipanel_sirt,'Visible','off')
 	set(handles.uipanel_cokri,'Visible','on')
 	if ~isfield(h, 'model3d'), return, end
 	if get(handles.popupmenu_type_data,'Value')==1 % tt
@@ -130,12 +129,7 @@ if val==1 % cokri
 	end
 elseif val==2 % lsqr
 	set(handles.uipanel_cokri,'Visible','off')
-	set(handles.uipanel_sirt,'Visible','off')
 	set(handles.uipanel_lsqr,'Visible','on')
-elseif val==3 % sirt
-	set(handles.uipanel_cokri,'Visible','off')
-	set(handles.uipanel_lsqr,'Visible','off')
-	set(handles.uipanel_sirt,'Visible','on')
 end
 
 
@@ -176,15 +170,6 @@ function edit_lsqr_correlmin_Callback(hObject, eventdata, handles)
 
 
 function edit_lsqr_correlmin_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-	set(hObject,'BackgroundColor','white');
-end
-
-
-function edit_sirt_n_iter_Callback(hObject, eventdata, handles)
-
-
-function edit_sirt_n_iter_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
 	set(hObject,'BackgroundColor','white');
 end
@@ -395,7 +380,6 @@ end
 
 cla(handles.axes1)
 cla(handles.axes2)
-cla(handles.axes3)
 cbh = findobj( 0, 'tag', 'Colorbar' );   
 for i = 1: length(cbh) 
     colorbar(cbh(i),'off') 
@@ -525,19 +509,12 @@ if get(handles.popupmenu_type_inv,'Value')==1
 
 	if h.param.mode==2 
 		gh = {clim; cmap; handles.axes1; handles.axes2; ''};
-%		if get(handles.checkbox_splitAxes,'Value')==0
-%			set(handles.axes1,'Visible','on','Position',[0.36 0.081 0.225 0.71])
-%		else
-%			set(handles.axes1,'Visible','on','Position',[0.36 0.483 0.56 0.307])
-%		end
 		set(handles.axes1,'Visible','on','Position',[0.425 0.081 0.19 0.71])
 		set(handles.axes2,'Visible','on','Position',[0.75 0.081 0.19 0.71])
-        set(handles.axes3,'Visible','off')
     else
         gh = {clim; cmap; handles.axes1; ''; ''};
         set(handles.axes1,'Visible','on','Position',[0.425 0.081 0.5 0.71])
 		set(handles.axes2,'Visible','off')
-		set(handles.axes3,'Visible','off')
     end
     h.tomo = inv_cokri3D(h.param, data, h.covar, h.model3d.grid3d, Ldc, ...
             handles.text_message_inv, gh);
@@ -630,9 +607,6 @@ end
 function edit_lsqr_gradmin_CreateFcn(hObject, eventdata, handles)
 
 function edit_lsqr_tol_CreateFcn(hObject, eventdata, handles)
-
-function edit_sirt_tol_CreateFcn(hObject, eventdata, handles)
-
 
 function edit_nom_inv_Callback(hObject, eventdata, handles)
 
@@ -727,8 +701,8 @@ end
 figure
 %ha=plotRais2D(t,true);
 for i = 1:length(t.rays)
-ha=plot3(t.rays{i}(:,1),t.rays{i}(:,2),t.rays{i}(:,3));
-hold on;
+    ha=plot3(t.rays{i}(:,1),t.rays{i}(:,2),t.rays{i}(:,3));
+    hold on;
 end
 grid on;
 
@@ -737,54 +711,40 @@ set(gca,'YLim',[h.model3d.grid3d.gry(1) h.model3d.grid3d.gry(length(h.model3d.gr
 set(gca,'ZLim',[h.model3d.grid3d.grz(1) h.model3d.grid3d.grz(length(h.model3d.grid3d.grz))])
 str = getappdata(handles.fig_bh_inv, 'str');
 title(str.s179,'FontSize',14)
-xlabel(str.s119)
-ylabel(str.s120)
+xlabel(['X ',str.s119],'FontSize',12)
+ylabel(['Y ',str.s119],'FontSize',12)
+zlabel(str.s120,'FontSize',12)
 
 
 function TomoMenuItem_Callback(hObject, eventdata, handles)
 h = getappdata(handles.fig_bh_inv, 'h');
 str = getappdata(handles.fig_bh_inv, 'str');
 if isfield(h, 'tomo')
+    
     ssplot = reshape((h.tomo.s),length(h.tomo.x),length(h.tomo.y),length(h.tomo.z));
     [nx,ny,nz] = size(ssplot);
-    ix = round(nx/2);
-    iy = round(ny/2);
-    iz = round(nz/2);
+    ix = h.tomo.x(round(nx/2));
+    iy = h.tomo.y(round(ny/2));
+    iz = h.tomo.z(round(nz/2));
     figure;
 	if h.param.tomo_amp==0
-		slice(1./ssplot,iy,ix,iz);
+		slice(h.tomo.x,h.tomo.y,h.tomo.z,1./ssplot,ix,iy,iz);
 		titre = [str.s121,' [m/ns]'];
 		clim = [h.tt_b_coul_min h.tt_b_coul_max];
 	else
-		slice(ssplot,iy,ix,iz);%,'Parent',g_handles{3});
+		slice(h.tomo.x,h.tomo.y,h.tomo.z,ssplot,ix,iy,iz);
 		titre = [str.s177,' [Np/m]'];
 		clim = [h.amp_b_coul_min h.amp_b_coul_max];
 	end
 	
-    if isfield(h.tomo, 'xi')
-        subplot(121)
-    end
-    
-	set(gca,'DataAspectRatio',[1 1 1],'YDir','normal')
+	set(gca,'DataAspectRatio',[1 1 1])
 	axis tight
 	title(titre,'FontSize',14)
-	xlabel(str.s119,'FontSize',12)
-	ylabel(str.s119,'FontSize',12)
-    zlabel(str.s120,'FontSize',8)
+	xlabel(['X ',str.s119],'FontSize',12)
+	ylabel(['Y ',str.s119],'FontSize',12)
+    zlabel(str.s120,'FontSize',12)
 	if get(handles.checkbox_b_coul,'Value')==1, caxis(clim), end
 	colorbar
-    if isfield(h.tomo, 'xi')
-        subplot(122)
-        data = reshape(h.tomo.xi,length(h.tomo.z), length(h.tomo.x));
-        imagesc(h.tomo.x, h.tomo.z, data);
-        set(gca,'DataAspectRatio',[1 1 1],'YDir','normal')
-        axis tight
-        title('\xi','FontSize',14)
-        xlabel(str.s119,'FontSize',12)
-        ylabel(str.s119,'FontSize',12)
-        zlabel(str.s120,'FontSize',8)
-        colorbar
-    end
 else
     msgbox('Please make inversion or load previous inversion.','Message','modal'); 
     return;
@@ -811,26 +771,26 @@ if isfield(h, 'tomo')
 	figure
 	set(gcf,'Position',[250 200 900 600])
     [nx,ny,nz] = size(data);
-    ix = round(nx/2);
-    iy = round(ny/2);
-    iz = round(nz/2);
+    ix = h.tomo.x(round(nx/2));
+    iy = h.tomo.y(round(ny/2));
+    iz = h.tomo.z(round(nz/2));
 	subplot(121)
-    slice(data,iy,ix,iz);
-	set(gca,'DataAspectRatio',[1 1 1],'YDir','normal')
+    slice(h.tomo.x,h.tomo.y,h.tomo.z,data,ix,iy,iz);
+	set(gca,'DataAspectRatio',[1 1 1])
 	axis tight
 	title(titre,'FontSize',12)
-	xlabel(str.s119,'FontSize',10)
-    ylabel(str.s119,'FontSize',10)
+	xlabel(['X ',str.s119],'FontSize',10)
+    ylabel(['Y ',str.s119],'FontSize',10)
 	zlabel(str.s120,'FontSize',10)
 	if get(handles.checkbox_b_coul,'Value')==1, caxis(clim), end
 	colorbar
 	subplot(122)
-    slice(ec_type,iy,ix,iz);
-	set(gca,'DataAspectRatio',[1 1 1],'YDir','normal')
+    slice(h.tomo.x,h.tomo.y,h.tomo.z,ec_type,ix,iy,iz);
+	set(gca,'DataAspectRatio',[1 1 1])
 	axis tight
 	title(str.s43,'FontSize',12)
-	xlabel(str.s119,'FontSize',10)
-    ylabel(str.s119,'FontSize',10)
+	xlabel(['X ',str.s119],'FontSize',10)
+    ylabel(['Y ',str.s119],'FontSize',10)
 	zlabel(str.s120,'FontSize',10)
     if get(handles.checkbox_b_coul,'Value')==1, caxis(clim), end
 	colorbar
@@ -860,11 +820,8 @@ set(handles.pushbutton_inv,       'String', upper(str.s33))
 set(handles.uipanel_grille,       'Title',  str.s92)
 set(handles.text_pas,             'String', lower(str.s162))
 %set(handles.text_nom_inv,         'String', str.s163)
-set(handles.uipanel_sirt,         'Title',  [str.s164,' - ',str.s160])
 set(handles.uipanel_lsqr,         'Title',  [str.s164,' - ',str.s159])
 set(handles.uipanel_cokri,        'Title',  [str.s164,' - ',str.s158])
-set(handles.text_sirt_tol,        'String', str.s165)
-set(handles.text_sirt_n_iter,     'String', str.s105)
 set(handles.text_lsqr_tol,        'String', str.s165)
 set(handles.text_lsqr_n_iter,     'String', str.s105)
 set(handles.checkbox_cokri_simu,  'String', str.s172)
@@ -874,15 +831,15 @@ set(handles.uipanel_mod2_covar,   'Title',  str.s93)
 set(handles.popupmenu_model11,    'String', str.s94)
 set(handles.popupmenu_model21,    'String', str.s94)
 
-set(handles.text_model12,        'String', str.s97)
-set(handles.text_model13,        'String', str.s977)
+set(handles.text_model12,         'String', str.s97)
+set(handles.text_model13,         'String', str.s977)
 set(handles.text_model14,     	  'String', str.s98)
 set(handles.text_model15,     	  'String', str.s99)
 set(handles.text_model16,     	  'String', str.s991)
 set(handles.text_model17,     	  'String', str.s992)
 set(handles.text_c1,              'String', str.s100)
-set(handles.text_model22,        'String', str.s97)
-set(handles.text_model23,        'String', str.s977)
+set(handles.text_model22,         'String', str.s97)
+set(handles.text_model23,         'String', str.s977)
 set(handles.text_model24,     	  'String', str.s98)
 set(handles.text_model25,     	  'String', str.s99)
 set(handles.text_model26,     	  'String', str.s991)
@@ -918,7 +875,16 @@ set(handles.checkbox_use_cont,    'String', str.s208)
 set(handles.checkbox_b_coul,      'String', str.s218)
 set(handles.text_rais_droits,     'String', str.s166)
 set(handles.text_rais_courbes,    'String', str.s153)
-set(handles.checkbox_splitAxes,   'String', str.s261)
+
+
+load rotate
+set(handles.togglebutton_rotate1,'CData',cdata)
+set(handles.togglebutton_rotate2,'CData',cdata)
+load zoom
+set(handles.togglebutton_zoom1,'CData',zoomCData)
+set(handles.togglebutton_zoom2,'CData',zoomCData)
+clear cdata zoomCData
+
 
 
 function pushbutton_visu_prev_Callback(hObject, eventdata, handles)
@@ -1092,14 +1058,12 @@ if get(handles.popupmenu_type_data,'Value')==1
 	if get(handles.checkbox_b_coul,'Value')==1
 		caxis(handles.axes1,[h.tt_b_coul_min h.tt_b_coul_max])
         caxis(handles.axes2,[h.tt_b_coul_min h.tt_b_coul_max])
-        caxis(handles.axes3,[h.tt_b_coul_min h.tt_b_coul_max])
 	end
 else
 	h.amp_b_coul_min = val;
 	if get(handles.checkbox_b_coul,'Value')==1
 		caxis(handles.axes1,[h.amp_b_coul_min h.amp_b_coul_max])
 		caxis(handles.axes2,[h.amp_b_coul_min h.amp_b_coul_max])
-        caxis(handles.axes3,[h.amp_b_coul_min h.amp_b_coul_max])
 	end
 end
 setappdata(handles.fig_bh_inv, 'h',h);
@@ -1119,14 +1083,12 @@ if get(handles.popupmenu_type_data,'Value')==1
 	if get(handles.checkbox_b_coul,'Value')==1
 		caxis(handles.axes1,[h.tt_b_coul_min h.tt_b_coul_max])
         caxis(handles.axes2,[h.tt_b_coul_min h.tt_b_coul_max])
-        caxis(handles.axes3,[h.tt_b_coul_min h.tt_b_coul_max])
 	end
 else
 	h.amp_b_coul_max = val;
 	if get(handles.checkbox_b_coul,'Value')==1
 		caxis(handles.axes1,[h.amp_b_coul_min h.amp_b_coul_max])
 		caxis(handles.axes2,[h.amp_b_coul_min h.amp_b_coul_max])
-        caxis(handles.axes3,[h.amp_b_coul_min h.amp_b_coul_max])
 	end
 end
 setappdata(handles.fig_bh_inv, 'h',h);
@@ -1323,16 +1285,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-function checkbox_splitAxes_Callback(hObject, eventdata, handles)
-if get(hObject,'Value')==0
-	set(handles.axes1,'Position',[0.36  0.081 0.225 0.71])
-	set(handles.axes2,'Position',[0.694 0.081 0.225 0.71])
-else
-	set(handles.axes1,'Position',[0.36 0.483 0.56 0.307])
-	set(handles.axes2,'Position',[0.36 0.081 0.56 0.307])
-end
-
-
 function edit_n_iter_antenne_Callback(hObject, eventdata, handles)
 
 
@@ -1425,18 +1377,18 @@ z(~isnan(imdata))=1;
 
 set(get(h1,'Children'),'FaceColor',[0 0 1])
 if isfield(tomo,'corr_tt_Lant')
-if ~isempty(tomo.corr_tt_Lant)
-    subplot(ns,2,5)
-    plot(theta, tomo.corr_tt_Lant, 'o')
-    xlabel(str.s36)
-    ylabel(str.s281)
-
-    corr_rel = tomo.corr_tt_Lant./data(:,7);
-    subplot(ns,2,6)
-    plot(theta, corr_rel, 'o')
-    xlabel(str.s36)
-    ylabel([str.s281,' [%]'])
-end
+    if ~isempty(tomo.corr_tt_Lant)
+        subplot(ns,2,5)
+        plot(theta, tomo.corr_tt_Lant, 'o')
+        xlabel(str.s36)
+        ylabel(str.s281)
+    
+        corr_rel = tomo.corr_tt_Lant./data(:,7);
+        subplot(ns,2,6)
+        plot(theta, corr_rel, 'o')
+        xlabel(str.s36)
+        ylabel([str.s281,' [%]'])
+    end
 end
 
 
@@ -1760,3 +1712,71 @@ load(h.db_file,'model3d')
 model3d(h.no_model3d) = h.model3d;
 save(h.db_file,'model3d','-append');
 update_Ldc(handles);
+
+
+% --- Executes on button press in togglebutton_zoom1.
+function togglebutton_zoom1_Callback(hObject, eventdata, handles)
+% hObject    handle to togglebutton_zoom1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of togglebutton_zoom1
+button_state = get(hObject,'Value');
+if button_state == get(hObject,'Max')
+    % toggle button is pressed
+	zoom(handles.axes1,'on')
+elseif button_state == get(hObject,'Min')
+    % toggle button is not pressed
+	zoom(handles.axes1,'off')
+end
+
+
+% --- Executes on button press in togglebutton_rotate1.
+function togglebutton_rotate1_Callback(hObject, eventdata, handles)
+% hObject    handle to togglebutton_rotate1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of togglebutton_rotate1
+button_state = get(hObject,'Value');
+if button_state == get(hObject,'Max')
+    % toggle button is pressed
+	rotate3d(handles.axes1,'on')
+elseif button_state == get(hObject,'Min')
+    % toggle button is not pressed
+	rotate3d(handles.axes1,'off')
+end
+
+
+% --- Executes on button press in togglebutton_zoom2.
+function togglebutton_zoom2_Callback(hObject, eventdata, handles)
+% hObject    handle to togglebutton_zoom2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of togglebutton_zoom2
+button_state = get(hObject,'Value');
+if button_state == get(hObject,'Max')
+    % toggle button is pressed
+	zoom(handles.axes2,'on')
+elseif button_state == get(hObject,'Min')
+    % toggle button is not pressed
+	zoom(handles.axes2,'off')
+end
+
+
+% --- Executes on button press in togglebutton_rotate2.
+function togglebutton_rotate2_Callback(hObject, eventdata, handles)
+% hObject    handle to togglebutton_rotate2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of togglebutton_rotate2
+button_state = get(hObject,'Value');
+if button_state == get(hObject,'Max')
+    % toggle button is pressed
+	rotate3d(handles.axes2,'on')
+elseif button_state == get(hObject,'Min')
+    % toggle button is not pressed
+	rotate3d(handles.axes2,'off')
+end

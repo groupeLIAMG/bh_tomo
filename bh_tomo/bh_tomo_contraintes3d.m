@@ -88,26 +88,9 @@ h.v_couche_inf = 0.12;
 h.a_couche_inf = 0.5;
 h.change_plot = true;
 h.cont_orig = [];
-h.plan = [];
 
-if nargin>=9
-    h.plan = varargin{6};
-end
-if nargin>=6
-    h.cont_orig = varargin{5};
-end
 if nargin>=7
-    tmp = varargin{4}; % [xTx zTx xRx zRx ...]
-    str = cell(1,(numel(tmp)/2));
-    for n=1:(numel(tmp)/2)
-        h.f(n).x = tmp( 2*n-1 );
-        h.f(n).z = tmp( 2*n );
-        str{n} = num2str(n);
-    end
-    set(handles.edit_nf, 'String', num2str(length(h.f)))
-    set(handles.popupmenu_f_no, 'String', str)
-    set(handles.edit_x_f, 'String', num2str(h.f(1).x))
-    set(handles.edit_z_f, 'String', num2str(h.f(1).z))
+    h.cont_orig = varargin{4};
 end
 if nargin>=6
     h.grz = varargin{3};
@@ -214,7 +197,6 @@ for i = 1:length(h.SW(1,1,:))
     h.ATT(:,:,i) = reshape(h.ATT(:,:,i)',length(h.SW(:,1,1)),length(h.SW(1,:,1)));
     h.VAR_A(:,:,i) = reshape(h.VAR_A(:,:,i)',length(h.SW(:,1,1)),length(h.SW(1,:,1)));
 end
-set(handles.edit_v_inf,'string',num2str(h.v_couche_inf));
 set(handles.edit_variance_cont,'String',num2str(h.variance_s));
 
 setappdata(handles.fig_bh_cont3d, 'h', h);
@@ -285,206 +267,6 @@ uiresume;
 %delete(hObject);
 
 
-function edit_nf_Callback(hObject, eventdata, handles)
-% val = str2double(get(hObject,'string'));
-% if isnan(val)
-%     str = getappdata(handles.fig_bh_cont3d, 'str');
-%     errordlg(str.s54)
-% 	return
-% end
-% h = getappdata(handles.fig_bh_cont3d, 'h');
-
-% setappdata(handles.fig_bh_cont3d, 'h', h)
-
-function edit_nf_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-function edit_x_f_Callback(hObject, eventdata, handles)
-% val = str2double(get(hObject,'string'));
-% if isnan(val)
-%     str = getappdata(handles.fig_bh_cont3d, 'str');
-%     errordlg(str.s54)
-% 	return
-% end
-% h = getappdata(handles.fig_bh_cont3d, 'h');
-% h.xRx = val;
-% setappdata(handles.fig_bh_cont3d, 'h', h)
-
-
-function edit_x_f_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-function popupmenu_f_no_Callback(hObject, eventdata, handles)
-h = getappdata(handles.fig_bh_cont3d, 'h');
-no = get(hObject,'Value');
-set(handles.edit_x_f, 'String', num2str(h.f(no).x))
-set(handles.edit_z_f, 'String', num2str(h.f(no).z))
-
-
-function popupmenu_f_no_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-function edit_z_f_Callback(hObject, eventdata, handles)
-% val = str2double(get(hObject,'string'));
-% if isnan(val)
-%     str = getappdata(handles.fig_bh_cont3d, 'str');
-%     errordlg(str.s54)
-% 	return
-% end
-% h = getappdata(handles.fig_bh_cont3d, 'h');
-% h.zRx = val;
-% setappdata(handles.fig_bh_cont3d, 'h', h)
-
-
-function edit_z_f_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-function checkbox_c_infer_Callback(hObject, eventdata, handles)
-h = getappdata(handles.fig_bh_cont3d, 'h');
-s2=nan;
-if get(hObject,'Value')==1
-    if get(handles.radiobutton_vel,'Value')==1
-        s2 = 1/h.v_couche_inf;
-    else
-        s2 = h.a_couche_inf;
-    end
-end
-if get(handles.radiobutton_vel,'Value')==1
-    DATA = h.SW;
-    VAR = h.VAR_S;
-    variance = h.variance_s;
-else
-    DATA = h.ATT;
-    VAR = h.VAR_A;
-    variance = h.variance_a;
-end
-
-ascending = 0;
-if h.f(2).x>h.f(1).x
-    ascending = 1;
-end
-
-
-pas_legacy=1;
-if ascending == 1
-    % a gauche
-    xs = h.xx( h.xx<h.f(1).x );
-    if ~isempty(xs)
-        zs = h.f(1).z*ones(size(xs));
-        for nn=1:length(xs)
-            [ii,jj] = find( h.XX==xs(nn) & h.ZZ<zs(nn) );
-            ni = length(ii);
-            DATA( ii((ni-pas_legacy+1):ni),jj(1:pas_legacy) ) = s2;
-            VAR( ii((ni-pas_legacy+1):ni),jj(1:pas_legacy) ) = variance;
-        end
-    end
-    for n=1:(length(h.f)-1)
-        % la surface
-        xs = h.xx( h.xx>=h.f(n).x & h.xx<=h.f(n+1).x );
-        if isempty(xs)
-            return
-        end
-        dx = xs(length(xs))-xs(1);
-        dz = h.f(n+1).z-h.f(n).z;
-        zs = h.f(n).z + dz/dx*(xs-h.f(n).x);
-        % au dessous
-        for nn=1:length(xs)
-            [ii,jj] = find( h.XX==xs(nn) & h.ZZ<zs(nn) );
-            ni = length(ii);
-            DATA( ii((ni-pas_legacy+1):ni),jj(1:pas_legacy) ) = s2;
-            VAR( ii((ni-pas_legacy+1):ni),jj(1:pas_legacy) ) = variance;
-        end
-    end
-    % a droite
-    xs = h.xx( h.xx>h.f(length(h.f)).x );
-    if ~isempty(xs)
-        zs = h.f(length(h.f)).z*ones(size(xs));
-        for nn=1:length(xs)
-            [ii,jj] = find( h.XX==xs(nn) & h.ZZ<zs(nn) );
-            ni = length(ii);
-            DATA( ii((ni-pas_legacy+1):ni),jj(1:pas_legacy) ) = s2;
-            VAR( ii((ni-pas_legacy+1):ni),jj(1:pas_legacy) ) = variance;
-        end
-    end
-else
-    % a gauche
-    xs = h.xx( h.xx<h.f(length(h.f)).x );
-    if ~isempty(xs)
-        zs = h.f(1).z*ones(size(xs));
-        for nn=1:length(xs)
-            [ii,jj] = find( h.XX==xs(nn) & h.ZZ<zs(nn) );
-            ni = length(ii);
-            DATA( ii((ni-pas_legacy+1):ni),jj(1:pas_legacy) ) = s2;
-            VAR( ii((ni-pas_legacy+1):ni),jj(1:pas_legacy) ) = variance;
-        end
-    end
-    for n=1:(length(h.f)-1)
-        % la surface
-        xs = h.xx( h.xx>=h.f(n+1).x & h.xx<=h.f(n).x );
-        if isempty(xs)
-            return
-        end
-        dx = xs(length(xs))-xs(1);
-        dz = h.f(n+1).z-h.f(n).z;
-        zs = h.f(n).z + dz/dx*(xs-h.f(n).x);
-        % au dessous
-        for nn=1:length(xs)
-            [ii,jj] = find( h.XX==xs(nn) & h.ZZ<zs(nn) );
-            ni = length(ii);
-            DATA( ii((ni-pas_legacy+1):ni),jj(1:pas_legacy) ) = s2;
-            VAR( ii((ni-pas_legacy+1):ni),jj(1:pas_legacy) ) = variance;
-        end
-    end
-    % a droite
-    xs = h.xx( h.xx>h.f(1).x );
-    if ~isempty(xs)
-        zs = h.f(length(h.f)).z*ones(size(xs));
-        for nn=1:length(xs)
-            [ii,jj] = find( h.XX==xs(nn) & h.ZZ<zs(nn) );
-            ni = length(ii);
-            DATA( ii((ni-pas_legacy+1):ni),jj(1:pas_legacy) ) = s2;
-            VAR( ii((ni-pas_legacy+1):ni),jj(1:pas_legacy) ) = variance;
-        end
-    end
-end
-if get(handles.radiobutton_vel,'Value')==1
-    h.SW = DATA;
-    h.VAR_S = VAR;
-else
-    h.ATT = DATA;
-    h.VAR_A = VAR;
-end
-setappdata(handles.fig_bh_cont3d, 'h', h)
-update_fig(handles)
-
-
-function edit_v_inf_Callback(hObject, eventdata, handles)
-h = getappdata(handles.fig_bh_cont3d, 'h');
-if get(handles.radiobutton_vel,'Value')==1
-    h.v_couche_inf = str2double(get(hObject,'String'));
-elseif get(handles.radiobutton_att,'Value')==1
-    h.a_couche_inf = str2double(get(hObject,'String'));
-end
-setappdata(handles.fig_bh_cont3d, 'h', h)
-
-
-function edit_v_inf_CreateFcn(hObject, eventdata, handles)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
 
 function togglebutton_zoom_Callback(hObject, eventdata, handles)
 button_state = get(hObject,'Value');
@@ -497,107 +279,6 @@ end
 function pushbutton_zReset_Callback(hObject, eventdata, handles)
 zoom(handles.fig_bh_cont3d,'out')
 
-function checkbox_contSurf_Callback(hObject, eventdata, handles)
-h = getappdata(handles.fig_bh_cont3d, 'h');
-s1=nan;
-if get(hObject,'Value')==1
-    if get(handles.radiobutton_vel,'Value')==1
-        s1 = 1/h.v_air;
-    else
-        s1 = h.a_air;
-    end
-end
-if get(handles.radiobutton_vel,'Value')==1
-    DATA = h.SW;
-    VAR = h.VAR_S;
-else
-    DATA = h.ATT;
-    VAR = h.VAR_A;
-end
-
-ascending = 0;
-if h.f(2).x>h.f(1).x
-    ascending = 1;
-end
-
-if ascending==1
-    % a gauche
-    xs = h.xx( h.xx<h.f(1).x );
-    if ~isempty(xs)
-        zs = h.f(1).z*ones(size(xs));
-        for n=1:length(xs)
-            DATA( h.XX==xs(n) & h.ZZ>=zs(n) ) = s1;
-            VAR( h.XX==xs(n) & h.ZZ>=zs(n) ) = 0;
-        end
-    end
-    for n=1:(length(h.f)-1)
-        % au dessus de la surface
-        xs = h.xx( h.xx>=h.f(n).x & h.xx<=h.f(n+1).x );
-        if isempty(xs)
-            return
-        end
-        dx = xs(length(xs))-xs(1);
-        dz = h.f(n+1).z-h.f(n).z;
-        zs = h.f(n).z + dz/dx*(xs-h.f(n).x);
-        for nn=1:length(xs)
-            DATA( h.XX==xs(nn) & h.ZZ>=zs(nn) ) = s1;
-            VAR( h.XX==xs(nn) & h.ZZ>=zs(nn) ) = 0;
-        end
-    end
-    % a droite
-    xs = h.xx( h.xx>h.f(length(h.f)).x );
-    if ~isempty(xs)
-        zs = h.f(length(h.f)).z*ones(size(xs));
-        for n=1:length(xs)
-            DATA( h.XX==xs(n) & h.ZZ>=zs(n) ) = s1;
-            VAR( h.XX==xs(n) & h.ZZ>=zs(n) ) = 0;
-        end
-    end
-else
-% a gauche
-    xs = h.xx( h.xx<h.f(length(h.f)).x );
-    if ~isempty(xs)
-        zs = h.f(1).z*ones(size(xs));
-        for n=1:length(xs)
-            DATA( h.XX==xs(n) & h.ZZ>=zs(n) ) = s1;
-            VAR( h.XX==xs(n) & h.ZZ>=zs(n) ) = 0;
-        end
-    end
-    for n=1:(length(h.f)-1)
-        % au dessus de la surface
-        xs = h.xx( h.xx>=h.f(n+1).x & h.xx<=h.f(n).x );
-        if isempty(xs)
-            return
-        end
-        dx = xs(length(xs))-xs(1);
-        dz = h.f(n+1).z-h.f(n).z;
-        zs = h.f(n).z + dz/dx*(xs-h.f(n).x);
-        for nn=1:length(xs)
-            DATA( h.XX==xs(nn) & h.ZZ>=zs(nn) ) = s1;
-            VAR( h.XX==xs(nn) & h.ZZ>=zs(nn) ) = 0;
-        end
-    end
-    % a droite
-    xs = h.xx( h.xx>h.f(1).x );
-    if ~isempty(xs)
-        zs = h.f(length(h.f)).z*ones(size(xs));
-        for n=1:length(xs)
-            DATA( h.XX==xs(n) & h.ZZ>=zs(n) ) = s1;
-            VAR( h.XX==xs(n) & h.ZZ>=zs(n) ) = 0;
-        end
-    end
-end
-
-if get(handles.radiobutton_vel,'Value')==1
-    h.SW = DATA;
-    h.VAR_S = VAR;
-else
-    h.ATT = DATA;
-    h.VAR_A = VAR;
-end
-
-setappdata(handles.fig_bh_cont3d, 'h', h)
-update_fig(handles)
 
 function update_fig(handles)
 %h = getappdata(handles.fig_bh_cont3d, 'h');
@@ -612,18 +293,10 @@ function update_fig_vitesse(handles)
 h = getappdata(handles.fig_bh_cont3d, 'h');
 iy = get(handles.popupmenu_y,'Value');
 SW = reshape(h.SW(:,iy,:),length(h.SW(:,1,1)),length(h.SW(1,1,:)))';
-XI = reshape(h.SW(:,iy,:),length(h.SW(:,1,1)),length(h.SW(1,1,:)))';
 if h.change_plot
     str = getappdata(handles.fig_bh_cont3d, 'str');
     axes(handles.axes1)
-	if get(handles.checkbox_show_xi,'Value')==0
-		h.h1 = imagesc(h.xx,h.zz,1./SW);
-	else
-		h.h1 = imagesc(h.xx,h.zz,XI);
-	end
-    %caxis(handles.axes1,[0 0.3]);
     edit_cmax_Callback(handles);
-    %colorbar('peer',handles.axes1);
     hold(handles.axes1,'on')
     plot(handles.axes1,h.aa,h.bb,'Color',[0.5 0.5 0.5])
     xlabel(str.s119)
@@ -632,11 +305,7 @@ if h.change_plot
     hold(handles.axes1,'off')
     h.change_plot = false;
 else
-	if get(handles.checkbox_show_xi,'Value')==0
-		set(h.h1,'CData',1./SW)
-	else
-		set(h.h1,'CData',XI)
-	end
+    set(h.h1,'CData',1./SW)
 end
 setappdata(handles.fig_bh_cont3d, 'h', h)
 
@@ -664,20 +333,20 @@ else
 end
 setappdata(handles.fig_bh_cont3d, 'h', h)
 
-function edit_vitesse(handles)
-h = getappdata(handles.fig_bh_cont3d, 'h');
-axes(handles.axes1);
-[x,z,b] = ginput(1);
-get(handles.pushbutton_edit,'Value')
-iy = get(handles.popupmenu_y,'Value');
-while b==1
-    ix=findnear(x,h.gridx);
-    iz=findnear(z,h.gridz);
-    h.vitesse(ix,iy,iz) = h.n_vitesse;
-    setappdata(handles.fig_bh_cont3d, 'h', h);
-    update_fig(handles);
-    [x,z,b] = ginput(1);
-end
+% function edit_vitesse(handles)
+% h = getappdata(handles.fig_bh_cont3d, 'h');
+% axes(handles.axes1);
+% [x,z,b] = ginput(1);
+% get(handles.pushbutton_edit,'Value')
+% iy = get(handles.popupmenu_y,'Value');
+% while b==1
+%     ix=findnear(x,h.gridx);
+%     iz=findnear(z,h.gridz);
+%     h.vitesse(ix,iy,iz) = h.n_vitesse;
+%     setappdata(handles.fig_bh_cont3d, 'h', h);
+%     update_fig(handles);
+%     [x,z,b] = ginput(1);
+% end
 
 function edit_SW(handles)
 h = getappdata(handles.fig_bh_cont3d, 'h');
@@ -723,16 +392,6 @@ var = h.VAR_S(ind);
 cont.slowness.data = [XX YY ZZ slown var];
 cont.slowness.variance = h.variance_s;
 
-ind = find( ~isnan(h.XI) );
-if ~isempty(ind)
-    slown = h.XI(ind);
-    ZZ = h.ZZ(ind);
-    YY = h.YY(ind);
-    XX = h.XX(ind);
-    var = h.VAR_xi(ind);
-    cont.slowness.data_xi = [XX YY ZZ slown var];
-end
-
 ind = find( ~isnan(h.ATT) );
 att = h.ATT(ind);
 ZZ = h.ZZ(ind);
@@ -756,7 +415,6 @@ if get(hObject,'Value')==1
     str = getappdata(handles.fig_bh_cont3d, 'str');
     set(handles.text_valeur,'String',[str.s121,' [m/ns]'])
     set(handles.edit_valeur,'String',num2str(h.n_vitesse))
-    set(handles.edit_v_inf,'String',num2str(h.v_couche_inf))
     set(handles.edit_variance_cont,'String',num2str(h.variance_s))
     h.change_plot = true;
     setappdata(handles.fig_bh_cont3d, 'h', h)
@@ -769,7 +427,6 @@ if get(hObject,'Value')==1
     str = getappdata(handles.fig_bh_cont3d, 'str');
     set(handles.text_valeur,'String',[str.s177,' [Np/m]'])
     set(handles.edit_valeur,'String',num2str(h.n_att))
-    set(handles.edit_v_inf,'String',num2str(h.a_couche_inf))
     set(handles.edit_variance_cont,'String',num2str(h.variance_a))
     h.change_plot = true;
     setappdata(handles.fig_bh_cont3d, 'h', h)
@@ -830,9 +487,7 @@ else
 end
 axes(handles.axes1)
 h.h1 = imagesc(h.xx,h.zz,VAR);
-%caxis(handles.axes1,[-variance variance]);
 edit_cmax_Callback(handles);
-%colorbar('peer',handles.axes1);
 hold(handles.axes1,'on')
 plot(handles.axes1,h.aa,h.bb,'Color',[0.5 0.5 0.5])
 xlabel(str.s119)
@@ -915,94 +570,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-function pushbutton_import_sx_Callback(hObject, eventdata, handles)
-if get(handles.radiobutton_att,'Value')==1
-    errordlg('Elliptic anisotropy not defined for attenuation')
-    return
-end
-[filename, pathname] = uigetfile({'*.dat','x-y-z-s_x-[var] data file (*.dat)';...
-    '*.*',  'All Files (*.*)'}, 'Pick a file');
-if isequal(filename,0) || isequal(pathname,0)
-    return
-else
-    data = load([pathname,filename]);
-end
-if size(data,2)~=4 && size(data,2)~=5
-    errordlg('File must contain x y z v_x, and optionally variance of slowness')
-    return
-end
-h = getappdata(handles.fig_bh_cont3d, 'h');
-if isempty(h.plan)
-    errordlg('Grid plane not defined')
-    return
-end
-coord = proj_plan(data(:,1:3), h.plan.x0, h.plan.a);
-coord = transl_rotat(coord, h.plan.origine, h.plan.az, h.plan.dip);
-
-for n=1:size(data,1)
-    ix = findnear(coord(n,1), h.xx);
-    iy = findnear(coord(n,2), h.yy);
-    iz = findnear(coord(n,3), h.zz);
-    h.SW(ix,iy,iz) = data(n,4);
-    if size(data,2)==5
-        h.VAR_S(ix,iy,iz) = data(n,5);
-    else
-        h.VAR_S(ix,iy,iz) = 0;
-    end
-end
-h.change_plot = true;
-setappdata(handles.fig_bh_cont3d, 'h', h)
-
-update_fig_vitesse(handles)
-
-
-
-function pushbutton_import_xi_Callback(hObject, eventdata, handles)
-if get(handles.radiobutton_att,'Value')==1
-    errordlg('Elliptic anisotropy not defined for attenuation')
-    return
-end
-[filename, pathname] = uigetfile({'*.dat','x-y-z-s_x-[var] data file (*.dat)';...
-    '*.*',  'All Files (*.*)'}, 'Pick a file');
-if isequal(filename,0) || isequal(pathname,0)
-    return
-else
-    data = load([pathname,filename]);
-end
-if size(data,2)~=4 && size(data,2)~=5
-    errordlg('File must contain x y z s_x, and optionally variance of slowness')
-    return
-end
-h = getappdata(handles.fig_bh_cont3d, 'h');
-if isempty(h.plan)
-    errordlg('Grid plane not defined')
-    return
-end
-coord = proj_plan(data(:,1:3), h.plan.x0, h.plan.a);
-coord = transl_rotat(coord, h.plan.origine, h.plan.az, h.plan.dip);
-
-for n=1:size(data,1)
-    ix = findnear(coord(n,1), h.xx);
-    iy = findnear(coord(n,1), h.yy);
-    iz = findnear(coord(n,3), h.zz);
-    h.XI(ix,iy,iz) = data(n,4);
-    if size(data,2)==5
-        h.VAR_xi(ix,iy,iz) = data(n,5);
-    else
-        h.VAR_xi(ix,iy,iz) = 0;
-    end
-end
-h.change_plot = true;
-setappdata(handles.fig_bh_cont3d, 'h', h)
-
-update_fig_vitesse(handles)
-
-
-function checkbox_show_xi_Callback(hObject, eventdata, handles)
-h = getappdata(handles.fig_bh_cont3d, 'h');
-h.change_plot = true;
-setappdata(handles.fig_bh_cont3d, 'h', h)
-update_fig(handles)
 
 function pushbutton_reinit_Callback(hObject, eventdata, handles)
 h = getappdata(handles.fig_bh_cont3d, 'h');
@@ -1038,20 +605,10 @@ set(handles.pushbutton_save,'String',str.s29)
 set(handles.pushbutton_quit,'String',str.s193)
 set(handles.pushbutton_annuler,'String',str.s91)
 set(handles.pushbutton_importer,'String',[str.s215,' ...'])
-set(handles.uipanel_cont_surf,'Title',str.s212)
 set(handles.uipanel_prop,'Title',str.s222)
-set(handles.checkbox_contSurf,'String',str.s213)
-set(handles.checkbox_c_infer,'String',str.s214)
-set(handles.text_c_infer,'String',str.s219)
-set(handles.text_nf,'String',str.s220)
-set(handles.text_no_f,'String',str.s221)
 set(handles.radiobutton_vel,'String',str.s121)
 set(handles.radiobutton_att,'String',str.s177)
 set(handles.uipanel_prop,'Title',str.s298)
 set(handles.radiobutton_vel,'String',str.s299)
 set(handles.pushbutton_var_cont,'String',str.s302)
 set(handles.text_variance_cont,'String',str.s303)
-set(handles.uipanel_anisotr,'Title',str.s304)
-set(handles.pushbutton_import_sx,'String',str.s305)
-set(handles.pushbutton_import_xi,'String',str.s306)
-set(handles.checkbox_show_xi,'String',str.s307)

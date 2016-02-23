@@ -1,9 +1,9 @@
-function D=deriv_second3d(M,N,P)
-% D=deriv_second3d(M,N,O)
+function D=old_deriv_second3d(M,N,P)
+% D=deriv_second3d(M,N,P)
 %
 % M size of system in first dimension
 % N size of system in second dimension
-% N size of system in third dimension
+% P size of system in third dimension
   
 % Copyright (C) 2013 Bernard Giroux
 %
@@ -22,7 +22,7 @@ function D=deriv_second3d(M,N,P)
 % 
 % 
 
-D = zeros(M*N*P);
+D = sparse(M*N*P,M*N*P);
 
 % nz = 7(M-2)(N-2)(P-2)
 for m=2:M-1
@@ -57,7 +57,6 @@ for m=2:M-1
 		end
 	end
 end
-
 
 %
 % m = 1

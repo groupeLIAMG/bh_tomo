@@ -41,7 +41,7 @@ nt = length(L(:,1));
 
 D=covardm(x,x,modelt,ct);
 
-if covar.aniso==0 && nugget_lt ~= 0
+if nugget_lt ~= 0
 	D = D + nugget_lt*speye(size(D,1));
 end
 

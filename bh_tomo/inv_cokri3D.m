@@ -58,9 +58,9 @@ gp.dz = grille.grz(2)-grille.grz(1);
 gp.nx = length(grille.grx)-1;
 gp.ny = length(grille.gry)-1;
 gp.nz = length(grille.grz)-1;
-gp.nsx = 5;
-gp.nsy = 5;
-gp.nsz = 5;
+
+nThreads = feature('numcores');
+g3d = grid3d(gp, nThreads);
 
 cont = [];
 if param.tomo_amp==0
@@ -158,8 +158,8 @@ for noIter=1:param.nbreitrd+param.nbreitrc
 		end
 		scont = cont(:,4)-l_moy;
 		[S_sim,ss] = simu_contrainte3d(L, dt, covar, indc, nt, ...
-																	 gridx, gridy, gridz, param.nbresimu, ...
-																	 scont, mode, c0);
+            gridx, gridy, gridz, param.nbresimu, ...
+            scont, mode, c0);
 	else
 		if mode==1 && ~isempty(t_handle)
 			set(t_handle,'String',[str.s225,', it ',num2str(noIter),' - ', ...
@@ -171,7 +171,7 @@ for noIter=1:param.nbreitrd+param.nbreitrc
 			drawnow
 		end
 		[S_sim,ss] = cokri_simu3d(L, dt, covar, nt, gridx, gridy, gridz, ...
-															param.nbresimu, mode, c0);
+            param.nbresimu, mode, c0);
 	end
 	
 	if param.tomo_amp==1
@@ -187,33 +187,22 @@ for noIter=1:param.nbreitrd+param.nbreitrc
 		end
 		
 		if  ~isempty(g_handles)
-% 			set(g_handles{3},'DataAspectRatio',[1 1 1],'YDir','normal')
-% 			title(str.s230,'FontSize',14)
-% 			xlabel(str.s119)
-%             ylabel(str.s119)
-% 			zlabel(str.s120)
-% 			if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
-% 			colorbar('peer',g_handles{3})
             ssplot = reshape((sgr+l_moy),gp.nx,gp.ny,gp.nz);
             [nx,ny,nz] = size(ssplot);
-            ix = round(nx/2);
-            iy = round(ny/2);
-            iz = round(nz/2);
+            ix = gridx(round(nx/2));
+            iy = gridy(round(ny/2));
+            iz = gridz(round(nz/2));
 			if param.tomo_amp==0
-                slice(1./ssplot,iy,ix,iz,'Parent',g_handles{4});
-% 				imagesc(gridx,gridz,1./reshape((sgr+l_moy),length(gridz),...
-% 																			 length(gridx)),'Parent',g_handles{4})
+                slice(gridx,gridy,gridz,1./ssplot,ix,iy,iz,'Parent',g_handles{4});
 			else
 				sgr(sgr<-l_moy) = -l_moy;
                 ssplot = reshape((sgr+l_moy),gp.nx,gp.ny,gp.nz);
-                slice(ssplot,iy,ix,iz,'Parent',g_handles{4});
-% 				imagesc(gridx,gridz,reshape((sgr+l_moy),length(gridz),...
-% 																		length(gridx)),'Parent',g_handles{4})
+                slice(gridx,gridy,gridz,ssplot,ix,iy,iz,'Parent',g_handles{4});
 			end
-			set(g_handles{4},'DataAspectRatio',[1 1 1],'YDir','normal')
+			set(g_handles{4},'DataAspectRatio',[1 1 1])
 			title(str.s231,'FontSize',12,'Parent',g_handles{4})
-			xlabel(str.s119,'Parent',g_handles{4})
-            ylabel(str.s119,'Parent',g_handles{4})
+			xlabel(['X ',str.s119],'Parent',g_handles{4})
+            ylabel(['Y ',str.s119],'Parent',g_handles{4})
 			zlabel(str.s120,'Parent',g_handles{4})
 			if ~isempty(g_handles{1}), caxis(g_handles{4},g_handles{1}), end
 			colorbar('peer', g_handles{4})
@@ -234,18 +223,18 @@ for noIter=1:param.nbreitrd+param.nbreitrc
 		if  ~isempty(g_handles)
             ssplot = reshape((ss+l_moy),gp.nx,gp.ny,gp.nz);
             [nx,ny,nz] = size(ssplot);
-            ix = round(nx/2);
-            iy = round(ny/2);
-            iz = round(nz/2);
+            ix = gridx(round(nx/2));
+            iy = gridy(round(ny/2));
+            iz = gridz(round(nz/2));
 			if param.tomo_amp==0
-                slice(1./ssplot,iy,ix,iz,'Parent',g_handles{3});
+                slice(gridx,gridy,gridz,1./ssplot,ix,iy,iz,'Parent',g_handles{3});
             else
-                slice(ssplot,iy,ix,iz,'Parent',g_handles{3});
+                slice(gridx,gridy,gridz,ssplot,ix,iy,iz,'Parent',g_handles{3});
 			end
-			set(g_handles{3},'DataAspectRatio',[1 1 1],'YDir','normal')
+			set(g_handles{3},'DataAspectRatio',[1 1 1])
 			title(str.s230,'FontSize',12,'Parent',g_handles{3})
-			xlabel(str.s119,'Parent',g_handles{3})
-			ylabel(str.s119,'Parent',g_handles{3})
+			xlabel(['X ',str.s119],'Parent',g_handles{3})
+			ylabel(['Y ',str.s119],'Parent',g_handles{3})
             zlabel(str.s120,'Parent',g_handles{3})
 			if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
 			colorbar('peer', g_handles{3})
@@ -277,7 +266,8 @@ for noIter=1:param.nbreitrd+param.nbreitrc
 										str.s229])
 			drawnow
 		end
-		[tt, tomo.rays, L] = ttcr3d(s, gp, data(:,[1 2 3]), data(:,[4 5 6]));         
+        [~, tomo.rays, L] = g3d.raytrace(s, data(:,[1 2 3]), data(:,[4 5 6]));
+        tt = L*s;  % for some reason, L*s more accurate
 	end
 	
 	if param.saveInvData == 1

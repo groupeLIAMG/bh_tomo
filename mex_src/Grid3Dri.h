@@ -34,8 +34,6 @@
 #include <vector>
 #include <ctime>
 
-#include <boost/math/special_functions/sign.hpp>
-
 #ifdef VTK
 #include "vtkDoubleArray.h"
 #include "vtkPointData.h"
@@ -46,6 +44,13 @@
 
 #include "Grid3D.h"
 #include "Interpolator.h"
+
+
+template <class T>
+inline int sign(const T& z) {
+   return (z == 0) ? 0 : (z < 0) ? -1 : 1;
+}
+
 
 template<typename T1, typename T2, typename NODE>
 class Grid3Dri : public Grid3D<T1,T2> {
@@ -634,18 +639,18 @@ void Grid3Dri<T1,T2,NODE>::getRaypath(const std::vector<sxyz<T1>>& Tx,
         getIJK(curr_pt, i, j, k);
         
         // planes we will intersect
-        T1 xp = xmin + dx*(i + (boost::math::sign(g.x)>0.0 ? 1.0 : 0.0));
-        T1 yp = ymin + dy*(j + (boost::math::sign(g.y)>0.0 ? 1.0 : 0.0));
-        T1 zp = zmin + dz*(k + (boost::math::sign(g.z)>0.0 ? 1.0 : 0.0));
+        T1 xp = xmin + dx*(i + (sign(g.x)>0.0 ? 1.0 : 0.0));
+        T1 yp = ymin + dy*(j + (sign(g.y)>0.0 ? 1.0 : 0.0));
+        T1 zp = zmin + dz*(k + (sign(g.z)>0.0 ? 1.0 : 0.0));
         
         if ( fabs(xp-curr_pt.x)<small) {
-            xp += dx*boost::math::sign(g.x);
+            xp += dx*sign(g.x);
         }
         if ( fabs(yp-curr_pt.y)<small) {
-            yp += dy*boost::math::sign(g.y);
+            yp += dy*sign(g.y);
         }
         if ( fabs(zp-curr_pt.z)<small) {
-            zp += dz*boost::math::sign(g.z);
+            zp += dz*sign(g.z);
         }
         
         // dist to planes
@@ -776,14 +781,14 @@ void Grid3Dri<T1,T2,NODE>::getRaypath_old(const std::vector<sxyz<T1>>& Tx,
                 return;
             }
             
-            iOut = boost::math::sign(gOut.x)<0.0 ? i-1 : i;
-            jOut = boost::math::sign(gOut.y)<0.0 ? j-1 : j;
-            kOut = boost::math::sign(gOut.z)<0.0 ? k-1 : k;
+            iOut = sign(gOut.x)<0.0 ? i-1 : i;
+            jOut = sign(gOut.y)<0.0 ? j-1 : j;
+            kOut = sign(gOut.z)<0.0 ? k-1 : k;
 
             // planes we will intersect
-            T1 xp = xmin + dx*(i + boost::math::sign(gOut.x));
-            T1 yp = ymin + dy*(j + boost::math::sign(gOut.y));
-            T1 zp = zmin + dz*(k + boost::math::sign(gOut.z));
+            T1 xp = xmin + dx*(i + sign(gOut.x));
+            T1 yp = ymin + dy*(j + sign(gOut.y));
+            T1 zp = zmin + dz*(k + sign(gOut.z));
             
             // dist to planes
             T1 tx = (xp - curr_pt.x)/gOut.x;
@@ -793,21 +798,21 @@ void Grid3Dri<T1,T2,NODE>::getRaypath_old(const std::vector<sxyz<T1>>& Tx,
             if ( tx<ty && tx<tz ) { // closer to xp
                 curr_pt += tx*gOut;
                 curr_pt.x = xp;     // make sure we don't accumulate rounding errors
-                iIn = iOut + boost::math::sign(gOut.x);
+                iIn = iOut + sign(gOut.x);
                 jIn = jOut;
                 kIn = kOut;
             } else if ( ty<tz ) {
                 curr_pt += ty*gOut;
                 curr_pt.y = yp;
                 iIn = iOut;
-                jIn = jOut + boost::math::sign(gOut.y);
+                jIn = jOut + sign(gOut.y);
                 kIn = kOut;
             } else {
                 curr_pt += tz*gOut;
                 curr_pt.z = zp;
                 iIn = iOut;
                 jIn = jOut;
-                kIn = kOut + boost::math::sign(gOut.z);
+                kIn = kOut + sign(gOut.z);
             }
 
         } else if ( onEdgeX ) {
@@ -846,17 +851,17 @@ void Grid3Dri<T1,T2,NODE>::getRaypath_old(const std::vector<sxyz<T1>>& Tx,
             }
             
             iOut = i;
-            jOut = boost::math::sign(gOut.y)<0.0 ? j-1 : j;
-            kOut = boost::math::sign(gOut.z)<0.0 ? k-1 : k;
+            jOut = sign(gOut.y)<0.0 ? j-1 : j;
+            kOut = sign(gOut.z)<0.0 ? k-1 : k;
             
             // planes we will intersect
-            T1 xp = xmin + dx*(i + boost::math::sign(gOut.x)>0.0 ? 1.0 : 0.0);
-            T1 yp = ymin + dy*(j + boost::math::sign(gOut.y));
-            T1 zp = zmin + dz*(k + boost::math::sign(gOut.z));
+            T1 xp = xmin + dx*(i + sign(gOut.x)>0.0 ? 1.0 : 0.0);
+            T1 yp = ymin + dy*(j + sign(gOut.y));
+            T1 zp = zmin + dz*(k + sign(gOut.z));
             
             if ( fabs(xp-curr_pt.x)<small) {
-                xp += dx*boost::math::sign(gOut.x);
-                iOut += boost::math::sign(gOut.x);
+                xp += dx*sign(gOut.x);
+                iOut += sign(gOut.x);
             }
             
             // dist to planes
@@ -867,21 +872,21 @@ void Grid3Dri<T1,T2,NODE>::getRaypath_old(const std::vector<sxyz<T1>>& Tx,
             if ( tx<ty && tx<tz ) { // closer to xp
                 curr_pt += tx*gOut;
                 curr_pt.x = xp;     // make sure we don't accumulate rounding errors
-                iIn = iOut + boost::math::sign(gOut.x);
+                iIn = iOut + sign(gOut.x);
                 jIn = jOut;
                 kIn = kOut;
             } else if ( ty<tz ) {
                 curr_pt += ty*gOut;
                 curr_pt.y = yp;
                 iIn = iOut;
-                jIn = jOut + boost::math::sign(gOut.y);
+                jIn = jOut + sign(gOut.y);
                 kIn = kOut;
             } else {
                 curr_pt += tz*gOut;
                 curr_pt.z = zp;
                 iIn = iOut;
                 jIn = jOut;
-                kIn = kOut + boost::math::sign(gOut.z);
+                kIn = kOut + sign(gOut.z);
             }
 
         } else if ( onEdgeY ) {
@@ -919,18 +924,18 @@ void Grid3Dri<T1,T2,NODE>::getRaypath_old(const std::vector<sxyz<T1>>& Tx,
                 return;
             }
 
-            iOut = boost::math::sign(gOut.x)<0.0 ? i-1 : i;
+            iOut = sign(gOut.x)<0.0 ? i-1 : i;
             jOut = j;
-            kOut = boost::math::sign(gOut.z)<0.0 ? k-1 : k;
+            kOut = sign(gOut.z)<0.0 ? k-1 : k;
             
             // planes we will intersect
-            T1 xp = xmin + dx*(i + boost::math::sign(gOut.x));
-            T1 yp = ymin + dy*(j + boost::math::sign(gOut.y)>0.0 ? 1.0 : 0.0);
-            T1 zp = zmin + dz*(k + boost::math::sign(gOut.z));
+            T1 xp = xmin + dx*(i + sign(gOut.x));
+            T1 yp = ymin + dy*(j + sign(gOut.y)>0.0 ? 1.0 : 0.0);
+            T1 zp = zmin + dz*(k + sign(gOut.z));
             
             if ( fabs(yp-curr_pt.y)<small) {
-                yp += dy*boost::math::sign(gOut.y);
-                jOut += boost::math::sign(gOut.y);
+                yp += dy*sign(gOut.y);
+                jOut += sign(gOut.y);
             }
             
             // dist to planes
@@ -941,21 +946,21 @@ void Grid3Dri<T1,T2,NODE>::getRaypath_old(const std::vector<sxyz<T1>>& Tx,
             if ( tx<ty && tx<tz ) { // closer to xp
                 curr_pt += tx*gOut;
                 curr_pt.x = xp;     // make sure we don't accumulate rounding errors
-                iIn = iOut + boost::math::sign(gOut.x);
+                iIn = iOut + sign(gOut.x);
                 jIn = jOut;
                 kIn = kOut;
             } else if ( ty<tz ) {
                 curr_pt += ty*gOut;
                 curr_pt.y = yp;
                 iIn = iOut;
-                jIn = jOut + boost::math::sign(gOut.y);
+                jIn = jOut + sign(gOut.y);
                 kIn = kOut;
             } else {
                 curr_pt += tz*gOut;
                 curr_pt.z = zp;
                 iIn = iOut;
                 jIn = jOut;
-                kIn = kOut + boost::math::sign(gOut.z);
+                kIn = kOut + sign(gOut.z);
             }
 
         } else if ( onEdgeZ ) {
@@ -993,18 +998,18 @@ void Grid3Dri<T1,T2,NODE>::getRaypath_old(const std::vector<sxyz<T1>>& Tx,
                 return;
             }
             
-            iOut = boost::math::sign(gOut.x)<0.0 ? i-1 : i;
-            jOut = boost::math::sign(gOut.y)<0.0 ? j-1 : j;
+            iOut = sign(gOut.x)<0.0 ? i-1 : i;
+            jOut = sign(gOut.y)<0.0 ? j-1 : j;
             kOut = k;
             
             // planes we will intersect
-            T1 xp = xmin + dx*(i + boost::math::sign(gOut.x));
-            T1 yp = ymin + dy*(j + boost::math::sign(gOut.y));
-            T1 zp = zmin + dz*(k + boost::math::sign(gOut.z)>0.0 ? 1.0 : 0.0);
+            T1 xp = xmin + dx*(i + sign(gOut.x));
+            T1 yp = ymin + dy*(j + sign(gOut.y));
+            T1 zp = zmin + dz*(k + sign(gOut.z)>0.0 ? 1.0 : 0.0);
             
             if ( fabs(zp-curr_pt.z)<small) {
-                zp += dz*boost::math::sign(gOut.z);
-                kOut += boost::math::sign(gOut.z);
+                zp += dz*sign(gOut.z);
+                kOut += sign(gOut.z);
             }
             
             // dist to planes
@@ -1015,21 +1020,21 @@ void Grid3Dri<T1,T2,NODE>::getRaypath_old(const std::vector<sxyz<T1>>& Tx,
             if ( tx<ty && tx<tz ) { // closer to xp
                 curr_pt += tx*gOut;
                 curr_pt.x = xp;     // make sure we don't accumulate rounding errors
-                iIn = iOut + boost::math::sign(gOut.x);
+                iIn = iOut + sign(gOut.x);
                 jIn = jOut;
                 kIn = kOut;
             } else if ( ty<tz ) {
                 curr_pt += ty*gOut;
                 curr_pt.y = yp;
                 iIn = iOut;
-                jIn = jOut + boost::math::sign(gOut.y);
+                jIn = jOut + sign(gOut.y);
                 kIn = kOut;
             } else {
                 curr_pt += tz*gOut;
                 curr_pt.z = zp;
                 iIn = iOut;
                 jIn = jOut;
-                kIn = kOut + boost::math::sign(gOut.z);
+                kIn = kOut + sign(gOut.z);
             }
 
         } else {
@@ -1066,21 +1071,21 @@ void Grid3Dri<T1,T2,NODE>::getRaypath_old(const std::vector<sxyz<T1>>& Tx,
             }
             
             // planes we will intersect
-            T1 xp = xmin + dx*(iIn + boost::math::sign(gOut.x)>0.0 ? 1.0 : 0.0);
-            T1 yp = ymin + dy*(jIn + boost::math::sign(gOut.y)>0.0 ? 1.0 : 0.0);
-            T1 zp = zmin + dz*(kIn + boost::math::sign(gOut.z)>0.0 ? 1.0 : 0.0);
+            T1 xp = xmin + dx*(iIn + sign(gOut.x)>0.0 ? 1.0 : 0.0);
+            T1 yp = ymin + dy*(jIn + sign(gOut.y)>0.0 ? 1.0 : 0.0);
+            T1 zp = zmin + dz*(kIn + sign(gOut.z)>0.0 ? 1.0 : 0.0);
             
             if ( fabs(xp-curr_pt.x)<small) {
-                xp += dx*boost::math::sign(gOut.x);
-                iOut += boost::math::sign(gOut.x);
+                xp += dx*sign(gOut.x);
+                iOut += sign(gOut.x);
             }
             if ( fabs(yp-curr_pt.y)<small) {
-                yp += dy*boost::math::sign(gOut.y);
-                jOut += boost::math::sign(gOut.y);
+                yp += dy*sign(gOut.y);
+                jOut += sign(gOut.y);
             }
             if ( fabs(zp-curr_pt.z)<small) {
-                zp += dz*boost::math::sign(gOut.z);
-                kOut += boost::math::sign(gOut.z);
+                zp += dz*sign(gOut.z);
+                kOut += sign(gOut.z);
             }
             
             // dist to planes
@@ -1091,21 +1096,21 @@ void Grid3Dri<T1,T2,NODE>::getRaypath_old(const std::vector<sxyz<T1>>& Tx,
             if ( tx<ty && tx<tz ) { // closer to xp
                 curr_pt += tx*gOut;
                 curr_pt.x = xp;     // make sure we don't accumulate rounding errors
-                iIn = iOut + boost::math::sign(gOut.x);
+                iIn = iOut + sign(gOut.x);
                 jIn = jOut;
                 kIn = kOut;
             } else if ( ty<tz ) {
                 curr_pt += ty*gOut;
                 curr_pt.y = yp;
                 iIn = iOut;
-                jIn = jOut + boost::math::sign(gOut.y);
+                jIn = jOut + sign(gOut.y);
                 kIn = kOut;
             } else {
                 curr_pt += tz*gOut;
                 curr_pt.z = zp;
                 iIn = iOut;
                 jIn = jOut;
-                kIn = kOut + boost::math::sign(gOut.z);
+                kIn = kOut + sign(gOut.z);
             }
 
         }

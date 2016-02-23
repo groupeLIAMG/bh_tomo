@@ -95,8 +95,8 @@ else
 	gridz = 0.5*(grille.grz(1:end-1)+grille.grz(2:end));
 end
 x=grille3d(min(gridx),gridx(2)-gridx(1),length(gridx),...
-					 min(gridy),gridy(2)-gridy(1),length(gridy),...
-					 min(gridz),gridz(2)-gridz(1),length(gridz));
+    min(gridy),gridy(2)-gridy(1),length(gridy),...
+    min(gridz),gridz(2)-gridz(1),length(gridz));
 
 gp.xmin = grille.grx(1);
 gp.ymin = grille.gry(1);
@@ -108,7 +108,8 @@ gp.nx = length(grille.grx)-1;
 gp.ny = length(grille.gry)-1;
 gp.nz = length(grille.grz)-1;
 
-g3d = grid3d(gp);
+nThreads = feature('numcores');
+g3d = grid3d(gp, nThreads);
 
 cont = [];
 if param.use_cont == true
@@ -191,20 +192,19 @@ for noIter=1:param.nbreitrc+param.nbreitrd
 	if ~isempty(g_handles)
         ssplot = reshape((ss+l_moy),gp.nx,gp.ny,gp.nz);
         [nx,ny,nz] = size(ssplot);
-        ix = round(nx/2);
-        iy = round(ny/2);
-        iz = round(nz/2);
+        ix = gridx(round(nx/2));
+        iy = gridy(round(ny/2));
+        iz = gridz(round(nz/2));
 		if param.tomo_amp==0
-            slice(1./ssplot,iy,ix,iz,'Parent',g_handles{3});
-			%imagesc(gridx,gridz,1./reshape((ss+l_moy),n,m),'Parent',g_handles{3})
+            slice(gridx,gridy,gridz,1./ssplot,ix,iy,iz,'Parent',g_handles{3});
         else
-            slice(ssplot,iy,ix,iz,'Parent',g_handles{3});
-			%imagesc(gridx,gridz,reshape((ss+l_moy),n,m),'Parent',g_handles{3})
+            slice(gridx,gridy,gridz,ssplot,ix,iy,iz,'Parent',g_handles{3});
 		end
-		set(g_handles{3},'DataAspectRatio',[1 1 1],'YDir','normal')
-		title('LSQR')
-		xlabel(str.s119)
-		ylabel(str.s120)
+		set(g_handles{3},'DataAspectRatio',[1 1 1])
+		title('LSQR','Parent',g_handles{3})
+        xlabel(['X ',str.s119],'Parent',g_handles{3})
+        ylabel(['Y ',str.s119],'Parent',g_handles{3})
+        zlabel(str.s120,'Parent',g_handles{3})
 		if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
 		colorbar('peer', g_handles{3})
 		eval(['colormap(',g_handles{2},')'])

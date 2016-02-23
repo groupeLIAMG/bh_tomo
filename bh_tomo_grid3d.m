@@ -147,6 +147,7 @@ end
 
 
 function init_grid(handles)
+g = getappdata(handles.fig_bh_grid3d,'g');
 data = getappdata(handles.fig_bh_grid3d,'data');
 g.Tx = data.Tx;
 g.Rx = data.Rx;
@@ -601,53 +602,26 @@ set(handles.edit_nz,'String',num2str(nz))
 
 function pushbutton_contraintes_Callback(hObject, eventdata, handles)
 data = getappdata(handles.fig_bh_grid3d,'data');
-% g = getappdata(handles.fig_bh_grid3d,'g');
-% h = getappdata(handles.fig_bh_grid3d,'h');
-% grx = [g.grx(1) g.grx(2)-g.grx(1) g.grx(length(g.grx))];
-% gry = [g.gry(1) g.gry(2)-g.gry(1) g.gry(length(g.gry))];
-% grz = [g.grz(1) g.grz(2)-g.grz(1) g.grz(length(g.grz))];
-% no = get(handles.popupmenu_origine,'Value');
-% tmp = 1:2;
-% no2 = tmp(no~=tmp);
-% 
-% f1(1) = data.boreholes(no).X;
-% f1(2) = data.boreholes(no).Y;
-% f1(3) = data.boreholes(no).Z_surf;
-% f2(1) = data.boreholes(no2).X;
-% f2(2) = data.boreholes(no2).Y;
-% f2(3) = data.boreholes(no2).Z_surf;
-% 
-% f1 = proj_plan(f1, h.x0, h.a);
-% f2 = proj_plan(f2, h.x0, h.a);
-% origine(1) = str2double(get(handles.edit_x0,'String'));
-% origine(2) = str2double(get(handles.edit_y0,'String'));
-% origine(3) = str2double(get(handles.edit_z0,'String'));
-% [az,dip] = calcul_azimuth_dip(handles);
-% 
-% f1 = transl_rotat(f1, origine, az, dip);
-% f2 = transl_rotat(f2, origine, az, dip);
-% 
-% tmp = [f1(1) f1(3) f2(1) f2(3)]; %  [xTx zTx xRx zRx]
-% for n=[no no2]
-% 	if isfield( data.boreholes(n), 'scont' )
-% 		g.cont.slowness = ajouteContraintesBH(g.cont.slowness, ...
-% 			data.boreholes(n).scont, h.x0, h.a, origine, az, dip);
-% 	end
-% 	if isfield( data.boreholes(n), 'acont' )
-% 		g.cont.attenuation = ajouteContraintesBH(g.cont.attenuation, ...
-% 			data.boreholes(n).acont, h.x0, h.a, origine, az, dip);
-% 	end
-% end
-% 
-% plan.x0      = h.x0;
-% plan.a       = h.a;
-% plan.origine = origine;
-% plan.az      = az;
-% plan.dip     = dip;
-% 	
-% [hh, g.cont] = bh_tomo_contraintes3d(grx, gry, grz, tmp, g.cont, plan);
-% if ishandle(hh), close(hh); end
-% setappdata(handles.fig_bh_grid3d,'g',g)
+g = getappdata(handles.fig_bh_grid3d,'g');
+h = getappdata(handles.fig_bh_grid3d,'h');
+grx = [g.grx(1) g.grx(2)-g.grx(1) g.grx(length(g.grx))];
+gry = [g.gry(1) g.gry(2)-g.gry(1) g.gry(length(g.gry))];
+grz = [g.grz(1) g.grz(2)-g.grz(1) g.grz(length(g.grz))];
+
+for n=numel(data.boreholes)
+	if isfield( data.boreholes(n), 'scont' )
+		g.cont.slowness = [g.cont.slowness; ...
+			data.boreholes(n).scont];
+	end
+	if isfield( data.boreholes(n), 'acont' )
+		g.cont.attenuation = [g.cont.attenuation; ...
+			data.boreholes(n).acont];
+	end
+end
+
+[hh, g.cont] = bh_tomo_contraintes3d(grx, gry, grz, g.cont);
+if ishandle(hh), close(hh); end
+setappdata(handles.fig_bh_grid3d,'g',g)
 
 
 function pushbutton_quitter_Callback(hObject, eventdata, handles)

@@ -1,34 +1,12 @@
 # bh_tomo
 
-bh_tomo is an open source borehole georadar data processing and
+bh_tomo is an open source borehole georadar/seismic data processing and
 ray-based 2D and 3D tomography software package.
-
-bh_tomo runs on Matlab 7.0.4 (Release 14 Service Pack 2) or later.
-
-Watch for manual_bh_tomo.pdf and
-
-Giroux, B., Gloaguen E. and Chouteau M.; bh_tomo - A Matlab borehole
-georadar 2D tomography package. Computers and Geosciences, 33,
-126--137, 2007. doi:10.1016/j.cageo.2006.05.014
-
-for a detailed description.
 
 ## Installation
 
-- Copy the files in this directory somewhere in your MATLABPATH or add
-the bh_tomo directory to your MATLABPATH environment variable.
-
-- In order to use the S-transform in bh_tomo_amp, you will need to download
-
-www.cora.nwra.com/~stockwel/rgspages/S-Transform/m_files/st.m
-
-save it in your MATLABPATH and **rename it st_bg.m**.  You can turn
-verbose off in this file to avoid numerous message printed in your
-Matlab command window.
-
-I have included a modified version of the suptitle.m file that allows
-to pass optional arguments to the text object.
-
+Copy the files in the bh_tomo directory somewhere in your MATLABPATH or add
+the bh_tomo directory to your MATLABPATH.
 
 ### MEX files
 
@@ -55,6 +33,31 @@ command prompt.
 **Important**: you need a compiler that supports the C++11 standard to
     compile most of the mex functions.  This has to be enabled in your
     mex setup.
+
+## Documentation
+
+Watch for manual_bh_tomo.pdf to learn how to use it and look at the following
+papers to understand the underlying theory:
+
+- Giroux, B., Gloaguen E. and Chouteau M., 2007.  bh_tomo - A Matlab borehole
+georadar 2D tomography package. Computers and Geosciences, 33,
+126--137. doi:10.1016/j.cageo.2006.05.014
+
+- Giroux, B., Bouchedda, A. et Chouteau, M., 2009. Assisted traveltime picking
+of crosshole GPR data, Geophysics, 74 (4), J35-J48. doi : 10.1190/1.3141002
+
+- Giroux, B. et Chouteau, M., 2010. Quantitative analysis of water content
+estimation errors using Ground Penetrating Radar data and a low-loss
+approximation, Geophysics 75, WA241-WA249. doi:10.1190/1.3464329
+
+- Giroux B et Gloaguen E, 2012. Geostatistical traveltime tomography in
+ elliptically anisotropic media. Geophysical Prospecting, 60, 1133-1149.
+ doi : 10.1111/j.1365-2478.2011.01047.x
+
+ - Giroux B et Bouchedda A, 2015. Ray-based time-lapse traveltime tomography,
+ SEG Technical Program Expanded Abstracts 2015 : pp. 5466-5471.
+ doi : 10.1190/segam2015-5815316.1
+
 
 ## License
 

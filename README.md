@@ -54,7 +54,7 @@ approximation, Geophysics 75, WA241-WA249. doi:10.1190/1.3464329
  elliptically anisotropic media. Geophysical Prospecting, 60, 1133-1149.
  doi : 10.1111/j.1365-2478.2011.01047.x
 
- - Giroux B et Bouchedda A, 2015. Ray-based time-lapse traveltime tomography,
+- Giroux B et Bouchedda A, 2015. Ray-based time-lapse traveltime tomography,
  SEG Technical Program Expanded Abstracts 2015 : pp. 5466-5471.
  doi : 10.1190/segam2015-5815316.1
 

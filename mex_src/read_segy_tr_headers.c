@@ -28,22 +28,74 @@ inline void Swap4Bytes(int32_t *x) {
     *x=(((*x>>24)&0xff) | ((*x&0xff)<<24) | ((*x>>8)&0xff00) | ((*x&0xff00)<<8));
 }
 
+void ibm2float(int32_t from[], int32_t to[], size_t n, int endian) {
+/***********************************************************************
+ * ibm2float - convert between 32 bit IBM and IEEE floating numbers
+ ************************************************************************
+ * Input:
+ * from     input vector
+ * to       output vector, can be same as input vector
+ * endian   byte order =0 little endian (DEC, PC's)
+ * =1 other systems
+ *************************************************************************
+ * Notes:
+ * Up to 3 bits lost on IEEE -> IBM
+ *
+ * IBM -> IEEE may overflow or underflow, taken care of by
+ * substituting large number or zero
+ *
+ * Only integer shifting and masking are used.
+ *************************************************************************
+ * Credits: CWP: Brian Sumner,  c.1985
+ *************************************************************************/
+    register int32_t fconv, fmant, t;
+    register size_t i;
+    
+    for (i = 0;i < n; ++i) {
+        
+        fconv = from[i];
+        
+        /* if little endian, i.e. endian=0 do this */
+        if (endian == 0) fconv = (fconv << 24) | ((fconv >> 24) & 0xff) |
+                ((fconv & 0xff00) << 8) | ((fconv & 0xff0000) >> 8);
+        
+        if (fconv) {
+            fmant = 0x00ffffff & fconv;
+            /* The next two lines were added by Toralf Foerster */
+            /* to trap non-IBM format data i.e. conv=0 data  */
+            if (fmant == 0)
+                mexWarnMsgTxt("mantissa is zero data may not be in IBM FLOAT Format !");
+            t = (int32_t) ((0x7f000000 & fconv) >> 22) - 130;
+            while (!(fmant & 0x00800000)) { --t; fmant <<= 1; }
+            if (t > 254) fconv = (0x80000000 & fconv) | 0x7f7fffff;
+            else if (t <= 0) fconv = 0;
+            else fconv =   (0x80000000 & fconv) | (t << 23)
+            | (0x007fffff & fmant);
+        }
+        to[i] = fconv;
+    }
+    return;
+}
+
 /*  the gateway routine.  */
 void mexFunction( int nlhs, mxArray *plhs[],
         int nrhs, const mxArray *prhs[] ) {
-    const short NFIELDS=86;
-    mwSize n, nf, m, ntraces, nfields, number_of_dims, ntraces_one[] = {1, 1};
+	
+	  const short NFIELDS_SEG=86;
+		short NFIELDS = 0;
+
+		mwSize n, nf, m, ntraces, nfields, number_of_dims, ntraces_one[] = {1, 1};
     const mwSize  *dim_array;
     double *tmp;
     int32_t *traces_no;
     int16_t *fields_no;
-    long offset, offset2;
+    long offset, offset2, ioff;
     
     mxArray **wvalue;
     void    *pdata=NULL;
     
-    const char *fnames[] = {  // follows CWP/SU naming convention for bytes 1-180
-        "tracl",
+    const char *fnames_seg[] = {  // follows CWP/SU naming convention for bytes 1-180
+			  "tracl",  // 1
         "tracr",
         "fldr",
         "tracf",
@@ -54,7 +106,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
         "nvs",
         "nhs",
         
-        "duse",
+        "duse",  // 11
         "offset",
         "gelev",
         "selev",
@@ -65,7 +117,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
         "gwdep",
         "scalel",
         
-        "scalco",
+        "scalco",  // 21
         "sx",
         "sy",
         "gx",
@@ -76,7 +128,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
         "sut",
         "gut",
         
-        "sstat",
+        "sstat", // 31
         "gstat",
         "tstat",
         "laga",
@@ -87,7 +139,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
         "ns",
         "dt",
         
-        "gain",
+        "gain",  // 41
         "igc",
         "igi",
         "corr",
@@ -98,7 +150,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
         "stas",
         "stae",
         
-        "tatyp",
+        "tatyp",  // 51
         "afilf",
         "afils",
         "nofilf",
@@ -109,7 +161,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
         "hcs",
         "year",
         
-        "day",
+        "day",  // 61
         "hour",
         "minute",
         "sec",
@@ -120,7 +172,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
         "grnlof",
         "gaps",
         
-        "otrav",
+        "otrav",  // 71
         
         //  names below arbitrarily given
         "xcdp",   // 72 - X coord of ensemble (CDP) position of this trace
@@ -140,8 +192,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
         "smeas",
         "smunit"   // 86 - source measurement units
     };
-    
-    const short word_length[] = {
+		char **fnames;
+		
+    const short word_length_seg[] = {
         4, 4, 4, 4, 4, 4, 4, 2, 2, 2,
         2, 4, 4, 4, 4, 4, 4, 4, 4, 2,
         2, 4, 4, 4, 4, 2, 2, 2, 2, 2,
@@ -152,20 +205,22 @@ void mexFunction( int nlhs, mxArray *plhs[],
         2, 4, 4, 4, 4, 4, 2, 2, 6, 2,
         2, 2, 2, 6, 6, 2
     };
+		short *word_length;
     
     FILE *fid;
     char *filename;
     
     if(nrhs<1)
         mexErrMsgTxt("At least one input variables required.");
-    else if(nrhs>3)
-        mexErrMsgTxt("No more than three input.");
+    else if(nrhs>5)
+        mexErrMsgTxt("No more than five input.");
     else if(nlhs > 1)
         mexErrMsgTxt("Too many output arguments.");
     
     int16_t *stmp = (int16_t *)mxMalloc(sizeof(int16_t));
     int32_t *itmp = (int32_t *)mxMalloc(sizeof(int32_t));
     double *dtmp = (double *)mxMalloc(sizeof(double));
+    float *ftmp = (float *)mxMalloc(sizeof(float));
 
     int bt = IsBigEndian();
 
@@ -272,8 +327,75 @@ void mexFunction( int nlhs, mxArray *plhs[],
         for (n=0; n<ntraces; ++n)
             traces_no[n] = n;
     }
-    
-    
+
+		// arg 4 & 5
+		// override standard SEG trace header structure
+		if ( nrhs==5 ) {
+			// arg 4: dictionnary
+			// arg 5: word length (code 5 is for IMB 4-byte float)
+
+			if ( mxIsCell(prhs[3]) ) {
+				NFIELDS = mxGetNumberOfElements(prhs[3]);
+
+				fnames = (char **)mxMalloc(sizeof(char*)*NFIELDS);
+				word_length = (short *)mxMalloc(sizeof(short)*NFIELDS);
+
+				const mxArray *cell_element_ptr;
+				char tmpstr[100];
+				
+				for ( n = 0; n<NFIELDS; ++n ) {
+					cell_element_ptr = mxGetCell(prhs[3], n);
+					if (cell_element_ptr == NULL) {
+						mexErrMsgTxt("\tEmpty Cell\n");
+					}
+					if (mxIsChar(cell_element_ptr)) {
+						mxGetString(cell_element_ptr, tmpstr, 99);
+						fnames[n] = (char *)mxMalloc(sizeof(char)*(1+strlen(tmpstr)));
+						strcpy(fnames[n], tmpstr);						
+					} else {
+						mexErrMsgTxt("cell elements must be char.");
+					}
+				}
+			} else {
+				mexErrMsgTxt("dictionnary must be of type cell.");
+			}
+
+			if (mxIsDouble(prhs[4])) {
+				number_of_dims = mxGetNumberOfDimensions(prhs[4]);
+				if ( number_of_dims != 2 ) {
+					mexErrMsgTxt("word length must be a rank 2 matrix.");
+				}
+				dim_array = mxGetDimensions(prhs[4]);
+				if( dim_array[0] != 1 && dim_array[1] != 1 ) {
+					mexErrMsgTxt("word length must be a vector.");
+				}
+				nfields = dim_array[0]*dim_array[1];
+				if ( nfields > NFIELDS ) {
+					mexErrMsgTxt("Number of fields in word length larger than in dictionnary.");
+				}
+				tmp = (double*)mxGetPr(prhs[4]);
+				for (n=0; n<nfields; ++n) {
+					word_length[n] = (short) lround( tmp[n] );
+				}
+				
+			} else {
+				mexErrMsgTxt("Arg 5 must be of type double.");
+			}
+			
+		} else {
+
+			// assign default dictionnary
+			
+			NFIELDS = NFIELDS_SEG;
+			fnames = (char **)mxMalloc(sizeof(char*)*NFIELDS);
+			word_length = (short *)mxMalloc(sizeof(short)*NFIELDS);
+			for ( n = 0; n<NFIELDS; ++n ) {
+				fnames[n] = (char *)mxMalloc(sizeof(char)*(1+strlen(fnames_seg[n])));
+				strcpy(fnames[n], fnames_seg[n]);
+				word_length[n] = word_length_seg[n];
+			}
+		}
+		    
     // arg 3: string trace header word number to read
     //
     
@@ -281,7 +403,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
         if (mxIsDouble(prhs[2])) {
             number_of_dims = mxGetNumberOfDimensions(prhs[2]);
             if ( number_of_dims != 2 ){
-                mexErrMsgTxt("Rx must be a rank 2 matrix.");
+                mexErrMsgTxt("fields must be a rank 2 matrix.");
             }
             dim_array = mxGetDimensions(prhs[2]);
             if( dim_array[0] != 1 && dim_array[1] != 1 ) {
@@ -329,7 +451,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
         for (n=0; n<nfields; ++n)
             fields_no[n] = n;
     }
-    
+
     
     // get the right field names
     //
@@ -356,6 +478,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
             case 4:
                 wvalue[nf] = mxCreateNumericArray(2, ntraces_one, mxINT32_CLASS, mxREAL);
                 break;
+				    case 5:
+							  wvalue[nf] = mxCreateNumericArray(2, ntraces_one, mxSINGLE_CLASS, mxREAL);
+                break;
             case 6:
                 wvalue[nf] = mxCreateNumericArray(2, ntraces_one, mxDOUBLE_CLASS, mxREAL);
                 break;
@@ -372,8 +497,10 @@ void mexFunction( int nlhs, mxArray *plhs[],
         for ( nf=0; nf<nfields; ++nf ) {
             
             offset2 = offset;
-            for (m=0; m<fields_no[nf]; ++m)
-                offset2 += word_length[m];
+            for (m=0; m<fields_no[nf]; ++m) {
+							  ioff = word_length[m]==5 ? 4 : word_length[m];  // we use 5 for 4-byte ibm float
+								offset2 += ioff;
+						}
             
             if ( fseek(fid, offset2, SEEK_SET) == -1 ) {
                 fclose(fid);
@@ -405,6 +532,15 @@ void mexFunction( int nlhs, mxArray *plhs[],
                     memcpy(((int32_t *)pdata)+n, itmp, 4);
                     
                     break;
+						    case 5:
+									  fread(itmp, 4, 1, fid);
+										ibm2float(itmp, (int32_t *)ftmp, 1, bt);
+
+										pdata =(float *) mxGetData( wvalue[nf] );
+
+										memcpy(((float *)pdata)+n, ftmp, sizeof(float));
+
+										break;
                 case 6:
                     fread(itmp, 4, 1, fid);
                     fread(stmp, 2, 1, fid);
@@ -418,7 +554,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
                     
                     pdata =(double *) mxGetData( wvalue[nf] );
                     
-                    memcpy(((double *)pdata+n), dtmp, sizeof(double));
+                    memcpy(((double *)pdata)+n, dtmp, sizeof(double));
                     
                     break;
                 default:
@@ -433,6 +569,6 @@ void mexFunction( int nlhs, mxArray *plhs[],
     }
     
     fclose(fid);
-    
+
     return;
 }

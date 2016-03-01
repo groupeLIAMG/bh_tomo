@@ -72,7 +72,8 @@ for i=1:r,
      h=h+(t1(:,id)*ones(1,n2)-ones(n1,1)*t2(:,id)').^2;
   end
   h=sqrt(h);
-  ji=(i-1)*p+1; js=i*p ;
+  ji=(i-1)*p+1;
+  js=i*p;
 
   % evaluation of the current basic structure
   g=eval(Gam(model(i,1),:));

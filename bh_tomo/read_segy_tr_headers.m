@@ -1,5 +1,5 @@
 % READ_SEGY_TR_HEADERS - read trace header info stored in a SEG-Y file 
-%    tr_headers = read_segy_tr_headers(segyfile, traces, fields)
+% tr_headers = read_segy_tr_headers(segyfile, traces, fields, dict, word_length)
 %
 % Input:
 %    segyfile (mandatory) : name of SEG-Y file
@@ -8,6 +8,14 @@
 %    fields (optional)  : indices or names of trace header word to retreive
 %                - indices are given as a vector such as [3 6 8:9]
 %                - names are separated by commas such as 'sx,sy,gx,gy'
+%    dict (optional)  : custom dictionary for trace header (cell array
+%                       of strings)
+%    word_length (optional)  : word length in bytes for trace header
+%                              (vector of double)
+%                              (mandatory if dict given)
+%	               - sum(word_length) must be less than 241
+%                - numel(word_length) must equal numel(dict)
+%                - 4-byte IBM float words are handled by setting word_length=5
 %
 % Output:
 %    tr_headers : struct variable containing vectors holding the field

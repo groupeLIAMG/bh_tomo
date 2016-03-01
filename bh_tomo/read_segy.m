@@ -10,11 +10,14 @@ function s = read_segy(segyfile, varargin)
 %                - indices are given as a vector such as [3 6 8:9]
 %                - names are separated by commas such as 'sx,sy,gx,gy' (see
 %                  read_segy_tr_headers for details)
-%    dict (optional)  : custom dictionary for trace header (cell array of strings)
-%    word_length (optional)  : word length in bytes for trace header (vector of double)
+%    dict (optional)  : custom dictionary for trace header (cell array
+%                       of strings)
+%    word_length (optional)  : word length in bytes for trace header
+%                              (vector of double)
 %                              (mandatory if dict given)
 %	               - sum(word_length) must be less than 241
 %                - numel(word_length) must equal numel(dict)
+%                - 4-byte IBM float words are handled by setting word_length=5
 %
 % Output:
 %    s : a struct variable holding

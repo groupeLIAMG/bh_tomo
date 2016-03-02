@@ -199,9 +199,9 @@ for noIter=1:param.nbreitrc+param.nbreitrd+param.nbreitra
 			imagesc(gridx,gridz,reshape((ss+l_moy),n,m),'Parent',g_handles{3})
 		end
 		set(g_handles{3},'DataAspectRatio',[1 1 1],'YDir','normal')
-		title('LSQR')
-		xlabel(str.s119)
-		ylabel(str.s120)
+		title(g_handles{3},'LSQR')
+		xlabel(g_handles{3},str.s119)
+		ylabel(g_handles{3},str.s120)
 		if ~isempty(g_handles{1})
             caxis(g_handles{3}, g_handles{1})
         end

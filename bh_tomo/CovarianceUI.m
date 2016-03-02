@@ -4,18 +4,74 @@ classdef CovarianceUI < handle
     properties (Access=private)
         cov
         guiHandles
+        facSpace  % vertical space factor between UI components
     end
     
     methods
         function obj = CovarianceUI(c)
-            obj.cov = c;
+            if isa(c, 'Covariance')
+                obj.cov = c;
+            else
+                error('Covariance model needed as input')
+            end
+            obj.facSpace = 3;
         end
         
-        function createUI(obj, parent, position)
-            obj.guiHandles.hp = uipanel('Parent',parent,...
-                'Position',position,...
-                'Title','Covariance parameters',...
-                'Resize','on',...
+        function hp = getUIpanel(obj, varargin)
+            %  Return a handle to the panel
+            obj.createUI(varargin)
+            hp = obj.guiHandles.hp;
+        end
+        function size = getPreferredSize(obj,varargin)
+            %  Return preferred size of panel in points units
+            if nargin>=2
+                tmp = varargin{1};
+            else
+                tmp = uicontrol('Style','edit',...
+                    'Visible','off',...
+                    'Units','points');
+            end
+            d = numel(obj.cov.range);
+            if d==2
+                numLines = 4;
+            else % d == 3
+                numLines = 7;
+            end
+           
+            vSizeAll = (numLines-1)*tmp.Position(4)/obj.facSpace + ...
+                (numLines+2.5)*tmp.Position(4);
+            
+            hSpace = tmp.Position(1)/2;
+            hSize = tmp.Position(3);
+            hSizeAll = 5*hSpace + 2*hSize;
+            size = [hSizeAll vSizeAll];
+        end
+    end
+    
+    methods (Access=private)
+        function editRangeX(obj,varargin)
+            obj.cov.range(1) = str2double(obj.guiHandles.editRangeX.String);
+        end
+        function editRangeY(obj,varargin)
+            obj.cov.range(2) = str2double(obj.guiHandles.editRangeY.String);
+        end
+        function editRangeZ(obj,varargin)
+            obj.cov.range(end) = str2double(obj.guiHandles.editRangeZ.String);
+        end
+        function editAngleX(obj,varargin)
+            obj.cov.angle(1) = str2double(obj.guiHandles.editAngleX.String);
+        end
+        function editAngleY(obj,varargin)
+            obj.cov.angle(2) = str2double(obj.guiHandles.editAngleY.String);
+        end
+        function editAngleZ(obj,varargin)
+            obj.cov.angle(3) = str2double(obj.guiHandles.editAngleZ.String);
+        end
+        function editSill(obj,varargin)
+            obj.cov.sill = str2double(obj.guiHandles.editSill.String);
+        end
+        function createUI(obj, args)
+            obj.guiHandles.hp = uipanel(args{:},...
                 'SizeChangedFcn',@obj.resizeUI);
             
             obj.guiHandles.textRangeX = uicontrol('Style','text',...
@@ -100,34 +156,6 @@ classdef CovarianceUI < handle
                     'Parent',obj.guiHandles.hp);
             end
         end
-        function hp = getUI(obj, parent, position)
-            obj.createUI(parent, position)
-            hp = obj.guiHandles.hp;
-        end
-    end
-    
-    methods (Access=private)
-        function editRangeX(obj,varargin)
-            obj.cov.range(1) = str2double(obj.guiHandles.editRangeX.String);
-        end
-        function editRangeY(obj,varargin)
-            obj.cov.range(2) = str2double(obj.guiHandles.editRangeY.String);
-        end
-        function editRangeZ(obj,varargin)
-            obj.cov.range(end) = str2double(obj.guiHandles.editRangeZ.String);
-        end
-        function editAngleX(obj,varargin)
-            obj.cov.angle(1) = str2double(obj.guiHandles.editAngleX.String);
-        end
-        function editAngleY(obj,varargin)
-            obj.cov.angle(2) = str2double(obj.guiHandles.editAngleY.String);
-        end
-        function editAngleZ(obj,varargin)
-            obj.cov.angle(3) = str2double(obj.guiHandles.editAngleZ.String);
-        end
-        function editSill(obj,varargin)
-            obj.cov.sill = str2double(obj.guiHandles.editSill.String);
-        end
         function resizeUI(obj,varargin)
             
             if ~isempty(obj.guiHandles)
@@ -145,13 +173,15 @@ classdef CovarianceUI < handle
                     numLines = 7;
                 end
                 
-                fac = 3;
-                vSizeAll = (numLines-1)*obj.guiHandles.editRangeX.Position(4)/fac + ...
-                    (numLines+1.5)*obj.guiHandles.editRangeX.Position(4);
-                vSpace = obj.guiHandles.editRangeX.Position(4)/fac;
+                hSpace = obj.guiHandles.textRangeX.Position(1)/2;
+                hSize = obj.guiHandles.textRangeX.Position(3);
+                
+                size = obj.getPreferredSize(obj.guiHandles.textRangeX);
+
+                vSpace = obj.guiHandles.editRangeX.Position(4)/obj.facSpace;
                 vSize = obj.guiHandles.editRangeX.Position(4);
-                if vSizeAll>pheight
-                    vSize = fac*pheight / (numLines-1+fac*(numLines+1.5));
+                if size(2)>pheight
+                    vSize = obj.facSpace*pheight / (numLines-1+obj.facSpace*(numLines+1.5));
                     obj.guiHandles.textRangeX.Position(4) = vSize;
                     obj.guiHandles.textRangeZ.Position(4) = vSize;
                     obj.guiHandles.textAngleX.Position(4) = vSize;
@@ -168,7 +198,7 @@ classdef CovarianceUI < handle
                         obj.guiHandles.editAngleY.Position(4) = vSize;
                         obj.guiHandles.editAngleZ.Position(4) = vSize;
                     end
-                    vSpace = vSize/fac;
+                    vSpace = vSize/obj.facSpace;
                 end
                 n=2.5;
                 obj.guiHandles.textRangeX.Position(2) = pheight-n*vSize;
@@ -196,11 +226,8 @@ classdef CovarianceUI < handle
                 obj.guiHandles.textSill.Position(2) = pheight-n*vSize-(n-2.5)*vSpace;
                 obj.guiHandles.editSill.Position(2) = pheight-n*vSize-(n-2.5)*vSpace;
 
-                hSpace = obj.guiHandles.textRangeX.Position(1)/2;
-                hSize = obj.guiHandles.textRangeX.Position(3);
-                hSizeAll = 5*hSpace + 2*hSize;
-                if hSizeAll>pwidth
-                    ratio = pwidth/hSizeAll;
+                if size(1)>pwidth
+                    ratio = pwidth/size(1);
                     hSpace = hSpace*ratio;
                     hSize = hSize*ratio;
 
@@ -243,7 +270,6 @@ classdef CovarianceUI < handle
                     obj.guiHandles.editAngleZ.Position(1) = 3*hSpace+hSize;
                 end                    
             end
-            
         end
     end
 end

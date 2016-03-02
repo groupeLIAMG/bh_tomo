@@ -201,10 +201,10 @@ for noIter=1:param.nbreitrc+param.nbreitrd
             slice(gridx,gridy,gridz,ssplot,ix,iy,iz,'Parent',g_handles{3});
 		end
 		set(g_handles{3},'DataAspectRatio',[1 1 1])
-		title('LSQR','Parent',g_handles{3})
-        xlabel(['X ',str.s119],'Parent',g_handles{3})
-        ylabel(['Y ',str.s119],'Parent',g_handles{3})
-        zlabel(str.s120,'Parent',g_handles{3})
+		title(g_handles{3},'LSQR','Parent',g_handles{3})
+        xlabel(g_handles{3},['X ',str.s119],'Parent',g_handles{3})
+        ylabel(g_handles{3},['Y ',str.s119],'Parent',g_handles{3})
+        zlabel(g_handles{3},str.s120,'Parent',g_handles{3})
 		if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
 		colorbar('peer', g_handles{3})
 		eval(['colormap(',g_handles{2},')'])

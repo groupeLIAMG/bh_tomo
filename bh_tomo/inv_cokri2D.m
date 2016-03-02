@@ -249,9 +249,9 @@ for noIter=1:param.nbreitrd+param.nbreitrc+param.nbreitra
         
         if  ~isempty(g_handles)
             set(g_handles{3},'DataAspectRatio',[1 1 1],'YDir','normal')
-            title(str.s230,'FontSize',14)
-            xlabel(str.s119)
-            ylabel(str.s120)
+            title(g_handles{3},str.s230,'FontSize',14)
+            xlabel(g_handles{3},str.s119)
+            ylabel(g_handles{3},str.s120)
             if ~isempty(g_handles{1}), caxis(g_handles{3}, g_handles{1}), end
             colorbar('peer',g_handles{3})
             if param.tomo_amp==0
@@ -261,9 +261,9 @@ for noIter=1:param.nbreitrd+param.nbreitrc+param.nbreitra
                 imagesc(gridx,gridz,reshape((sgr+l_moy),length(gridz),length(gridx)),'Parent',g_handles{4})
             end
             set(g_handles{4},'DataAspectRatio',[1 1 1],'YDir','normal')
-            title(str.s231,'FontSize',14)
-            xlabel(str.s119)
-            ylabel(str.s120)
+            title(g_handles{4},str.s231,'FontSize',14)
+            xlabel(g_handles{4},str.s119)
+            ylabel(g_handles{4},str.s120)
             if ~isempty(g_handles{1}), caxis(g_handles{4}, g_handles{1}), end
             colorbar('peer', g_handles{4})
             eval(['colormap(',g_handles{2},')'])
@@ -287,9 +287,9 @@ for noIter=1:param.nbreitrd+param.nbreitrc+param.nbreitra
                 imagesc(gridx,gridz,reshape((ss+l_moy),n,m),'Parent',g_handles{3})
             end
             set(g_handles{3},'DataAspectRatio',[1 1 1],'YDir','normal')
-            title(str.s230,'FontSize',14)
-            xlabel(str.s119)
-            ylabel(str.s120)
+            title(g_handles{3},str.s230,'FontSize',14)
+            xlabel(g_handles{3},str.s119)
+            ylabel(g_handles{3},str.s120)
             if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
             colorbar('peer', g_handles{3})
             eval(['colormap(',g_handles{2},')'])

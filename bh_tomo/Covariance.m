@@ -1,6 +1,5 @@
-classdef Covariance < matlab.mixin.Heterogeneous
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+classdef Covariance < matlab.mixin.Heterogeneous & handle
+    %COVARIANCE Base class for covariance models
     
     properties
         range
@@ -22,21 +21,24 @@ classdef Covariance < matlab.mixin.Heterogeneous
                 obj.sill = s;
             end
         end
-        function obj = set.range(obj, r)
+        function set.range(obj, r)
             if isnumeric(r)
+                if numel(r)~=2 && numel(r)~=3
+                    error('Covariance should be defined for 2D or 3D models')
+                end
                 obj.range = max(r, 100*eps); % range of 0 not allowed
             else
                 error('range must be numeric')
             end
         end
-        function obj = set.angle(obj, a)
+        function set.angle(obj, a)
             if isnumeric(a)
                 obj.angle = a;
             else
                 error('angle must be numeric')
             end
         end
-        function obj = set.sill(obj, s)
+        function set.sill(obj, s)
             if isscalar(s)
                 obj.sill = s;
             else
@@ -102,6 +104,7 @@ classdef Covariance < matlab.mixin.Heterogeneous
             h=sqrt(h);
         end
     end
+    
     methods (Abstract)
         k = compute(obj, x, x0);
     end

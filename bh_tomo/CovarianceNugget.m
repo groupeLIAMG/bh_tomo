@@ -8,7 +8,7 @@ classdef CovarianceNugget < Covariance
     
     methods
         function obj = CovarianceNugget(s)
-            obj@Covariance([],[],s);
+            obj@Covariance([1 1],0,s);
             obj.type = CovarianceModels.nugget;
         end
         function k = compute(obj, x, x0)

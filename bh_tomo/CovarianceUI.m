@@ -72,6 +72,7 @@ classdef CovarianceUI < handle
         end
         function createUI(obj, args)
             obj.guiHandles.hp = uipanel(args{:},...
+                'Visible','off',...
                 'SizeChangedFcn',@obj.resizeUI);
             
             obj.guiHandles.textRangeX = uicontrol('Style','text',...
@@ -154,12 +155,15 @@ classdef CovarianceUI < handle
                     'Units','points',...
                     'Callback',@obj.editAngleZ,...
                     'Parent',obj.guiHandles.hp);
+                
+                obj.guiHandles.hp.Visible = 'on';
             end
         end
         function resizeUI(obj,varargin)
             
             if ~isempty(obj.guiHandles)
 
+                obj.guiHandles.hp.Visible = 'off';
                 obj.guiHandles.hp.Units = 'points';
             
                 % Get figure width and height
@@ -268,7 +272,9 @@ classdef CovarianceUI < handle
                     obj.guiHandles.editRangeY.Position(1) = 3*hSpace+hSize;
                     obj.guiHandles.editAngleY.Position(1) = 3*hSpace+hSize;
                     obj.guiHandles.editAngleZ.Position(1) = 3*hSpace+hSize;
-                end                    
+                end
+                obj.guiHandles.hp.Visible = 'on';
+
             end
         end
     end

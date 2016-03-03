@@ -4,60 +4,87 @@ classdef BoreholeUI < handle
     properties (SetAccess=private)
         boreholes
     end
+    properties (Dependent)
+        Position
+        FontSize   % should remain be within [10 11 12]
+    end
     properties (Access=private)
         handles
     end
     events
-        coordinatesChanged
+        coordinatesChanged, boreholeAdded, boreholeDeleted
     end
     methods
-        function hp = getUIpanel(obj, varargin)
-            %  Return a handle to the panel
-            obj.createUI(varargin)
-            hp = obj.handles.hp;
+        function obj = BoreholeUI(varargin)
+            obj.handles.hp = uipanel(varargin{:},...
+            'Title','Boreholes',...
+            'Visible','off',...
+            'SizeChangedFcn', @obj.resizeUI);
+            
+            obj.addComponents();
+            obj.resizeUI();
+        end
+        function set.Position(obj, p)
+            obj.handles.hp.Position = p;
+        end
+        function set.FontSize(obj, s)
+            obj.handles.hp.FontSize = s+1;
+            obj.handles.addBH.FontSize = s;
+            obj.handles.removeBH.FontSize = s;
+            obj.handles.importBH.FontSize = s;
+            obj.handles.plotBH.FontSize = s;
+            obj.handles.listBH.FontSize = s;
+            obj.handles.textCoord.FontSize = s;
+            obj.handles.textX.FontSize = s;
+            obj.handles.textY.FontSize = s;
+            obj.handles.textZ.FontSize = s;
+            obj.handles.textCollar.FontSize = s;
+            obj.handles.textBottom.FontSize = s;
+            obj.handles.topX.FontSize = s;
+            obj.handles.topY.FontSize = s;
+            obj.handles.topZ.FontSize = s;
+            obj.handles.bottomX.FontSize = s;
+            obj.handles.bottomY.FontSize = s;
+            obj.handles.bottomZ.FontSize = s;
+            obj.handles.textZwater.FontSize = s;
+            obj.handles.Zwater.FontSize = s;
+            obj.handles.textZsurf.FontSize = s;
+            obj.handles.Zsurf.FontSize = s;
+            obj.handles.textDiam.FontSize = s;
+            obj.handles.diameter.FontSize = s;
+            obj.handles.contS.FontSize = s;
+            obj.handles.contA.FontSize = s;
+            obj.resizeUI();
         end
     end
     
     methods (Access=private)
-        function createUI(obj, args)
-            width = 300;
-            height = 360;
-            obj.handles.hp = uipanel(args{:},...
-                'Units','points',...
-                'Title','Boreholes',...
-                'Position',[5 5 width height], ...
-                'Visible','off',...
-                'SizeChangedFcn',@obj.resizeUI);
+        function addComponents(obj)
             
             obj.handles.addBH = uicontrol('Style','pushbutton',...
                 'String','Add',...
                 'Units','points',...
-                'Position',[20 height-45 60 20], ...
                 'Callback',@obj.addBH,...
                 'Parent',obj.handles.hp);
             obj.handles.removeBH = uicontrol('Style','pushbutton',...
                 'String','Remove',...
                 'Units','points',...
-                'Position',[85 height-45 60 20], ...
                 'Callback',@obj.removeBH,...
                 'Parent',obj.handles.hp);
-            obj.handles.aimportBH = uicontrol('Style','pushbutton',...
+            obj.handles.importBH = uicontrol('Style','pushbutton',...
                 'String','Import',...
                 'Units','points',...
-                'Position',[150 height-45 60 20], ...
                 'Callback',@obj.importBH,...
                 'Parent',obj.handles.hp);
             obj.handles.plotBH = uicontrol('Style','pushbutton',...
                 'String','Plot',...
                 'Units','points',...
-                'Position',[215 height-45 60 20], ...
                 'Callback',@obj.plotBH,...
                 'Parent',obj.handles.hp);
 
             obj.handles.listBH = uicontrol('Style','listbox',...
                 'Max',1,'Min',0,...
                 'Units','points',...
-                'Position',[30 height-155 width-66 100],...
                 'Callback',@obj.listBH,...
                 'Parent',obj.handles.hp);
             
@@ -65,125 +92,152 @@ classdef BoreholeUI < handle
                 'String','Coordinates',...
                 'Units','points',...
                 'HorizontalAlignment','right',...
-                'Position',[width/2-95 height-190 60 20], ...
                 'Parent',obj.handles.hp);
             obj.handles.textX = uicontrol('Style','text',...
                 'String','X:',...
                 'Units','points',...
                 'HorizontalAlignment','right',...
-                'Position',[width/2-95 height-210 60 20], ...
                 'Parent',obj.handles.hp);
             obj.handles.textY = uicontrol('Style','text',...
                 'String','Y:',...
                 'Units','points',...
                 'HorizontalAlignment','right',...
-                'Position',[width/2-95 height-235 60 20], ...
                 'Parent',obj.handles.hp);
             obj.handles.textZ = uicontrol('Style','text',...
                 'String','Elevation:',...
                 'Units','points',...
                 'HorizontalAlignment','right',...
-                'Position',[width/2-95 height-260 60 20], ...
                 'Parent',obj.handles.hp);
             obj.handles.textCollar = uicontrol('Style','text',...
                 'String','Collar',...
                 'Units','points',...
                 'HorizontalAlignment','center',...
-                'Position',[width/2-30 height-190 60 20], ...
                 'Parent',obj.handles.hp);
             obj.handles.textBottom = uicontrol('Style','text',...
                 'String','Bottom',...
                 'Units','points',...
                 'HorizontalAlignment','center',...
-                'Position',[width/2+35 height-190 60 20], ...
                 'Parent',obj.handles.hp);
             
             obj.handles.topX = uicontrol('Style','edit',...
                 'Units','points',...
                 'Callback',@obj.topX,...
-                'Position',[width/2-30 height-210 60 20], ...
                 'Parent',obj.handles.hp);
             obj.handles.topY = uicontrol('Style','edit',...
                 'Units','points',...
                 'Callback',@obj.topY,...
-                'Position',[width/2-30 height-235 60 20], ...
                 'Parent',obj.handles.hp);
             obj.handles.topZ = uicontrol('Style','edit',...
                 'Units','points',...
                 'Callback',@obj.topZ,...
-                'Position',[width/2-30 height-260 60 20], ...
                 'Parent',obj.handles.hp);
             obj.handles.bottomX = uicontrol('Style','edit',...
                 'Units','points',...
                 'Callback',@obj.bottomX,...
-                'Position',[width/2+35 height-210 60 20], ...
                 'Parent',obj.handles.hp);
             obj.handles.bottomY = uicontrol('Style','edit',...
                 'Units','points',...
                 'Callback',@obj.bottomY,...
-                'Position',[width/2+35 height-235 60 20], ...
                 'Parent',obj.handles.hp);
             obj.handles.bottomZ = uicontrol('Style','edit',...
                 'Units','points',...
                 'Callback',@obj.bottomZ,...
-                'Position',[width/2+35 height-260 60 20], ...
                 'Parent',obj.handles.hp);
 
             obj.handles.textZsurf = uicontrol('Style','text',...
                 'String','Elevation at surface:',...
                 'Units','points',...
                 'HorizontalAlignment','right',...
-                'Position',[width/2-105 height-285 100 20], ...
                 'Parent',obj.handles.hp);
             obj.handles.Zsurf = uicontrol('Style','edit',...
                 'Units','points',...
                 'Callback',@obj.Zsurf,...
-                'Position',[width/2 height-285 60 20], ...
                 'Parent',obj.handles.hp);
 
             obj.handles.textZwater = uicontrol('Style','text',...
                 'String','Elev. water:',...
                 'Units','points',...
                 'HorizontalAlignment','right',...
-                'Position',[20 height-310 60 20], ...
                 'Parent',obj.handles.hp);
             obj.handles.Zwater = uicontrol('Style','edit',...
                 'Units','points',...
                 'Callback',@obj.Zwater,...
-                'Position',[85 height-310 60 20], ...
                 'Parent',obj.handles.hp);
 
             obj.handles.textDiam = uicontrol('Style','text',...
                 'String','Diameter:',...
                 'Units','points',...
                 'HorizontalAlignment','right',...
-                'Position',[160 height-310 50 20], ...
                 'Parent',obj.handles.hp);
             obj.handles.diameter = uicontrol('Style','edit',...
                 'Units','points',...
                 'Callback',@obj.diameter,...
-                'Position',[215 height-310 60 20], ...
                 'Parent',obj.handles.hp);
 
             obj.handles.contS = uicontrol('Style','pushbutton',...
                 'String','Constraints slown.',...
                 'Units','points',...
-                'Position',[width/2-127 height-345 120 20], ...
                 'Callback',@obj.contS,...
                 'Parent',obj.handles.hp);
             obj.handles.contA = uicontrol('Style','pushbutton',...
                 'String','Constraints atten.',...
                 'Units','points',...
-                'Position',[width/2+5 height-345 120 20], ...
                 'Callback',@obj.contA,...
                 'Parent',obj.handles.hp);
 
             obj.handles.hp.Visible = 'on';
         end
         function resizeUI(obj,varargin)
+            oldUnits = obj.handles.hp.Units;
+            obj.handles.hp.Units = 'points';
             obj.handles.hp.Visible = 'off';
-            % TODO
+
+            p = obj.handles.hp.Position;
+            width = p(3);  % prefered: 300
+            height = p(4); % prefered: 360
+
+            vSize = 20;
+            hSize = width/5;
+            hSpace = width/60;
+            vSpace = 5;
+            hBorder = width/15;
+            vBorderTop = height/8;
+            vBorder = 15;
+            
+            vSizeList = height-vBorderTop-2*vSpace-(vBorder+7*vSize+7*vSpace);
+            
+            obj.handles.addBH.Position = [hBorder height-vBorderTop hSize vSize];
+            obj.handles.removeBH.Position = [hBorder+hSize+hSpace height-vBorderTop hSize vSize];
+            obj.handles.importBH.Position = [hBorder+2*hSize+2*hSpace height-vBorderTop hSize vSize];
+            obj.handles.plotBH.Position = [hBorder+3*hSize+3*hSpace height-vBorderTop hSize vSize];
+            
+            obj.handles.listBH.Position = [1.5*hBorder vBorder+7*vSize+7*vSpace width-3*hBorder vSizeList];
+            obj.handles.textCoord.Position = [width/2-3/2*hSize-hSpace vBorder+6*vSize+6*vSpace hSize vSize];
+            obj.handles.textX.Position = [width/2-3/2*hSize-hSpace vBorder+5*vSize+5*vSpace hSize vSize];
+            obj.handles.textY.Position = [width/2-3/2*hSize-hSpace vBorder+4*vSize+4*vSpace hSize vSize];
+            obj.handles.textZ.Position = [width/2-3/2*hSize-hSpace vBorder+3*vSize+3*vSpace hSize vSize];
+            obj.handles.textCollar.Position = [width/2-hSize/2 vBorder+6*vSize+6*vSpace hSize vSize];
+            obj.handles.textBottom.Position = [width/2+hSize/2+hSpace vBorder+6*vSize+6*vSpace hSize vSize];
+            obj.handles.topX.Position = [width/2-hSize/2 vBorder+5*vSize+5*vSpace hSize vSize];
+            obj.handles.topY.Position = [width/2-hSize/2 vBorder+4*vSize+4*vSpace hSize vSize];
+            obj.handles.topZ.Position = [width/2-hSize/2 vBorder+3*vSize+3*vSpace hSize vSize];
+            obj.handles.bottomX.Position = [width/2+hSize/2+hSpace vBorder+5*vSize+5*vSpace hSize vSize];
+            obj.handles.bottomY.Position = [width/2+hSize/2+hSpace vBorder+4*vSize+4*vSpace hSize vSize];
+            obj.handles.bottomZ.Position = [width/2+hSize/2+hSpace vBorder+3*vSize+3*vSpace hSize vSize];
+            
+            obj.handles.textZsurf.Position = [width/2-5/3*hSize-hSpace vBorder+2*vSize+2*vSpace 5/3*hSize vSize];
+            obj.handles.Zsurf.Position = [width/2 vBorder+2*vSize+2*vSpace hSize vSize];
+            
+            obj.handles.textZwater.Position = [hBorder vBorder+vSize+vSpace hSize vSize];
+            obj.handles.Zwater.Position = [hBorder+hSize+hSpace vBorder+vSize+vSpace hSize vSize];
+            obj.handles.textDiam.Position = [hBorder+2*hSize+2*hSpace vBorder+vSize+vSpace 5/6*hSize vSize];
+            obj.handles.diameter.Position = [hBorder+17/6*hSize+3*hSpace vBorder+vSize+vSpace hSize vSize];
+            
+            obj.handles.contS.Position = [width/2-2*hSize-hSpace-2 vBorder 2*hSize vSize];
+            obj.handles.contA.Position = [width/2+hSpace vBorder 2*hSize vSize];
+            
             obj.handles.hp.Visible = 'on';
+            obj.handles.hp.Units = oldUnits;
         end
         
         function addBH(obj,varargin)
@@ -203,6 +257,7 @@ classdef BoreholeUI < handle
             obj.handles.listBH.String = names;
             obj.handles.listBH.Value = length(obj.boreholes);
             obj.updateEdits
+            notify(obj,'boreholeAdded')
         end
         function removeBH(obj, varargin)
             no = obj.handles.listBH.Value;
@@ -217,6 +272,7 @@ classdef BoreholeUI < handle
             obj.handles.listBH.String = names;
             obj.handles.listBH.Value = length(obj.boreholes);
             obj.updateEdits
+            notify(obj,'boreholeDeleted')
         end
         function importBH(obj, varargin)
             [filename, pathname] = uigetfile('*.xyz', 'Import borehole');
@@ -246,6 +302,7 @@ classdef BoreholeUI < handle
             obj.handles.listBH.String = names;
             obj.handles.listBH.Value = length(obj.boreholes);
             obj.updateEdits
+            notify(obj,'boreholeAdded')
         end
         function plotBH(obj, varargin)
             if isempty(obj.boreholes), return, end
@@ -274,24 +331,45 @@ classdef BoreholeUI < handle
         function topX(obj, varargin)
             no = obj.handles.listBH.Value;
             if no>0 && no<=length(obj.boreholes)
-                obj.boreholes(no).X = str2double( obj.handles.topX );
-                obj.boreholes(no).fdata(1,1) = obj.boreholes(no).X;
+                if obj.boreholes(no).X==obj.boreholes(no).fdata(1,1)
+                    obj.boreholes(no).X = str2double( obj.handles.topX.String );
+                    obj.boreholes(no).fdata(1,1) = obj.boreholes(no).X;
+                else
+                    % prepend fdata with new value
+                    obj.boreholes(no).X = str2double( obj.handles.topX.String );
+                    obj.boreholes(no).fdata = [obj.boreholes(no).X obj.boreholes(no).Y obj.boreholes(no).Z;
+                        obj.boreholes(no).fdata];
+                end
                 notify(obj,'coordinatesChanged');
             end
         end
         function topY(obj, varargin)
             no = obj.handles.listBH.Value;
             if no>0 && no<=length(obj.boreholes)
-                obj.boreholes(no).Y = str2double( obj.handles.topY );
-                obj.boreholes(no).fdata(1,2) = obj.boreholes(no).Y;
+                if obj.boreholes(no).Y==obj.boreholes(no).fdata(1,2)
+                    obj.boreholes(no).Y = str2double( obj.handles.topY.String );
+                    obj.boreholes(no).fdata(1,2) = obj.boreholes(no).Y;
+                else
+                    % prepend fdata with new value
+                    obj.boreholes(no).Y = str2double( obj.handles.topY.String );
+                    obj.boreholes(no).fdata = [obj.boreholes(no).X obj.boreholes(no).Y obj.boreholes(no).Z;
+                        obj.boreholes(no).fdata];
+                end
                 notify(obj,'coordinatesChanged');
             end
         end
         function topZ(obj, varargin)
             no = obj.handles.listBH.Value;
             if no>0 && no<=length(obj.boreholes)
-                obj.boreholes(no).Z = str2double( obj.handles.topZ );
-                obj.boreholes(no).fdata(1,3) = obj.boreholes(no).Z;
+                if obj.boreholes(no).Z==obj.boreholes(no).fdata(1,3)
+                    obj.boreholes(no).Z = str2double( obj.handles.topZ.String );
+                    obj.boreholes(no).fdata(1,3) = obj.boreholes(no).Z;
+                else
+                    % prepend fdata with new value
+                    obj.boreholes(no).Z = str2double( obj.handles.topZ.String );
+                    obj.boreholes(no).fdata = [obj.boreholes(no).X obj.boreholes(no).Y obj.boreholes(no).Z;
+                        obj.boreholes(no).fdata];                    
+                end
                 notify(obj,'coordinatesChanged');
             end
 
@@ -299,43 +377,64 @@ classdef BoreholeUI < handle
         function bottomX(obj, varargin)
             no = obj.handles.listBH.Value;
             if no>0 && no<=length(obj.boreholes)
-                obj.boreholes(no).Xmax = str2double( obj.handles.bottomX );
-                obj.boreholes(no).fdata(end,1) = obj.boreholes(no).Xmax;
+                if obj.boreholes(no).Xmax == obj.boreholes(no).fdata(end,1)
+                    obj.boreholes(no).Xmax = str2double( obj.handles.bottomX.String );
+                    obj.boreholes(no).fdata(end,1) = obj.boreholes(no).Xmax;
+                else
+                    % append new value to fdata
+                    obj.boreholes(no).Xmax = str2double( obj.handles.bottomX.String );
+                    obj.boreholes(no).fdata = [obj.boreholes(no).fdata;
+                        obj.boreholes(no).X obj.boreholes(no).Y obj.boreholes(no).Z];
+                end
                 notify(obj,'coordinatesChanged');
             end
         end
         function bottomY(obj, varargin)
             no = obj.handles.listBH.Value;
             if no>0 && no<=length(obj.boreholes)
-                obj.boreholes(no).Ymax = str2double( obj.handles.bottomY );
-                obj.boreholes(no).fdata(end,2) = obj.boreholes(no).Ymax;
+                if obj.boreholes(no).Ymax == obj.boreholes(no).fdata(end,2)
+                    obj.boreholes(no).Ymax = str2double( obj.handles.bottomY.String );
+                    obj.boreholes(no).fdata(end,2) = obj.boreholes(no).Ymax;
+                else
+                    % append new value to fdata
+                    obj.boreholes(no).Ymax = str2double( obj.handles.bottomY.String );
+                    obj.boreholes(no).fdata = [obj.boreholes(no).fdata;
+                        obj.boreholes(no).X obj.boreholes(no).Y obj.boreholes(no).Z];
+                end
                 notify(obj,'coordinatesChanged');
             end
         end
         function bottomZ(obj, varargin)
             no = obj.handles.listBH.Value;
             if no>0 && no<=length(obj.boreholes)
-                obj.boreholes(no).Zmax = str2double( obj.handles.bottomZ );
-                obj.boreholes(no).fdata(end,3) = obj.boreholes(no).Zmax;
+                if obj.boreholes(no).Zmax == obj.boreholes(no).fdata(end,3)
+                    obj.boreholes(no).Zmax = str2double( obj.handles.bottomZ.String );
+                    obj.boreholes(no).fdata(end,3) = obj.boreholes(no).Zmax;
+                else
+                    % append new value to fdata
+                    obj.boreholes(no).Zmax = str2double( obj.handles.bottomZ.String );
+                    obj.boreholes(no).fdata = [obj.boreholes(no).fdata;
+                        obj.boreholes(no).X obj.boreholes(no).Y obj.boreholes(no).Z];
+                end
                 notify(obj,'coordinatesChanged');
             end
         end
         function Zsurf(obj, varargin)
             no = obj.handles.listBH.Value;
             if no>0 && no<=length(obj.boreholes)
-                obj.boreholes(no).Z_surf = str2double( obj.handles.Zsurf );
+                obj.boreholes(no).Z_surf = str2double( obj.handles.Zsurf.String );
             end
         end
         function Zwater(obj, varargin)
             no = obj.handles.listBH.Value;
             if no>0 && no<=length(obj.boreholes)
-                obj.boreholes(no).Z_water = str2double( obj.handles.Zwater );
+                obj.boreholes(no).Z_water = str2double( obj.handles.Zwater.String );
             end
         end
         function diameter(obj, varargin)
             no = obj.handles.listBH.Value;
             if no>0 && no<=length(obj.boreholes)
-                obj.boreholes(no).diam = str2double( obj.handles.diameter );
+                obj.boreholes(no).diam = str2double( obj.handles.diameter.String );
             end
         end
         function contS(obj, varargin)

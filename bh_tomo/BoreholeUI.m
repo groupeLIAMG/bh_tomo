@@ -7,7 +7,9 @@ classdef BoreholeUI < handle
     properties (Access=private)
         handles
     end
-    
+    events
+        coordinatesChanged
+    end
     methods
         function hp = getUIpanel(obj, varargin)
             %  Return a handle to the panel
@@ -24,7 +26,8 @@ classdef BoreholeUI < handle
                 'Units','points',...
                 'Title','Boreholes',...
                 'Position',[5 5 width height], ...
-                'Visible','off');
+                'Visible','off',...
+                'SizeChangedFcn',@obj.resizeUI);
             
             obj.handles.addBH = uicontrol('Style','pushbutton',...
                 'String','Add',...
@@ -177,7 +180,11 @@ classdef BoreholeUI < handle
 
             obj.handles.hp.Visible = 'on';
         end
-        
+        function resizeUI(obj,varargin)
+            obj.handles.hp.Visible = 'off';
+            % TODO
+            obj.handles.hp.Visible = 'on';
+        end
         
         function addBH(obj,varargin)
             name = inputdlg('Borehole name');
@@ -269,6 +276,7 @@ classdef BoreholeUI < handle
             if no>0 && no<=length(obj.boreholes)
                 obj.boreholes(no).X = str2double( obj.handles.topX );
                 obj.boreholes(no).fdata(1,1) = obj.boreholes(no).X;
+                notify(obj,'coordinatesChanged');
             end
         end
         function topY(obj, varargin)
@@ -276,6 +284,7 @@ classdef BoreholeUI < handle
             if no>0 && no<=length(obj.boreholes)
                 obj.boreholes(no).Y = str2double( obj.handles.topY );
                 obj.boreholes(no).fdata(1,2) = obj.boreholes(no).Y;
+                notify(obj,'coordinatesChanged');
             end
         end
         function topZ(obj, varargin)
@@ -283,6 +292,7 @@ classdef BoreholeUI < handle
             if no>0 && no<=length(obj.boreholes)
                 obj.boreholes(no).Z = str2double( obj.handles.topZ );
                 obj.boreholes(no).fdata(1,3) = obj.boreholes(no).Z;
+                notify(obj,'coordinatesChanged');
             end
 
         end
@@ -291,6 +301,7 @@ classdef BoreholeUI < handle
             if no>0 && no<=length(obj.boreholes)
                 obj.boreholes(no).Xmax = str2double( obj.handles.bottomX );
                 obj.boreholes(no).fdata(end,1) = obj.boreholes(no).Xmax;
+                notify(obj,'coordinatesChanged');
             end
         end
         function bottomY(obj, varargin)
@@ -298,6 +309,7 @@ classdef BoreholeUI < handle
             if no>0 && no<=length(obj.boreholes)
                 obj.boreholes(no).Ymax = str2double( obj.handles.bottomY );
                 obj.boreholes(no).fdata(end,2) = obj.boreholes(no).Ymax;
+                notify(obj,'coordinatesChanged');
             end
         end
         function bottomZ(obj, varargin)
@@ -305,6 +317,7 @@ classdef BoreholeUI < handle
             if no>0 && no<=length(obj.boreholes)
                 obj.boreholes(no).Zmax = str2double( obj.handles.bottomZ );
                 obj.boreholes(no).fdata(end,3) = obj.boreholes(no).Zmax;
+                notify(obj,'coordinatesChanged');
             end
         end
         function Zsurf(obj, varargin)

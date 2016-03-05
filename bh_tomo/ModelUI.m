@@ -11,12 +11,26 @@ classdef ModelUI < handle
         properties (Access=private)
         handles
     end
+    properties (SetAccess=immutable,Hidden=true)
+        bhUI
+        mogUI
+    end
     events
         modelAdded, modelDeleted
     end
 
     methods
-        function obj = ModelUI(varargin)
+        function obj = ModelUI(b,m,varargin)
+            if isa(b,'BoreholeUI')
+                obj.bhUI = b;
+            else
+                error('Give BoreholeUI object as input')
+            end
+            if isa(m,'MogUI')
+                obj.mogUI = m;
+            else
+                error('Give BoreholeUI object as input')
+            end
             obj.handles.hp = uipanel(varargin{:},...
             'Title','Models',...
             'Visible','off',...

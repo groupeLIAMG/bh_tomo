@@ -2,7 +2,7 @@ function bh_tomo2_db(varargin)
     %BH_TOMO2_DB
     
     db_file = '';
-    air = [];
+    air = AirShots.empty;
     auto_pick = [];
     
     width = 1000;
@@ -46,13 +46,13 @@ function bh_tomo2_db(varargin)
     %
     % Create MOG panel
     %
-    hmog = MogUI(f,'Units','points');
+    hmog = MogUI(hborehole,f,'Units','points');
     hmog.FontSize = 11;
     
     %
     % Create Model panel
     %
-    hmodel= ModelUI(f,'Units','points');
+    hmodel= ModelUI(hborehole,hmog,f,'Units','points');
     hmodel.FontSize = 11;
     
     %

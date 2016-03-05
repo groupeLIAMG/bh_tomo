@@ -111,15 +111,16 @@ classdef MogUI < handle
         [x, y, z, c] = projectBorehole(fdata, prof, nom)
         
         function removeMog(obj,varargin)
-            
-            no = get(obj.handles.listMogs,'Value');
-            ind=1:length(obj.mogs);
-            ind = ind~=no;
-            obj.mogs = obj.mogs(ind);
-
-            obj.updateList()
-            obj.updateUIfields()
-            obj.notify('mogDeleted')
+            no = obj.handles.listMogs.Value;
+            if no>0 && no<=length(obj.mogs)
+                ind=1:length(obj.mogs);
+                ind = ind~=no;
+                obj.mogs = obj.mogs(ind);
+                
+                obj.updateList()
+                obj.updateUIfields()
+                obj.notify('mogDeleted')
+            end
         end
         function listMogs(obj,varargin)
             obj.updateUIfields()
@@ -129,12 +130,33 @@ classdef MogUI < handle
         function airAfter(obj,varargin)
         end
         function popupType(obj,varargin)
+            no = obj.handles.listMogs.Value;
+            if no>0 && no<=length(obj.mogs)
+                obj.mogs(no).type = obj.handles.popupType.type;
+                obj.updateCoords()
+            end
         end
         function popupTx(obj,varargin)
+            no = obj.handles.listMogs.Value;
+            if no>0 && no<=length(obj.mogs)
+                obj.mogs(no).Tx = obj.handles.popupTx.Value;
+            end
         end
         function popupRx(obj,varargin)
+            no = obj.handles.listMogs.Value;
+            if no>0 && no<=length(obj.mogs)
+                obj.mogs(no).Rx = obj.handles.popupRx.Value;
+            end
         end
         function renameMog(obj,varargin)
+            no = obj.handles.listMogs.Value;
+            if no>0 && no<=length(obj.mogs)
+                name = myinputdlg('Enter new name');
+                if ~isempty(name)
+                    obj.mogs(no).name = char(name);
+                    obj.updateList()
+                end
+            end
         end
         function importMog(obj,varargin)
         end
@@ -157,18 +179,46 @@ classdef MogUI < handle
         function prune(obj,varargin)
         end
         function editDate(obj,varargin)
+            no = obj.handles.listMogs.Value;
+            if no>0 && no<=length(obj.mogs)
+                obj.mogs(no).data = obj.handles.editDate.String;
+            end
         end
         function editFreq(obj,varargin)
+            no = obj.handles.listMogs.Value;
+            if no>0 && no<=length(obj.mogs)
+                obj.mogs(no).data.rnomfreq = str2double(obj.handles.editFreq.String);
+            end
         end
         function editFeedRx(obj,varargin)
+            no = obj.handles.listMogs.Value;
+            if no>0 && no<=length(obj.mogs)
+                obj.mogs(no).data.RxOffset = str2double(obj.handles.editFeedRx.String);
+            end
         end
         function editFeedTx(obj,varargin)
+            no = obj.handles.listMogs.Value;
+            if no>0 && no<=length(obj.mogs)
+                obj.mogs(no).data.TxOffset = str2double(obj.handles.editFeedTx.String);
+            end
         end
         function checkDtCorr(obj,varargin)
+            no = obj.handles.listMogs.Value;
+            if no>0 && no<=length(obj.mogs)
+                obj.mogs(no).user_fac_dt = obj.handles.checkDtCorr.Value;
+            end
         end
         function editDtCorr(obj,varargin)
+            no = obj.handles.listMogs.Value;
+            if no>0 && no<=length(obj.mogs)
+                obj.mogs(no).fac_dt = str2double(obj.handles.editDtCorr.String);
+            end
         end
         function editMultFac(obj,varargin)
+            no = obj.handles.listMogs.Value;
+            if no>0 && no<=length(obj.mogs)
+                obj.mogs(no).f_et = str2double(obj.handles.editMultFac.String);
+            end
         end
         function updateList(obj,varargin)
             value = [];
@@ -192,19 +242,20 @@ classdef MogUI < handle
         end
         function updateUIfields(obj)
             no = obj.handles.listMogs.Value;
-            
-            obj.handles.editDate.String = obj.mogs(no).date;
-            obj.handles.editMultFac.String = num2str( obj.mogs(no).f_et );
-            obj.handles.editDtCorr.String = num2str( obj.mogs(no).fac_dt );
-            obj.handles.editFeedTx.String = num2str( obj.mogs(no).data.TxOffset );
-            obj.handles.editFeedRx.String = num2str( obj.mogs(no).data.RxOffset );
-            obj.handles.editFreq.String = num2str( obj.mogs(no).data.rnomfreq );
-            obj.handles.checkDtCorr.Value = obj.mogs(no).user_fac_dt;
-            obj.handles.popupType.Value = obj.mogs(no).type;
-            obj.handles.popupRx.Value = obj.mogs(no).Rx;
-            obj.handles.popupTx.Value = obj.mogs(no).Tx;
+            if no>0 && no<=length(obj.mogs)
+                obj.handles.editDate.String = obj.mogs(no).date;
+                obj.handles.editMultFac.String = num2str( obj.mogs(no).f_et );
+                obj.handles.editDtCorr.String = num2str( obj.mogs(no).fac_dt );
+                obj.handles.editFeedTx.String = num2str( obj.mogs(no).data.TxOffset );
+                obj.handles.editFeedRx.String = num2str( obj.mogs(no).data.RxOffset );
+                obj.handles.editFreq.String = num2str( obj.mogs(no).data.rnomfreq );
+                obj.handles.checkDtCorr.Value = obj.mogs(no).user_fac_dt;
+                obj.handles.popupType.Value = obj.mogs(no).type;
+                obj.handles.popupRx.Value = obj.mogs(no).Rx;
+                obj.handles.popupTx.Value = obj.mogs(no).Tx;
             
             % TODO add air shot 
+            end
         end
     end
 end

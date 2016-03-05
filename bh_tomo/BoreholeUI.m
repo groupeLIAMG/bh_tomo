@@ -1,12 +1,12 @@
 classdef BoreholeUI < handle
     %BOREHOLEUI User interface to manage Boreholes
     
-    properties (SetAccess=private)
+    properties
         boreholes
     end
     properties (Dependent)
         Position
-        FontSize   % should remain be within [10 11 12]
+        FontSize   % should be within [10 11 12]
     end
     properties (Access=private)
         handles
@@ -23,6 +23,15 @@ classdef BoreholeUI < handle
             
             obj.addComponents();
             obj.resizeUI();
+        end
+        function set.boreholes(obj, b)
+            if isa(b, 'Borehole')
+                obj.boreholes = b;
+            else
+                error('Boreholes should be objects of class Borehole')
+            end
+            obj.updateList(1)
+            obj.updateEdits()
         end
         function set.Position(obj, p)
             obj.handles.hp.Position = p;
@@ -196,13 +205,18 @@ classdef BoreholeUI < handle
             width = p(3);  % prefered: 300
             height = p(4); % prefered: 360
 
-            vSize = 20;
             hSize = width/5;
             hSpace = width/60;
-            vSpace = 5;
             hBorder = width/15;
-            vBorderTop = height/8;
-            vBorder = 15;
+            
+            vFac = 0.8*height/360;
+            if vFac<1
+                vFac = 1;
+            end
+            vSize = 22*vFac;
+            vSpace = 5*vFac;
+            vBorderTop = 45*vFac;
+            vBorder = 15*vFac;
             
             vSizeList = height-vBorderTop-2*vSpace-(vBorder+7*vSize+7*vSpace);
             
@@ -241,8 +255,11 @@ classdef BoreholeUI < handle
         end
         
         function addBH(obj,varargin)
-            name = inputdlg('Borehole name');
+            name = myinputdlg('Borehole name');
             if isempty(name)
+                return;
+            end
+            if isempty(char(name))
                 return;
             end
             if isempty(obj.boreholes)
@@ -250,14 +267,10 @@ classdef BoreholeUI < handle
             else
                 obj.boreholes(end+1) = Borehole(char(name));
             end
-            names = cell(1,length(obj.boreholes));
-            for n=1:length(obj.boreholes)
-                names{n} = obj.boreholes(n).name;
-            end
-            obj.handles.listBH.String = names;
+            obj.updateList()
             obj.handles.listBH.Value = length(obj.boreholes);
-            obj.updateEdits
-            notify(obj,'boreholeAdded')
+            obj.updateEdits()
+            obj.notify('boreholeAdded')
         end
         function removeBH(obj, varargin)
             no = obj.handles.listBH.Value;
@@ -265,14 +278,10 @@ classdef BoreholeUI < handle
             ind = ind~=no;
 
             obj.boreholes = obj.boreholes(ind);
-            names = cell(1,length(obj.boreholes));
-            for n=1:length(obj.boreholes)
-                names{n} = obj.boreholes(n).name;
-            end
-            obj.handles.listBH.String = names;
-            obj.handles.listBH.Value = length(obj.boreholes);
-            obj.updateEdits
-            notify(obj,'boreholeDeleted')
+
+            obj.updateList()
+            obj.updateEdits()
+            obj.notify('boreholeDeleted')
         end
         function importBH(obj, varargin)
             [filename, pathname] = uigetfile('*.xyz', 'Import borehole');
@@ -295,14 +304,10 @@ classdef BoreholeUI < handle
             obj.boreholes(end).Zmax = fdata(end,3);
             obj.boreholes(end).fdata = fdata;
 
-            names = cell(1,length(obj.boreholes));
-            for n=1:length(obj.boreholes)
-                names{n} = obj.boreholes(n).name;
-            end
-            obj.handles.listBH.String = names;
+            obj.updateList()
             obj.handles.listBH.Value = length(obj.boreholes);
-            obj.updateEdits
-            notify(obj,'boreholeAdded')
+            obj.updateEdits()
+            obj.notify('boreholeAdded')
         end
         function plotBH(obj, varargin)
             if isempty(obj.boreholes), return, end
@@ -326,7 +331,7 @@ classdef BoreholeUI < handle
 
         end
         function listBH(obj,varargin)
-            obj.updateEdits
+            obj.updateEdits()
         end
         function topX(obj, varargin)
             no = obj.handles.listBH.Value;
@@ -340,7 +345,7 @@ classdef BoreholeUI < handle
                     obj.boreholes(no).fdata = [obj.boreholes(no).X obj.boreholes(no).Y obj.boreholes(no).Z;
                         obj.boreholes(no).fdata];
                 end
-                notify(obj,'coordinatesChanged');
+                obj.notify('coordinatesChanged');
             end
         end
         function topY(obj, varargin)
@@ -355,7 +360,7 @@ classdef BoreholeUI < handle
                     obj.boreholes(no).fdata = [obj.boreholes(no).X obj.boreholes(no).Y obj.boreholes(no).Z;
                         obj.boreholes(no).fdata];
                 end
-                notify(obj,'coordinatesChanged');
+                obj.notify('coordinatesChanged');
             end
         end
         function topZ(obj, varargin)
@@ -370,7 +375,7 @@ classdef BoreholeUI < handle
                     obj.boreholes(no).fdata = [obj.boreholes(no).X obj.boreholes(no).Y obj.boreholes(no).Z;
                         obj.boreholes(no).fdata];                    
                 end
-                notify(obj,'coordinatesChanged');
+                obj.notify('coordinatesChanged');
             end
 
         end
@@ -386,7 +391,7 @@ classdef BoreholeUI < handle
                     obj.boreholes(no).fdata = [obj.boreholes(no).fdata;
                         obj.boreholes(no).X obj.boreholes(no).Y obj.boreholes(no).Z];
                 end
-                notify(obj,'coordinatesChanged');
+                obj.notify('coordinatesChanged');
             end
         end
         function bottomY(obj, varargin)
@@ -401,7 +406,7 @@ classdef BoreholeUI < handle
                     obj.boreholes(no).fdata = [obj.boreholes(no).fdata;
                         obj.boreholes(no).X obj.boreholes(no).Y obj.boreholes(no).Z];
                 end
-                notify(obj,'coordinatesChanged');
+                obj.notify('coordinatesChanged');
             end
         end
         function bottomZ(obj, varargin)
@@ -416,7 +421,7 @@ classdef BoreholeUI < handle
                     obj.boreholes(no).fdata = [obj.boreholes(no).fdata;
                         obj.boreholes(no).X obj.boreholes(no).Y obj.boreholes(no).Z];
                 end
-                notify(obj,'coordinatesChanged');
+                obj.notify('coordinatesChanged');
             end
         end
         function Zsurf(obj, varargin)
@@ -478,6 +483,26 @@ classdef BoreholeUI < handle
             end
         end
 
+        function updateList(obj,varargin)
+            value = [];
+            if nargin==2
+                value = varargin{1};
+            end
+            if ~isempty(obj.boreholes)
+                names = cell(1,length(obj.boreholes));
+                for n=1:length(obj.boreholes)
+                    names{n} = obj.boreholes(n).name;
+                end
+                obj.handles.listBH.String = names;
+                obj.handles.listBH.Value = length(obj.boreholes);
+            else
+                obj.handles.listBH.String = '';
+                obj.handles.listBH.Value = 1;
+            end
+            if ~isempty(value)
+                obj.handles.listBH.Value = value;
+            end
+        end
         function updateEdits(obj)
             no = obj.handles.listBH.Value;
             if no>0 && no<=length(obj.boreholes)
@@ -490,6 +515,16 @@ classdef BoreholeUI < handle
                 obj.handles.Zsurf.String = num2str( obj.boreholes(no).Z_surf );
                 obj.handles.Zwater.String = num2str( obj.boreholes(no).Z_water );
                 obj.handles.diameter.String = num2str( obj.boreholes(no).diam );
+            else
+                obj.handles.topX.String = '';
+                obj.handles.topY.String = '';
+                obj.handles.topZ.String = '';
+                obj.handles.bottomX.String = '';
+                obj.handles.bottomY.String = '';
+                obj.handles.bottomZ.String = '';
+                obj.handles.Zsurf.String = '';
+                obj.handles.Zwater.String = '';
+                obj.handles.diameter.String = '';
             end
         end
     end

@@ -1,6 +1,6 @@
 classdef MogData < handle
     %MOGDATA  Multi-offset data
-    
+
     properties
         ntrace                % number of traces in MOG
         nptsptrc              % number of sample per trace
@@ -12,8 +12,10 @@ classdef MogData < handle
         rdata                 % raw data
         timestp               % time vector
         Tx_x                  % x coordinate of source
+        Tx_y                  % y coordinate of source
         Tx_z                  % z coordinate of source
         Rx_x                  % x coordinate of receiver
+        Rx_y                  % y coordinate of receiver
         Rx_z                  % z coordinate of receiver
         antennas              % type of antenna
         synthetique           % true of synthetic data
@@ -24,7 +26,7 @@ classdef MogData < handle
         date                  % date of survey
         tdata
     end
-    
+
     methods
         function obj = MogData
             obj.ntrace = 0;
@@ -37,8 +39,10 @@ classdef MogData < handle
             obj.rdata = 0;
             obj.timestp = 0;
             obj.Tx_x = 0;
+            obj.Tx_y = 0;
             obj.Tx_z = 0;
             obj.Rx_x = 0;
+            obj.Rx_y = 0;
             obj.Rx_z = 0;
             obj.antennas = '';
             obj.synthetique = 0;
@@ -53,7 +57,7 @@ classdef MogData < handle
             obj.readRAD( basename )
             obj.readRD3( basename )
             obj.readTLF( basename )
-            
+
             % Offset between antenna feed point and top of antenna
             obj.TxOffset = 0;
             obj.RxOffset = 0;
@@ -66,10 +70,10 @@ classdef MogData < handle
                     obj.RxOffset = 0.365;
                 end
             end
-            
+
             obj.Tx_z = obj.Tx_z(1:obj.ntrace);
             obj.Rx_z = obj.Rx_z(1:obj.ntrace);
-            
+
             obj.Rx_x = zeros(1,obj.ntrace);
             obj.Rx_y = zeros(1,obj.ntrace);
             obj.Tx_x = zeros(1,obj.ntrace);
@@ -100,8 +104,10 @@ classdef MogData < handle
             obj.rdata = data.rdata;
             obj.timestp = data.timestp;
             obj.Tx_x = data.Tx_x;
+            obj.Tx_y = zeros(1,obj.ntrace);
             obj.Tx_z = data.Tx_z;
             obj.Rx_x = data.Rx_x;
+            obj.Rx_y = zeros(1,obj.ntrace);
             obj.Rx_z = data.Rx_z;
             obj.antennas = data.antennas;
             obj.synthetique = data.synthetique;
@@ -129,8 +135,10 @@ classdef MogData < handle
             obj.rdata = data.rdata;
             obj.timestp = data.timestp;
             obj.Tx_x = data.Tx_x;
+            obj.Tx_y = zeros(1,obj.ntrace);
             obj.Tx_z = data.Tx_z;
             obj.Rx_x = data.Rx_x;
+            obj.Rx_y = zeros(1,obj.ntrace);
             obj.Rx_z = data.Rx_z;
             obj.antennas = data.antennas;
             obj.synthetique = data.synthetique;
@@ -143,7 +151,7 @@ classdef MogData < handle
             end
         end
         function readMSIS(obj, basename)
-            
+
             fid=fopen(basename,'rt');
             if fid < 2
                 fichier = [basename,'.dat'];
@@ -156,11 +164,11 @@ classdef MogData < handle
                     end
                 end
             end
-            
+
             obj.antennas = 'Microsis';
             obj.tunits = 'ms';
             obj.cunits = 'm';
-            
+
             while 1
                 tline = fgetl(fid);
                 if ~ischar(tline), break, end
@@ -180,10 +188,10 @@ classdef MogData < handle
             fseek (fid, position, 'bof');
             obj.rdata = fscanf(fid, '%f',[obj.ntrace inf])';
             fclose(fid);
-            
+
             obj.timec = 1e-3/obj.timec;
             obj.timestp = obj.timec*(1:obj.nptsptrc);
-            
+
             readTLF( basename );
         end
         function readSU(obj, basename)
@@ -198,9 +206,9 @@ classdef MogData < handle
             obj.antennas = 'Seismic Un*x';
             obj.tunits = 'ms';
             obj.comment='true positions';
-            
+
             obj.timestp = obj.timec*(1:obj.nptsptrc);
-            
+
             obj.Tx_x = zeros(1,obj.ntrace);
             obj.Tx_y = zeros(1,obj.ntrace);
             obj.Tx_z = zeros(1,obj.ntrace);
@@ -215,11 +223,11 @@ classdef MogData < handle
                 obj.Rx_y(n) = tr_header(n).GroupY;
                 obj.Rx_z(n) = tr_header(n).ReceiverGroupElevation;
             end
-            
+
         end
         function readSEGY(obj, basename)
             s = read_segy(basename, [], 'scalco,sx,sy,gx,gy,selev,gelev');
-            
+
             obj.ntrace = size( s.data, 2 );
             obj.nptsptrc = double(s.bh.hns);
             obj.rstepsz = 0;
@@ -241,9 +249,9 @@ classdef MogData < handle
             obj.antennas = 'SEG Y';
             obj.comment='true positions';
             obj.tunits = 'ms';
-            
+
             obj.timestp = obj.timec*(1:obj.nptsptrc);
-            
+
             ind = s.th.scalco>0;
             if any(ind)
                 obj.Tx_x(ind) = double(s.th.scalco(ind)) .* double(s.th.sx(ind));
@@ -253,7 +261,7 @@ classdef MogData < handle
                 obj.Rx_y(ind) = double(s.th.scalco(ind)) .* double(s.th.gy(ind));
                 obj.Rx_z(ind) = double(s.th.scalco(ind)) .* double(s.th.gelev(ind));
             end
-            
+
             ind = ~ind;
             if any(ind)
                 obj.Tx_x(ind) = double(s.th.sx(ind)) ./ abs( double(s.th.scalco(ind)) );
@@ -263,11 +271,11 @@ classdef MogData < handle
                 obj.Rx_y(ind) = double(s.th.gy(ind)) ./ abs( double(s.th.scalco(ind)) );
                 obj.Rx_z(ind) = double(s.th.gelev(ind)) ./ abs( double(s.th.scalco(ind)) );
             end
-            
+
         end
-        
+
     end
-    
+
     methods (Access=private)
         function readRAD(obj, basename)
             fid=fopen(basename,'rt');
@@ -282,7 +290,7 @@ classdef MogData < handle
                     end
                 end
             end
-            
+
             while 1
                 tline = fgetl(fid);
                 if ~ischar(tline), break, end
@@ -306,7 +314,7 @@ classdef MogData < handle
             if obj.synthetique==0
                 obj.antennas = strcat(obj.antennas, ' - Ramac');
             end
-            
+
             fclose(fid);
         end
         function readRD3(obj, basename)
@@ -323,7 +331,7 @@ classdef MogData < handle
                 end
             end
             obj.rdata = fread(fid, [obj.nptsptrc obj.ntrace], 'int16','ieee-le');
-            
+
             fclose(fid);
         end
         function readTLF(obj, basename)
@@ -340,14 +348,14 @@ classdef MogData < handle
                 end
             end
             fgetl(fid);
-            
+
             obj.Tx_z = [];
             obj.Rx_z = [];
             while ~feof(fid)
                 tnd = fscanf(fid,'%d', 1);
                 tnf = fscanf(fid,'%d', 1);
                 nt = tnf-tnd+1;
-                
+
                 Rxd = fscanf(fid,'%f', 1);
                 Rxf = fscanf(fid,'%f', 1);
                 if nt == 1
@@ -357,12 +365,12 @@ classdef MogData < handle
                     dRx = (Rxf-Rxd)/(nt-1);
                 end
                 Tx  = fscanf(fid,'%f', 1);
-                
+
                 if nt > 0, obj.Tx_z = [obj.Tx_z Tx*ones(1, nt)]; end
                 obj.Rx_z = [obj.Rx_z Rxd:dRx:Rxf];
                 fgetl(fid);
             end
-            
+
             fclose(fid);
         end
         function readHD(obj, basename)
@@ -378,11 +386,11 @@ classdef MogData < handle
                     end
                 end
             end
-            
+
             obj.antennas = 'Ekko';
             obj.synthetique = 0;
             obj.tunits = 'ns';
-            
+
             fgetl(fid);
             obj.comment = fgetl(fid);
             tline = fgetl(fid);
@@ -405,9 +413,9 @@ classdef MogData < handle
                     tRx_z = sscanf(tline(ic(2)+1:count),'%f');
                 end
             end
-            
+
             obj.date = fgetl(fid);
-            
+
             while 1
                 tline = fgetl(fid);
                 if ~ischar(tline), break, end
@@ -429,17 +437,17 @@ classdef MogData < handle
                     obj.csurvmod = tline(21:end);
                 end
             end
-            
+
             fclose(fid);
-            
+
             obj.timec = nttwin/obj.nptsptrc;
             obj.timestp = obj.timec*(1:obj.nptsptrc);
-            
+
             obj.Tx_x = zeros(1,obj.ntrace);
             obj.Tx_z = tTx_z*ones(1,obj.ntrace);
             obj.Rx_x = rantsep*ones(1,obj.ntrace);
             obj.Rx_z = tRx_z + obj.rstepsz*(0:(obj.ntrace-1));
-            
+
         end
         function readDT1(obj, basename)
             fid=fopen(basename,'rt');
@@ -464,4 +472,3 @@ classdef MogData < handle
         end
     end
 end
-

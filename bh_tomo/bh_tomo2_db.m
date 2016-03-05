@@ -68,7 +68,7 @@ function bh_tomo2_db(varargin)
         'FontSize',12,...
         'Position',[0.05 0.05 0.9 0.9]);
     htextinfo.String = {'','','Database: ','',...
-        '0 Borehole(s)','0 MOG(s)','0 Model(s)'};
+        '0 Borehole(s)','0 MOG(s)','0 Model(s)','','0 traces'};
     
     resizeUI()
 
@@ -111,6 +111,15 @@ function bh_tomo2_db(varargin)
     end
     function updateMogInfo(varargin)
         htextinfo.String{6} = [num2str(numel(hmog.mogs)),' MOG(s)'];
+        if numel(hmog.mogs)>0
+            nt = 0;
+            for n=1:numel(hmog.mogs)
+                nt = nt + hmog.mogs(n).data.ntrace;
+            end
+            htextinfo.String{9} = [num2str(nt),' traces'];
+        else
+            htextinfo.String{9} = '0 traces';
+        end
     end
     function updateModelInfo(varargin)
         htextinfo.String{7} = [num2str(numel(hmodel.models)),' Model(s)'];
@@ -140,6 +149,10 @@ function bh_tomo2_db(varargin)
         auto_pick = tmp.auto_pick; %#ok<SETNU>
 
         htextinfo.String{3} = ['Database: ',file];
+        updateBHinfo()
+        updateMogInfo()
+        updateModelInfo()
+        hmog.updateBHlist()
     end
     function saveFile(varargin)
         if isempty(db_file)

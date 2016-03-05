@@ -50,14 +50,14 @@ v2 = v2(iv1);
 ind = v1==v1(1);
 % si x_min est repete
 if sum( ind ) > 1
-	[tmp, iv2] = sort( v2(ind) );
+	[~, iv2] = sort( v2(ind) );
 	v2(ind) = v2( iv2 );
 	order(ind) = order( iv2 );
 end
 
 for n=1:nd-2
     dist = sqrt( ( v1(n)-v1((n+1):nd) ).^2 + ( v2(n)-v2((n+1):nd) ).^2 );
-	[tmp, ind] = sort(dist);
+	[~, ind] = sort(dist);
 	tmp = v1((n+1):nd);
 	v1((n+1):nd) = tmp(ind);
 	tmp = v2((n+1):nd);

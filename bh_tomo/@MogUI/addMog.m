@@ -61,6 +61,7 @@ switch filterindex
         obj.mogs(no).data = MogData();
         obj.mogs(no).data.readSEGY([rep,name]);
 end
+obj.mogs(no).initialize();
 
 debut=0;
 if no>1

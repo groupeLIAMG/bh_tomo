@@ -1,94 +1,103 @@
 function bh_tomo2_db(varargin)
-    %BH_TOMO2_DB
-    
-    db_file = '';
-    air = AirShots.empty;
-    auto_pick = [];
-    
-    width = 1000;
-    height = 800;
+%BH_TOMO2_DB
 
-    f = figure('Visible','off',...
-        'Units','points',...
-        'Position',[360 200 width height],...
-        'Tag','fig_bh_tomo2_db',...
-        'Name','bh_tomo_db',...
-        'NumberTitle','off',...
-        'ToolBar','none',...,
-        'MenuBar','None',...
-        'SizeChangedFcn',@resizeUI,...
-        'CloseRequestFcn',@quitUI);
-    
-    %
-    % Menu
-    %
-    hmenu = uimenu(f,'Label','File');
-    uimenu(hmenu,'Label','Open ...',...
-        'Accelerator','O',...
-        'Callback',@openFile);
-    uimenu(hmenu,'Label','Save',...
-        'Accelerator','S',...
-        'Callback',@saveFile);
-    uimenu(hmenu,'Label','Save As ...',...
-        'Accelerator','A',...
-        'Callback',@saveFileAs);
-    uimenu(hmenu,'Label','Close',...
-        'Separator','on',...
-        'Accelerator','W',...
-        'Callback',@closeWindow);
-    
-    %
-    % Create Borehole panel
-    %
-    hborehole = BoreholeUI(f,'Units','points');
-    hborehole.FontSize = 11;
-    
-    %
-    % Create MOG panel
-    %
-    hmog = MogUI(hborehole,f,'Units','points');
-    hmog.FontSize = 11;
-    
-    %
-    % Create Model panel
-    %
-    hmodel= ModelUI(hborehole,hmog,f,'Units','points');
-    hmodel.FontSize = 11;
-    
-    %
-    % Create info panel
-    %
-    hinfo = uipanel(f,'Title','Infos','Units','points');
-    hinfo.FontSize = 12;
-    htextinfo = uicontrol('Style','text',...
-        'Parent',hinfo,...
-        'BackgroundColor',[1 1 1],...
-        'Units','normalized',...
-        'HorizontalAlignment','center',...
-        'FontSize',12,...
-        'Position',[0.05 0.05 0.9 0.9]);
-    htextinfo.String = {'','','Database: ','',...
-        '0 Borehole(s)','0 MOG(s)','0 Model(s)','','0 traces'};
-    
-    resizeUI()
+db_file = '';
+auto_pick = [];
+saved = true;
 
-    %
-    % Add listeners
-    %
-    addlistener(hborehole,'boreholeAdded',@updateBHinfo);
-    addlistener(hborehole,'boreholeDeleted',@updateBHinfo);
-    addlistener(hborehole,'boreholeAdded',@hmog.updateBHlist);
-    addlistener(hborehole,'boreholeDeleted',@hmog.updateBHlist);
-    
-    addlistener(hmodel,'modelAdded',@updateModelInfo);
-    addlistener(hmodel,'modelDeleted',@updateModelInfo);
-    
-    addlistener(hmog,'mogAdded',@updateMogInfo);
-    addlistener(hmog,'mogDeleted',@updateMogInfo);
-  
-    
-  
+width = 1000;
+height = 800;
+% get screen size
+su = get(groot,'Units');
+set(groot,'Units','points')
+scnsize = get(groot,'ScreenSize');
+pos = [scnsize(3)/2-width/2 scnsize(4)/2-height/2 width height];
+set(groot,'Units',su)       % Restore default root screen units
+
+f = figure('Visible','off',...
+    'Units','points',...
+    'Position',pos,...
+    'Tag','fig_bh_tomo2_db',...
+    'Name','bh_tomo_db',...
+    'NumberTitle','off',...
+    'ToolBar','none',...,
+    'MenuBar','None',...
+    'SizeChangedFcn',@resizeUI,...
+    'CloseRequestFcn',@closeWindow);
+
+%
+% Menu
+%
+hmenu = uimenu(f,'Label','File');
+uimenu(hmenu,'Label','Open ...',...
+    'Accelerator','O',...
+    'Callback',@openFile);
+uimenu(hmenu,'Label','Save',...
+    'Accelerator','S',...
+    'Callback',@saveFile);
+uimenu(hmenu,'Label','Save As ...',...
+    'Accelerator','A',...
+    'Callback',@saveFileAs);
+uimenu(hmenu,'Label','Close',...
+    'Separator','on',...
+    'Accelerator','W',...
+    'Callback',@closeWindow);
+
+%
+% Create Borehole panel
+%
+hborehole = BoreholeUI(f,'Units','points');
+hborehole.FontSize = 11;
+
+%
+% Create MOG panel
+%
+hmog = MogUI(hborehole,f,'Units','points');
+hmog.FontSize = 11;
+
+%
+% Create Model panel
+%
+hmodel= ModelUI(hborehole,hmog,f,'Units','points');
+hmodel.FontSize = 11;
+
+%
+% Create info panel
+%
+hinfo = uipanel(f,'Title','Infos','Units','points');
+hinfo.FontSize = 12;
+htextinfo = uicontrol('Style','text',...
+    'Parent',hinfo,...
+    'BackgroundColor',[1 1 1],...
+    'Units','normalized',...
+    'HorizontalAlignment','center',...
+    'FontSize',12,...
+    'Position',[0.05 0.05 0.9 0.9]);
+htextinfo.String = {'','','Database: ','',...
+    '0 Borehole(s)','0 MOG(s)','0 Model(s)','','0 traces'};
+
+resizeUI()
+
+%
+% Add listeners
+%
+addlistener(hborehole,'boreholeAdded',@updateBHinfo);
+addlistener(hborehole,'boreholeDeleted',@updateBHinfo);
+addlistener(hborehole,'boreholeAdded',@hmog.updateBHlist);
+addlistener(hborehole,'boreholeDeleted',@hmog.updateBHlist);
+addlistener(hborehole,'boreholeEdited',@dbEdited);
+
+addlistener(hmog,'mogAdded',@updateMogInfo);
+addlistener(hmog,'mogDeleted',@updateMogInfo);
+addlistener(hmog,'mogEdited',@dbEdited);
+
+addlistener(hmodel,'modelAdded',@updateModelInfo);
+addlistener(hmodel,'modelDeleted',@updateModelInfo);
+addlistener(hmodel,'modelEdited',@dbEdited);
+
+
     function resizeUI(varargin)
+        f.Visible = 'off';
         hBorder = 15;
         width = f.Position(3);
         height = f.Position(4);
@@ -106,8 +115,12 @@ function bh_tomo2_db(varargin)
         f.Visible = 'on';
     end
 
+    function dbEdited(varargin)
+        saved = false;
+    end
     function updateBHinfo(varargin)
         htextinfo.String{5} = [num2str(numel(hborehole.boreholes)),' Borehole(s)'];
+        saved = false;
     end
     function updateMogInfo(varargin)
         htextinfo.String{6} = [num2str(numel(hmog.mogs)),' MOG(s)'];
@@ -120,9 +133,11 @@ function bh_tomo2_db(varargin)
         else
             htextinfo.String{9} = '0 traces';
         end
+        saved = false;
     end
     function updateModelInfo(varargin)
         htextinfo.String{7} = [num2str(numel(hmodel.models)),' Model(s)'];
+        saved = false;
     end
 
     function openFile(varargin)
@@ -136,7 +151,7 @@ function bh_tomo2_db(varargin)
             warndlg(['File ',file,' is version 1 database, please convert first'])
             return
         end
-
+        
         if ~isfield(tmp,'boreholes')
             errordlg(['File ',file,' not a bh_tomo database'],'File error')
             return
@@ -145,14 +160,15 @@ function bh_tomo2_db(varargin)
         hmog.mogs = tmp.mogs;
         hmodel.models = tmp.models;
         
-        air = tmp.air; %#ok<SETNU>
+        hmog.air = tmp.air;
         auto_pick = tmp.auto_pick; %#ok<SETNU>
-
+        
         htextinfo.String{3} = ['Database: ',file];
         updateBHinfo()
         updateMogInfo()
         updateModelInfo()
         hmog.updateBHlist()
+        saved = true;
     end
     function saveFile(varargin)
         if isempty(db_file)
@@ -161,7 +177,7 @@ function bh_tomo2_db(varargin)
                 return
             end
             db_file = [rep,file];
-            htextinfo.String{3} = ['Database: ',file];            
+            htextinfo.String{3} = ['Database: ',file];
         end
         names_mog = cell(1,length(hmog.mogs));
         for n=1:length(hmog.mogs)
@@ -170,7 +186,9 @@ function bh_tomo2_db(varargin)
         models = hmodel.models; %#ok<NASGU>
         boreholes = hborehole.boreholes; %#ok<NASGU>
         mogs = hmog.mogs; %#ok<NASGU>
+        air = hmog.air; %#ok<NASGU>
         save(db_file,'names_mog','mogs','air','boreholes','models','auto_pick')
+        saved = true;
     end
     function saveFileAs(varargin)
         [file, rep] = uiputfile('*.mat','Save Database');
@@ -186,13 +204,26 @@ function bh_tomo2_db(varargin)
         models = hmodel.models; %#ok<NASGU>
         boreholes = hborehole.boreholes; %#ok<NASGU>
         mogs = hmog.mogs; %#ok<NASGU>
+        air = hmog.air; %#ok<NASGU>
         save(db_file,'names_mog','mogs','air','boreholes','models','auto_pick')
+        saved = true;
     end
     function closeWindow(varargin)
+        if saved == false
+            choice = questdlg('Database not saved, quit anyway?',...
+                'bh_tomo_db',...
+                'Don''t save','Cancel','Save','Save');
+            switch choice
+                case 'Don''t save'
+                case 'Cancel'
+                    return
+                case 'Save'
+                    saveFile()
+            end
+        end
         quitUI()
     end
     function quitUI(varargin)
-        % TODO check for unsaved data
         delete(f)
     end
 end

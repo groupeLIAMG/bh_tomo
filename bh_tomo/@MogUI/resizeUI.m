@@ -53,17 +53,17 @@ obj.handles.prune.Position     = [width-hBorder-hSize            height-vBorderT
 obj.handles.textDate.Position = [width-hBorder-2.5*hSize-hSpace vBorder hSize vSize];
 obj.handles.editDate.Position = [width-hBorder-1.5*hSize vBorder 1.5*hSize vSize];
 
-obj.handles.textFreq.Position = [width-hBorder-3*hSize-hSpace vBorderTop+5*(vSpace+vSize) 2*hSize vSize];
-obj.handles.editFreq.Position = [width-hBorder-hSize vBorderTop+5*(vSpace+vSize) hSize vSize];
-obj.handles.textFeedRx.Position = [width-hBorder-3*hSize-hSpace vBorderTop+4*(vSpace+vSize) 2*hSize vSize];
-obj.handles.editFeedRx.Position = [width-hBorder-hSize vBorderTop+4*(vSpace+vSize) hSize vSize];
-obj.handles.textFeedTx.Position = [width-hBorder-3*hSize-hSpace vBorderTop+3*(vSpace+vSize) 2*hSize vSize];
-obj.handles.editFeedTx.Position = [width-hBorder-hSize vBorderTop+3*(vSpace+vSize) hSize vSize];
+obj.handles.textFreq.Position = [width-hBorder-2.7*hSize-hSpace vBorderTop+5*(vSpace+vSize) 2*hSize vSize];
+obj.handles.editFreq.Position = [width-hBorder-0.7*hSize vBorderTop+5*(vSpace+vSize) 0.7*hSize vSize];
+obj.handles.textFeedRx.Position = [width-hBorder-2.7*hSize-hSpace vBorderTop+4*(vSpace+vSize) 2*hSize vSize];
+obj.handles.editFeedRx.Position = [width-hBorder-0.7*hSize vBorderTop+4*(vSpace+vSize) 0.7*hSize vSize];
+obj.handles.textFeedTx.Position = [width-hBorder-2.7*hSize-hSpace vBorderTop+3*(vSpace+vSize) 2*hSize vSize];
+obj.handles.editFeedTx.Position = [width-hBorder-0.7*hSize vBorderTop+3*(vSpace+vSize) 0.7*hSize vSize];
 ext = obj.handles.checkDtCorr.Extent;
-obj.handles.checkDtCorr.Position = [width-hBorder-1.15*ext(3)-hSize-hSpace vBorderTop+2*(vSpace+vSize) 1.15*ext(3) vSize];
-obj.handles.editDtCorr.Position = [width-hBorder-hSize vBorderTop+2*(vSpace+vSize) hSize vSize];
-obj.handles.textMultFac.Position = [width-hBorder-3*hSize-hSpace vBorderTop+vSpace+vSize 2*hSize vSize];
-obj.handles.editMultFac.Position = [width-hBorder-hSize vBorderTop+vSpace+vSize hSize vSize];
+obj.handles.checkDtCorr.Position = [width-hBorder-1.13*ext(3)-0.7*hSize-hSpace vBorderTop+2*(vSpace+vSize) 1.15*ext(3) vSize];
+obj.handles.editDtCorr.Position = [width-hBorder-0.7*hSize vBorderTop+2*(vSpace+vSize) 0.7*hSize vSize];
+obj.handles.textMultFac.Position = [width-hBorder-2.7*hSize-hSpace vBorderTop+vSpace+vSize 2*hSize vSize];
+obj.handles.editMultFac.Position = [width-hBorder-0.7*hSize vBorderTop+vSpace+vSize 0.7*hSize vSize];
 
 obj.handles.hp.Visible = 'on';
 obj.handles.hp.Units = oldUnits;

@@ -5,13 +5,13 @@ classdef Mog < handle
         name
         date
         data        % raw data
-        av
-        ap
-        Tx
-        Rx
-        tt          % traveltime data
-        et          % traveltime standard deviation
-        tt_done     %
+        av          % index of air shot before survey
+        ap          % index of air shot after survey
+        Tx          % index of source borehole
+        Rx          % index of receiver borehole
+        tt          % traveltime vector
+        et          % traveltime standard deviation vector
+        tt_done     % 
         ttTx
         ttTx_done
         amp_tmin
@@ -87,6 +87,10 @@ classdef Mog < handle
             obj.pruneParams.arrondi = 0;
             obj.pruneParams.use_SB = 0;
             obj.pruneParams.seuil_SB = 0;
+            obj.pruneParams.zmin = -1e99;
+            obj.pruneParams.zmax = 1e99;
+            obj.pruneParams.thetaMin = -90;
+            obj.pruneParams.thetaMax = 90;
             
             obj.ID = Mog.getID();
         end
@@ -103,11 +107,37 @@ classdef Mog < handle
             else
                 error('Data must be a MogData object')
             end
-            obj.initialize();
         end
-    end
-    
-    methods (Access=private)
+        function [tt,t0] = getCorrectedTravelTimes(obj,air)
+            if ~isa(air,'AirShots')
+                error('air shot data should be instance of class AirShots')
+            end
+            if obj.data.synthetique==1
+                tt = obj.tt;
+                t0 = zeros(size(tt));
+                return
+            else
+                airBefore = air(obj.av);
+                airAfter = air(obj.ap);
+                [t0,fac_dt_av,fac_dt_ap] = corr_t0(length(obj.tt), ...
+                    airBefore, airAfter, true);
+            end
+            if ~isempty(obj.av), air( obj.av ).fac_dt = fac_dt_av; end
+            if ~isempty(obj.ap), air( obj.ap ).fac_dt = fac_dt_ap; end
+            if obj.user_fac_dt==0
+                if fac_dt_av~=1 && fac_dt_ap ~= 1
+                    obj.fac_dt = 0.5*(fac_dt_av+fac_dt_ap);
+                elseif fac_dt_av~=1
+                    obj.fac_dt = fac_dt_av;
+                elseif fac_dt_ap~=1
+                    obj.fac_dt = fac_dt_ap;
+                else
+                    obj.fac_dt = 1;
+                end
+            end
+            t0 = obj.fac_dt*t0;
+            tt = obj.fac_dt*obj.tt - t0;
+        end
         function initialize(obj)
             if isempty(obj.data)
                 return
@@ -144,6 +174,128 @@ classdef Mog < handle
         end
     end
     
+    methods (Access=private)
+        function [t0,fac_dt_av,fac_dt_ap] = corr_t0(ndata,before,after,varargin)
+            if nargin>=4
+                show = varargin{1};
+            else
+                show = false;
+            end
+            fac_dt_av = 1;
+            fac_dt_ap = 1;
+            if isempty(before) && isempty(before)
+                warndlg({'t0 correction not applied';
+                    'Pick t0 before and t0 after for correction'})
+                t0 = zeros(1,ndata);
+                return
+            end
+            v_air = 0.2998;  % this correction for radar
+            t0av = [];
+            t0ap = [];
+            if ~isempty(before)
+                if strcmp(before.method, 'fixed_antenna')
+                    t0av = get_t0_fixed(before, v_air);
+                elseif strcmp(before.method, 'walkaway')
+                    [t0av, fac_dt_av] = get_t0_wa(before, v_air, show);
+                end
+            end
+            if ~isempty(after)
+                if strcmp(after.method, 'fixed_antenna')
+                    t0ap = get_t0_fixed(after, v_air);
+                elseif strcmp(after.method, 'walkaway')
+                    [t0ap, fac_dt_ap] = get_t0_wa(after, v_air, show);
+                end
+            end
+            if isnan(t0av) || isnan(t0ap)
+                warndlg({'t0 correction not applied';
+                    'Pick t0 before and t0 after for correction'})
+                t0 = zeros(1,ndata);
+                return
+            end
+            if isempty(t0av) && isempty(t0ap)
+                t0 = zeros(1,ndata);
+            elseif isempty(t0av)
+                t0 = t0ap*ones(1,ndata);
+            elseif isempty(t0ap)
+                t0 = t0av*ones(1,ndata);
+            else
+                dt0 = t0ap-t0av;
+                ddt0 = dt0/(ndata-1);
+                t0 = t0av+ddt0*(0:(ndata-1));
+            end
+        end
+        function t0 = get_t0_fixed(tir, v)
+            times = tir.tt(tir.tt_done);
+            std_times = tir.et(tir.tt_done);
+            ind = times~=-1;
+            if all(std_times == -1)
+                times = mean(times(ind));
+            else
+                times = sum(times(ind).*std_times(ind))/sum(std_times(ind));
+            end
+            t0 = times - tir.d_TxRx/v;
+        end
+        function [t0, fac] = get_t0_wa(tir, v, show)
+            ind = tir.tt~=-1;
+            times = tir.tt(tir.tt_done & ind)';
+            std_times = tir.et(tir.tt_done & ind)';
+            d = tir.d_TxRx(tir.tt_done & ind)';
+            slown = 1/v;
+            if all(std_times == -1)
+                b = [d ones(size(d))]\times;
+                t0 = b(2);
+                %app_slowness = b(1);
+                %fac = true_slowness/app_slowness;
+                fac = slown/b(1);
+                if show
+                    figure('Name','Air shot')
+                    plot(d,times,'o')
+                    hold on
+                    plot([0;d],b(1)*[0;d]+b(2),'k')
+                    xlabel('Distance')
+                    ylabel('Time')
+                    title([tir.name,' - correction factor: ',num2str(fac)])
+                    text(d(2), b(1), ['t_0 at ',num2str(t0)])
+                    hold off
+                end
+            else
+                W = diag(1./(std_times.^2));
+                x = [d ones(size(d))];
+                b = (x'*W*x)\(x'*W*times);
+                t0 = b(2);
+                fac = slown/b(1);
+                if show
+                    figure('Name','Air shot')
+                    subplot(121)
+                    plot([0;d],b(1)*[0;d]+b(2),'k','LineWidth',1)
+                    hold on
+                    errorbar(d,times,std_times,'o')
+                    xlabel('Distance')
+                    ylabel('Time')
+                    title([tir.name,' - correction factor: ',num2str(fac)])
+                    text(d(2), b(1), ['t_0 at ',num2str(t0)])
+                    ylim=get(gca,'YLim');
+                    ylim(1)=0;
+                    set(gca,'YLim',ylim)
+                    hold off
+                    subplot(122)
+                    plot([0;d],slown*[0;d]+b(2)*fac,'g','LineWidth',1)
+                    hold on
+                    errorbar(d,times*fac,std_times,'o')
+                    xlabel('Distance')
+                    ylabel('Time')
+                    title('After \Delta t corection')
+                    text(d(2), b(1), ['t_0 at ',num2str(t0*fac)])
+                    ylim=get(gca,'YLim');
+                    ylim(1)=0;
+                    set(gca,'YLim',ylim)
+                    hold off
+                end
+            end
+        end
+                    
+    end
+    
     methods (Static)
         function obj = loadobj(a)
             obj = a;
@@ -152,4 +304,4 @@ classdef Mog < handle
     end
     
 end
-
+        

@@ -1,7 +1,7 @@
 function prune(obj,varargin)
 
 no = obj.handles.listMogs.Value;
-if no<=0 && no>length(obj.mogs)
+if no<=0 || no>length(obj.mogs)
     warndlg('No MOG selected')
     return
 end

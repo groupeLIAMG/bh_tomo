@@ -12,7 +12,7 @@ classdef BoreholeUI < handle
         handles
     end
     events
-        coordinatesChanged, boreholeAdded, boreholeDeleted
+        coordinatesChanged, boreholeAdded, boreholeDeleted, boreholeEdited
     end
     methods
         function obj = BoreholeUI(varargin)
@@ -429,18 +429,21 @@ classdef BoreholeUI < handle
             no = obj.handles.listBH.Value;
             if no>0 && no<=length(obj.boreholes)
                 obj.boreholes(no).Z_surf = str2double( obj.handles.Zsurf.String );
+                obj.notify('boreholeEdited');
             end
         end
         function Zwater(obj, varargin)
             no = obj.handles.listBH.Value;
             if no>0 && no<=length(obj.boreholes)
                 obj.boreholes(no).Z_water = str2double( obj.handles.Zwater.String );
+                obj.notify('boreholeEdited');
             end
         end
         function diameter(obj, varargin)
             no = obj.handles.listBH.Value;
             if no>0 && no<=length(obj.boreholes)
                 obj.boreholes(no).diam = str2double( obj.handles.diameter.String );
+                obj.notify('boreholeEdited');
             end
         end
         function contS(obj, varargin)
@@ -461,6 +464,7 @@ classdef BoreholeUI < handle
                     scont.variance = zeros(size(cont(:,2)));
                 end
                 obj.boreholes(no).scont = scont;
+                obj.notify('boreholeEdited');
             end
         end
         function contA(obj, varargin)
@@ -481,6 +485,7 @@ classdef BoreholeUI < handle
                     acont.variance = zeros(size(cont(:,2)));
                 end
                 obj.boreholes(no).acont = acont;
+                obj.notify('boreholeEdited');
             end
         end
 

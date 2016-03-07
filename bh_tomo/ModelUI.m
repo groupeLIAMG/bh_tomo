@@ -16,7 +16,7 @@ classdef ModelUI < handle
         mogUI
     end
     events
-        modelAdded, modelDeleted
+        modelAdded, modelDeleted, modelEdited
     end
 
     methods

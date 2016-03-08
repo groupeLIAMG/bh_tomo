@@ -195,9 +195,9 @@ classdef BoreholeUI < handle
                 'Callback',@obj.contA,...
                 'Parent',obj.handles.hp);
 
-            obj.handles.hp.Visible = 'on';
         end
         function resizeUI(obj,varargin)
+            obj.handles.hp.Visible = 'off';
             oldUnits = obj.handles.hp.Units;
             obj.handles.hp.Units = 'points';
             obj.handles.hp.Visible = 'off';

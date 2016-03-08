@@ -6,7 +6,7 @@ auto_pick = [];
 saved = true;
 
 width = 1000;
-height = 800;
+height = 700;
 % get screen size
 su = get(groot,'Units');
 set(groot,'Units','points')
@@ -24,6 +24,12 @@ f = figure('Visible','off',...
     'MenuBar','None',...
     'SizeChangedFcn',@resizeUI,...
     'CloseRequestFcn',@closeWindow);
+
+fs = 11;
+if ispc
+    fs = 10;
+end
+
 
 %
 % Menu
@@ -47,31 +53,31 @@ uimenu(hmenu,'Label','Close',...
 % Create Borehole panel
 %
 hborehole = BoreholeUI(f,'Units','points');
-hborehole.FontSize = 11;
+hborehole.FontSize = fs;
 
 %
 % Create MOG panel
 %
 hmog = MogUI(hborehole,f,'Units','points');
-hmog.FontSize = 11;
+hmog.FontSize = fs;
 
 %
 % Create Model panel
 %
 hmodel= ModelUI(hborehole,hmog,f,'Units','points');
-hmodel.FontSize = 11;
+hmodel.FontSize = fs;
 
 %
 % Create info panel
 %
 hinfo = uipanel(f,'Title','Infos','Units','points');
-hinfo.FontSize = 12;
+hinfo.FontSize = fs+1;
 htextinfo = uicontrol('Style','text',...
     'Parent',hinfo,...
     'BackgroundColor',[1 1 1],...
     'Units','normalized',...
     'HorizontalAlignment','center',...
-    'FontSize',12,...
+    'FontSize',fs+1,...
     'Position',[0.05 0.05 0.9 0.9]);
 htextinfo.String = {'','','Database: ','',...
     '0 Borehole(s)','0 MOG(s)','0 Model(s)','','0 traces'};
@@ -103,14 +109,15 @@ addlistener(hmodel,'modelEdited',@dbEdited);
         height = f.Position(4);
         vBorderTop = 20;
         
-        vSize = height/2 - vBorderTop;
+        vSize1 = 4*height/7 - vBorderTop;
+        vSize2 = 3*height/7 - vBorderTop;
         hsize = width/3 - hBorder;
         
-        hborehole.Position = [hBorder height/2+hBorder/2 hsize vSize];
-        hmog.Position = [2*hBorder+hsize height/2+hBorder/2 2*hsize vSize];
+        hborehole.Position = [hBorder vSize2+2*hBorder hsize vSize1];
+        hmog.Position = [2*hBorder+hsize vSize2+2*hBorder 2*hsize vSize1];
         
-        hmodel.Position = [hBorder hBorder 2*hsize vSize];
-        hinfo.Position = [width-hsize-hBorder hBorder hsize vSize];
+        hmodel.Position = [hBorder hBorder 2*hsize vSize2];
+        hinfo.Position = [width-hsize-hBorder hBorder hsize vSize2];
         
         f.Visible = 'on';
     end

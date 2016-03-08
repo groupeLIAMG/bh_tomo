@@ -124,9 +124,9 @@ classdef ModelUI < handle
 
         end
         function resizeUI(obj,varargin)
+            obj.handles.hp.Visible = 'off';
             oldUnits = obj.handles.hp.Units;
             obj.handles.hp.Units = 'points';
-            obj.handles.hp.Visible = 'off';
 
             p = obj.handles.hp.Position;
             width = p(3);  % prefered: 630

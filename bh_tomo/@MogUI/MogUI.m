@@ -72,6 +72,7 @@ classdef MogUI < handle
             obj.handles.airAfter.FontSize = s;
             obj.handles.renameMog.FontSize = s;
             obj.handles.importMog.FontSize = s;
+            obj.handles.mergeMogs.FontSize = s;
             obj.handles.spectra.FontSize = s;
             obj.handles.rawData.FontSize = s;
             obj.handles.zop.FontSize = s;
@@ -129,6 +130,8 @@ classdef MogUI < handle
         airBefore(obj,varargin)
         airAfter(obj,varargin)
         prune(obj,varargin)
+        spectra(obj,varargin)
+        mergeMogs(obj,varargin)
         [x,y,z,c] = projectBorehole(fdata,prof,nom)
         
         function removeMog(obj,varargin)
@@ -180,8 +183,6 @@ classdef MogUI < handle
                     obj.notify('mogEdited')
                 end
             end
-        end
-        function spectra(obj,varargin)
         end
         function rawData(obj,varargin)
             no = obj.handles.listMogs.Value;

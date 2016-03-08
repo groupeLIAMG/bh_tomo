@@ -8,7 +8,7 @@ end
 mog = obj.mogs(no);
 SNR = [];
 width = 700;
-height = 750;
+height = 700;
 
 % get screen size
 su = get(groot,'Units');
@@ -18,6 +18,9 @@ pos = [scnsize(3)/2-width/2 scnsize(4)/2-height/2 width height];
 set(groot,'Units',su)       % Restore default root screen units
 
 fs = 11;
+if ispc
+    fs = 10;
+end
 
 f = figure('Visible','off',...
     'Units','points',...
@@ -216,7 +219,7 @@ uiwait(f)
         hzmax.Position = [width-hBorderRight-hSize-hSize2/2 height-vBorderTop-15*vSize-7*vSpace hSize2 vSize];
         hzmaxEdit.Position = [width-hBorderRight-3/2*hSize height-vBorderTop-16*vSize-7*vSpace hSize vSize];
         
-        hinfo.Position = [width-hBorderRight-2*hSize vBorder+2*vSize+5*vSpace 2*hSize 8*vSize];
+        hinfo.Position = [width-hBorderRight-2*hSize vBorder+2*vSize+5*vSpace 2*hSize 7*vSize];
         
         f.Visible = 'on';
     end

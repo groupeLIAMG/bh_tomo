@@ -6,7 +6,10 @@ height = 175;
 border = 25;
 vBorder = 15;
 vSize = 30;
-fs = 12;
+fs = 11;
+if ispc
+    fs = 9;
+end
 position = [0 0 width height];
 units = 'points';
 position = mygetnicedialoglocation(position,units);

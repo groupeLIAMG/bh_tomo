@@ -1,7 +1,20 @@
 function bh_tomo2_db(varargin)
 %BH_TOMO2_DB
 
-db_file = '';
+rep='';
+file='';
+if nargin>=2
+    rep=varargin{1};
+    file=varargin{2};
+end
+
+fs = 11;
+if nargin>=3
+    fs = varargin{3};
+elseif ispc
+    fs = 10;
+end
+
 auto_pick = [];
 saved = true;
 
@@ -24,11 +37,6 @@ f = figure('Visible','off',...
     'MenuBar','None',...
     'SizeChangedFcn',@resizeUI,...
     'CloseRequestFcn',@closeWindow);
-
-fs = 11;
-if ispc
-    fs = 10;
-end
 
 
 %
@@ -82,7 +90,6 @@ htextinfo = uicontrol('Style','text',...
 htextinfo.String = {'','','Database: ','',...
     '0 Borehole(s)','0 MOG(s)','0 Model(s)','','0 traces'};
 
-resizeUI()
 
 %
 % Add listeners
@@ -100,6 +107,12 @@ addlistener(hmog,'mogEdited',@dbEdited);
 addlistener(hmodel,'modelAdded',@updateModelInfo);
 addlistener(hmodel,'modelDeleted',@updateModelInfo);
 addlistener(hmodel,'modelEdited',@dbEdited);
+
+if ~isempty(file)
+    loadDB();
+end
+f.Visible = 'on';
+
 
 
     function resizeUI(varargin)
@@ -152,8 +165,10 @@ addlistener(hmodel,'modelEdited',@dbEdited);
         if isequal(file,0)
             return
         end
-        db_file = [rep,file];
-        tmp = load(db_file);
+        loadDB();
+    end
+    function loadDB(varargin)
+        tmp = load([rep,file]);
         if isfield(tmp,'panels')
             warndlg(['File ',file,' is version 1 database, please convert first'])
             return
@@ -178,14 +193,14 @@ addlistener(hmodel,'modelEdited',@dbEdited);
         saved = true;
     end
     function saveFile(varargin)
-        if isempty(db_file)
+        if isempty(file)
             [file, rep] = uiputfile('*.mat','Save Database');
             if isequal(file,0)
                 return
             end
-            db_file = [rep,file];
             htextinfo.String{3} = ['Database: ',file];
         end
+        db_file = [rep,file];
         names_mog = cell(1,length(hmog.mogs));
         for n=1:length(hmog.mogs)
             names_mog{n} = hmog.mogs(n).name;

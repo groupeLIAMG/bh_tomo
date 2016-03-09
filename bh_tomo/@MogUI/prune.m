@@ -5,6 +5,12 @@ if no<=0 || no>length(obj.mogs)
     warndlg('No MOG selected')
     return
 end
+fs = 11;
+if isa(varargin{1},'matlab.ui.control.UIControl')
+    fs = varargin{1}.FontSize;
+elseif ispc
+    fs = 9;
+end
 mog = obj.mogs(no);
 SNR = [];
 width = 700;
@@ -16,11 +22,6 @@ set(groot,'Units','points')
 scnsize = get(groot,'ScreenSize');
 pos = [scnsize(3)/2-width/2 scnsize(4)/2-height/2 width height];
 set(groot,'Units',su)       % Restore default root screen units
-
-fs = 11;
-if ispc
-    fs = 10;
-end
 
 f = figure('Visible','off',...
     'Units','points',...

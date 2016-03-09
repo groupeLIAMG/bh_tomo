@@ -44,6 +44,7 @@ classdef MogUI < handle
                 error('Mogs should be objects of class Mog')
             end
             obj.updateList(1)
+            obj.updateUIfields()
         end
         function set.air(obj, a)
             if isa(a, 'AirShots')

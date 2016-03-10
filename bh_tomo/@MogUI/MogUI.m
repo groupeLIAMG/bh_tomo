@@ -287,8 +287,8 @@ classdef MogUI < handle
                 set(gca, 'DataAspectRatio',[1 1 1],'Units','normalized')
                 title([num2str(100*sum(ind2)/length(ind2)), '%'])
                 axis tight
-                xlabel('Tx-Rx Distance [m]','FontSize',8)
-                ylabel('Elevation [m]','FontSize',8)
+                xlabel('Tx-Rx Distance [m]')
+                zlabel('Elevation [m]')
                 view(az,el)
             end
         end

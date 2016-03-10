@@ -343,7 +343,14 @@ classdef MogData < handle
                     fichier = [basename,'.TLF'];
                     fid=fopen(fichier,'rt');
                     if fid < 2
-                        error(['Cannot open TLF file: ',basename])
+                        
+                        button = positionInputdlg(obj);
+                        switch button
+                            case 'ok'
+                                return % params are entered
+                            case 'cancel'
+                                error(['Cannot open TLF file: ',basename])
+                        end
                     end
                 end
             end

@@ -1,4 +1,8 @@
-function button = positionInputdlg(obj)
+function button = positionInputdlg(mogData)
+
+if ~isa(mogData,'MogData')
+    error('positionInputdlg: input should be an instance of MogData')
+end
 
 button = 'cancel';
 
@@ -132,21 +136,21 @@ uiwait(f)
             return
         end
         
-        zFixed = str2double(hfixedPos.String)+zeros(1,obj.ntrace);
+        zFixed = str2double(hfixedPos.String)+zeros(1,mogData.ntrace);
         if hupdown.Value == 1
             sign=1;  % positive downward
         else
             sign=-1;
         end
         dz=str2double(hinc.String);
-        zMobile = str2double(hmovingPos.String)+sign*dz*(0:(obj.ntrace-1));
+        zMobile = str2double(hmovingPos.String)+sign*dz*(0:(mogData.ntrace-1));
         
         if hfixedType.Value==1
-            obj.Tx_z = zFixed;
-            obj.Rx_z = zMobile;
+            mogData.Tx_z = zFixed;
+            mogData.Rx_z = zMobile;
         else
-            obj.Tx_z = zMobile;
-            obj.Rx_z = zFixed;
+            mogData.Tx_z = zMobile;
+            mogData.Rx_z = zFixed;
         end
         
         button = 'ok';

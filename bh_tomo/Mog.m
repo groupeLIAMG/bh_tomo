@@ -76,10 +76,10 @@ classdef Mog < handle
             obj.Tx = 1;         % no du Tx
             obj.Rx = 1;         % no du Rx
             obj.tau_params = [];
-            obj.fw = [];                            % donnees filtrees par transf. ondelettes
+            obj.fw = [];                       % donnees filtrees par transf. ondelettes
             obj.f_et = 1;
             obj.amp_name_Ldc = {};
-            obj.type = 1;                           % X-hole (1) ou VRP (2)
+            obj.type = 1;                      % X-hole (1) ou VRP (2)
             obj.fac_dt = 1;
             obj.user_fac_dt = 0;
             obj.pruneParams.sautTx = 0;

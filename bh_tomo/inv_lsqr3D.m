@@ -63,7 +63,7 @@ function  tomo =  inv_lsqr3D(param,  data, grille,  L, t_handle,  g_handles)
 %
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <http://www.gnu.org/licenses/>.
-% 
+%
 %
 
 str = get_str_locale();
@@ -109,7 +109,7 @@ gp.ny = length(grille.gry)-1;
 gp.nz = length(grille.grz)-1;
 
 nThreads = feature('numcores');
-g3d = grid3d(gp, nThreads);
+g3d = grid3d_old(gp, nThreads);
 
 cont = [];
 if param.use_cont == true
@@ -173,7 +173,7 @@ for noIter=1:param.nbreitrc+param.nbreitrd
     p=length(gridz);
     n=length(gridy);
     m=length(gridx);
-	D=deriv_second3d(m,n,p);  
+	D=deriv_second3d(m,n,p);
 	D=D(ind,ind);
 	ld=[L(:,ind);D*param.alpha];
 	dls=[dt;zeros(length(ind),1)];
@@ -233,7 +233,7 @@ for noIter=1:param.nbreitrc+param.nbreitrd
         %        end
         [~, tomo.rays, L] = g3d.raytrace(s, data(:,[1 2 3]), data(:,[4 5 6]));
         tt = L*s;  % for some reason, L*s more accurate
-        
+
 	end
 	if param.saveInvData == 1
 		if noIter < param.nbreitrd || param.tomo_amp==1 || ...
@@ -249,4 +249,3 @@ end
 if param.saveInvData == 1
     tomo.invData(end).date = datestr(now);
 end
-

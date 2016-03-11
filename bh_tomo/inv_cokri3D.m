@@ -17,7 +17,7 @@ function tomo = inv_cokri3D(param, data, covar, grille, L, t_handle, g_handles)
 %
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <http://www.gnu.org/licenses/>.
-% 
+%
 %
 
 global kss ks0 Css
@@ -60,7 +60,7 @@ gp.ny = length(grille.gry)-1;
 gp.nz = length(grille.grz)-1;
 
 nThreads = feature('numcores');
-g3d = grid3d(gp, nThreads);
+g3d = grid3d_old(gp, nThreads);
 
 cont = [];
 if param.tomo_amp==0
@@ -83,10 +83,10 @@ if param.ival==2
 	x=grille3d(min(gridx),gridx(2)-gridx(1),length(gridx),...
 						 min(gridy),gridy(2)-gridy(1),length(gridy),...
 						 min(gridz),gridz(2)-gridz(1),length(gridz));
-	
+
 	%	np=calcul_kss_global(np,x,ind,covar,gridx,gridz,m,n,t_handle);
 	calcul_kss_global3D(x,ind,covar,t_handle);
-	
+
 	if ~isempty( cont ) && param.use_cont
 		indc = zeros(size(cont,1),1);
 		for i=1:size(cont,1)
@@ -96,16 +96,16 @@ if param.ival==2
 			indc(i)=min(ind11(ind22(ind33)));
 		end
 		clear ind11 ind22 ind33
-		
+
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-		
+
 		%Terme de gauche
 		ks0=kss(indc,:);
 		%Covariance des donnees de contrainte
-		
+
 		% contraintes dures
 		Css = kss(indc,indc);
-		
+
 		% contraintes souples
 		% la variance est contenue ds la 5e colonne
 		if size(cont,2)==5
@@ -123,29 +123,29 @@ end
 
 
 for noIter=1:param.nbreitrd+param.nbreitrc
-	
+
 	if ~isempty(t_handle)
 		set(t_handle, 'String',[str.s225,' - ',str.s228,' ',num2str(noIter)])
 		drawnow
 	else
 		disp([str.s225,' - ',str.s228,' ',num2str(noIter)]); drawnow
 	end
-	
+
 	if noIter == 1
 		l_moy = mean(data(:,7)./sum(L,2));
 	else
 		l_moy = mean(tomo.s);
 	end
 	mta = sum(L*l_moy,2);
-	
+
 	%vecteur des delta temps (t-moy(t))
 	dt = data(:,7) - mta;
-	
+
 	mode = 1;
 	if param.mode==2 && noIter==(param.nbreitrd+param.nbreitrc)
 		mode = 2;
 	end
-	
+
 	if ~isempty( cont ) && param.use_cont
 		if mode==1 && ~isempty(t_handle)
 			set(t_handle,'String',[str.s225,', it ',num2str(noIter),' - ', ...
@@ -173,19 +173,19 @@ for noIter=1:param.nbreitrd+param.nbreitrc
 		[S_sim,ss] = cokri_simu3d(L, dt, covar, nt, gridx, gridy, gridz, ...
             param.nbresimu, mode, c0);
 	end
-	
+
 	if param.tomo_amp==1
 		ss(ss<-l_moy) = -l_moy;   % on fixe l'attenuation a zero
 	end
 	if mode==2
 		[diff1,~,diff1_min]=choixsimu(L(:,ind),S_sim(ind,:),dt,c0);
-		
+
 		if param.use_cont==false || isempty( cont )
 			sgr = deformationGraduelle(S_sim, L, c0, dt);
 		else
 			sgr = S_sim(:,diff1_min);
 		end
-		
+
 		if  ~isempty(g_handles)
             ssplot = reshape((sgr+l_moy),gp.nx,gp.ny,gp.nz);
             [nx,ny,nz] = size(ssplot);
@@ -241,7 +241,7 @@ for noIter=1:param.nbreitrd+param.nbreitrc
 			eval(['colormap(',g_handles{2},')'])
 			drawnow
 		end
-		
+
 		tomo.s=ss+l_moy;
 		tomo.x=gridx;
 		tomo.y=gridy;
@@ -249,9 +249,9 @@ for noIter=1:param.nbreitrd+param.nbreitrc
 		%tomo.dt=dt;
 	end
 	tomo.L = sparse(L);
-	
+
 	if param.tomo_amp==0 && noIter>=param.nbreitrd && param.nbreitrc > 0
-		
+
 		% update les rais
 		s = tomo.s;
 		% RADAR : si on a des points ou la vitesse > 0.2998 m/ns
@@ -269,7 +269,7 @@ for noIter=1:param.nbreitrd+param.nbreitrc
         [~, tomo.rays, L] = g3d.raytrace(s, data(:,[1 2 3]), data(:,[4 5 6]));
         tt = L*s;  % for some reason, L*s more accurate
 	end
-	
+
 	if param.saveInvData == 1
 		if noIter <= param.nbreitrd+param.nbreitrc || param.tomo_amp==1 || ...
 					param.nbreitrc==0

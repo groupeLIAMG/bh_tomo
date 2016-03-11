@@ -69,52 +69,52 @@
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 % GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <http://www.gnu.org/licenses/>.
-% 
-% 
+%
+%
 
 
-classdef grid3d < handle
+classdef grid3d_old < handle
     properties (Access = private, Hidden = true)
         objectHandle; % Handle to the underlying C++ class instance
     end
     methods
         % Constructor - Create a new C++ class instance
-        function this = grid3d(varargin)
+        function this = grid3d_old(varargin)
             this.objectHandle = grid3d_mex('new', varargin{:});
         end
-        
+
         % Destructor - Destroy the C++ class instance
         function delete(this)
             grid3d_mex('delete', this.objectHandle);
         end
-        
+
         % raytrace
         function varargout = raytrace(this, varargin)
             [varargout{1:nargout}] = grid3d_mex('raytrace', this.objectHandle, varargin{:});
         end
-        
+
         % for saving in mat-files
         function s = saveobj(obj)
-            s.xmin = grid2drcfs_mex('get_xmin', obj.objectHandle);
-            s.ymin = grid2drcfs_mex('get_ymin', obj.objectHandle);
-            s.zmin = grid2drcfs_mex('get_zmin', obj.objectHandle);
-            s.dx = grid2drcfs_mex('get_dx', obj.objectHandle);
-            s.dy = grid2drcfs_mex('get_dy', obj.objectHandle);
-            s.dz = grid2drcfs_mex('get_dz', obj.objectHandle);
-            s.nx = grid2drcfs_mex('get_nx', obj.objectHandle);
-            s.ny = grid2drcfs_mex('get_ny', obj.objectHandle);
-            s.nz = grid2drcfs_mex('get_nz', obj.objectHandle);
-            s.nthreads = grid2drcfs_mex('get_nthreads', obj.objectHandle);
+            s.xmin = grid3d_mex('get_xmin', obj.objectHandle);
+            s.ymin = grid3d_mex('get_ymin', obj.objectHandle);
+            s.zmin = grid3d_mex('get_zmin', obj.objectHandle);
+            s.dx = grid3d_mex('get_dx', obj.objectHandle);
+            s.dy = grid3d_mex('get_dy', obj.objectHandle);
+            s.dz = grid3d_mex('get_dz', obj.objectHandle);
+            s.nx = grid3d_mex('get_nx', obj.objectHandle);
+            s.ny = grid3d_mex('get_ny', obj.objectHandle);
+            s.nz = grid3d_mex('get_nz', obj.objectHandle);
+            s.nthreads = grid3d_mex('get_nthreads', obj.objectHandle);
         end
     end
     methods(Static)
         % for loading from mat-files
         function obj = loadobj(s)
             if isstruct(s)
-                obj = grid2drcfs(s, s.nthreads);
+                obj = grid3d_old(s, s.nthreads);
             else
                 error('Wrong input arguments')
             end

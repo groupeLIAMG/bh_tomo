@@ -23,7 +23,7 @@ classdef BoreholeUI < handle
             'SizeChangedFcn', @obj.resizeUI);
             
             obj.addComponents();
-            obj.resizeUI();
+            obj.handles.hp.Visible = 'on';
         end
         function set.boreholes(obj, b)
             if isa(b, 'Borehole')
@@ -64,7 +64,6 @@ classdef BoreholeUI < handle
             obj.handles.diameter.FontSize = s;
             obj.handles.contS.FontSize = s;
             obj.handles.contA.FontSize = s;
-            obj.resizeUI();
         end
     end
     
@@ -200,7 +199,6 @@ classdef BoreholeUI < handle
             obj.handles.hp.Visible = 'off';
             oldUnits = obj.handles.hp.Units;
             obj.handles.hp.Units = 'points';
-            obj.handles.hp.Visible = 'off';
 
             p = obj.handles.hp.Position;
             width = p(3);  % prefered: 300

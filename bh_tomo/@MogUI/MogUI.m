@@ -35,7 +35,7 @@ classdef MogUI < handle
                 'SizeChangedFcn', @obj.resizeUI);
             obj.data_rep = '';
             obj.addComponents();
-            obj.resizeUI();
+            obj.handles.hp.Visible = 'on';
         end
         function set.mogs(obj, m)
             if isa(m, 'Mog')
@@ -52,8 +52,6 @@ classdef MogUI < handle
             else
                 error('air should be objects of class AirShots')
             end
-%             obj.updateList(1)
-%             obj.updateUIfields()
         end
         function set.Position(obj, p)
             obj.handles.hp.Position = p;
@@ -95,7 +93,6 @@ classdef MogUI < handle
             obj.handles.editDtCorr.FontSize = s;
             obj.handles.textMultFac.FontSize = s;
             obj.handles.editMultFac.FontSize = s;
-            obj.resizeUI();
         end
         function updateBHlist(obj,varargin)
             boreholes = obj.bhUI.boreholes;
@@ -132,6 +129,7 @@ classdef MogUI < handle
         airAfter(obj,varargin)
         prune(obj,varargin)
         spectra(obj,varargin)
+        zop(obj,varargin)
         mergeMogs(obj,varargin)
         [x,y,z,c] = projectBorehole(fdata,prof,nom)
         
@@ -201,8 +199,6 @@ classdef MogUI < handle
                 xlabel('Trace no')
                 ylabel('Time [ns]')
             end
-        end
-        function zop(obj,varargin)
         end
         function statsAmp(obj,varargin)
             no = obj.handles.listMogs.Value;

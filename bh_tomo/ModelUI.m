@@ -38,7 +38,7 @@ classdef ModelUI < handle
             'SizeChangedFcn', @obj.resizeUI);
             
             obj.addComponents();
-            obj.resizeUI();
+            obj.handles.hp.Visible = 'on';
         end
         function set.models(obj,m)
             if isa(m, 'Model')
@@ -63,8 +63,6 @@ classdef ModelUI < handle
             obj.handles.addMOG.FontSize = s;
             obj.handles.removeMOG.FontSize = s;
             obj.handles.listMOGs.FontSize = s;
-            
-            obj.resizeUI();
         end
     end
    
@@ -89,8 +87,7 @@ classdef ModelUI < handle
                 'Parent',obj.handles.hp);
             
             obj.handles.grid = uipanel(obj.handles.hp,'Title','Grid',...
-                'Units','points',...
-                'SizeChangedFcn', @obj.resizeUI);
+                'Units','points');
             
             obj.handles.createGrid = uicontrol('Style','pushbutton',...
                 'String','Create',...
@@ -104,8 +101,7 @@ classdef ModelUI < handle
                 'Parent',obj.handles.grid);
             
             obj.handles.mogs = uipanel(obj.handles.hp,'Title','MOGs',...
-                'Units','points',...
-                'SizeChangedFcn', @obj.resizeUI);
+                'Units','points');
             obj.handles.addMOG = uicontrol('Style','pushbutton',...
                 'String','Add MOG',...
                 'Units','points',...

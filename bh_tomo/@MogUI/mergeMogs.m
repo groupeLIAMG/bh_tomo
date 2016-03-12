@@ -17,9 +17,12 @@ if isa(varargin{1},'matlab.ui.control.UIControl')
 elseif ispc
     fs = 9;
 end
-
-width = 450;
-height = 300;
+vScale = 1;
+if ispc
+    vScale = 0.81;
+end
+width = 450*vScale;
+height = 300*vScale;
 
 % get screen size
 su = get(groot,'Units');
@@ -72,6 +75,7 @@ hcompatTable = uitable(f,...
     'ColumnFormat',{'logical','char'},...
     'ColumnWidth',{25 'auto'},...
     'ColumnEditable',[true false],...
+    'Units','points',...
     'Fontsize',fs,...
     'RowName',[]);
 
@@ -122,6 +126,9 @@ uiwait(f)
         vFac = 0.8*height/500;
         if vFac<1
             vFac = 1;
+        end
+        if ispc
+            vFac = vFac*0.81;
         end
         vSize = 22*vFac;
         vBorderTop = 50*vFac;

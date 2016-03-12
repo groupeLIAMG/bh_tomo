@@ -12,14 +12,18 @@ fs = 11;
 if nargin>=3
     fs = varargin{3};
 elseif ispc
-    fs = 10;
+    fs = 9;
+end
+vScale = 1;
+if ispc
+    vScale = 0.81;
 end
 
 auto_pick = [];
 saved = true;
 
 width = 1000;
-height = 700;
+height = 800*vScale;
 % get screen size
 su = get(groot,'Units');
 set(groot,'Units','points')
@@ -120,7 +124,7 @@ f.Visible = 'on';
         hBorder = 15;
         width = f.Position(3);
         height = f.Position(4);
-        vBorderTop = 20;
+        vBorderTop = 20*vScale;
         
         vSize1 = 4*height/7 - vBorderTop;
         vSize2 = 3*height/7 - vBorderTop;

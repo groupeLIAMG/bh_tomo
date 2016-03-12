@@ -212,6 +212,9 @@ classdef BoreholeUI < handle
             if vFac<1
                 vFac = 1;
             end
+            if ispc
+                vFac = 0.81*vFac;
+            end
             vSize = 22*vFac;
             vSpace = 5*vFac;
             vBorderTop = 45*vFac;

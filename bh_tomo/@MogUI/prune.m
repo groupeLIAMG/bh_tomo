@@ -11,10 +11,14 @@ if isa(varargin{1},'matlab.ui.control.UIControl')
 elseif ispc
     fs = 9;
 end
+vScale = 1;
+if ispc
+    vScale = 0.81;
+end
 mog = obj.mogs(no);
 SNR = [];
 width = 700;
-height = 700;
+height = 700*vScale;
 
 % get screen size
 su = get(groot,'Units');
@@ -185,6 +189,9 @@ uiwait(f)
         vFac = 0.8*height/750;
         if vFac<1
             vFac = 1;
+        end
+        if ispc
+            vFac = 0.81*vFac;
         end
         vSize = 22*vFac;
         vSpace = 5*vFac;

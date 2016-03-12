@@ -158,13 +158,38 @@ classdef Grid3D < Grid
             s.ny = grid3d_mex('get_ny', obj.mexObj);
             s.nz = grid3d_mex('get_nz', obj.mexObj);
             s.nthreads = grid3d_mex('get_nthreads', obj.mexObj);
+            
+            s.grx = obj.grx;
+            s.gry = obj.gry;
+            s.grz = obj.grz;
+            s.cont = obj.cont;
+            s.Tx = obj.Tx;
+            s.Rx = obj.Rx;
+            s.TxCosDir = obj.TxCosDir;
+            s.RxCosDir = obj.RxCosDir;
+            s.x0 = obj.x0;
+            s.bord = obj.bord;
+            s.Tx_Z_water = obj.Tx_Z_water;
+            s.Rx_Z_water = obj.Rx_Z_water;
+            s.in = obj.in;
         end
     end
     methods(Static)
         % for loading from mat-files
         function obj = loadobj(s)
             if isstruct(s)
-                obj = Grid3d(s, s.nthreads);
+                obj = Grid3D(s.grx, s.gry, s.grz, s.nthreads);
+                
+                obj.cont = s.cont;
+                obj.Tx = s.Tx;
+                obj.Rx = s.Rx;
+                obj.TxCosDir = s.TxCosDir;
+                obj.RxCosDir = s.RxCosDir;
+                obj.x0 = s.x0;
+                obj.bord = s.bord;
+                obj.Tx_Z_water = s.Tx_Z_water;
+                obj.Rx_Z_water = s.Rx_Z_water;
+                obj.in = s.in;
             else
                 error('Wrong input arguments')
             end

@@ -22,3 +22,24 @@ s = ones(numel(grx)-1,numel(gry)-1,numel(grz)-1);
 
 tt-tt2
 
+
+
+g2 = Grid2D(grx,grz);
+
+s = ones(numel(grx)-1,numel(grz)-1);
+
+Tx = [0 0; 0 0;  0 0;  0 0;  0 0];
+Rx = [3 0; 3 -1; 3 -2; 3 -3; 3 -4];
+
+[tt3, rays, L] = g2.raytrace(s(:), Tx, Rx);
+
+grz = -16:0.5:1;
+g2.grz = grz;
+s = ones(numel(grx)-1,numel(grz)-1);
+
+[tt4, rays2, L2] = g2.raytrace(s(:), Tx, Rx);
+
+tt3-tt4
+
+save /tmp/test
+

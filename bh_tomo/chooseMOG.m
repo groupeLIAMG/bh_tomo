@@ -27,10 +27,19 @@ dbFile = '';
 filename = '';
 number = 0;
 names_mog = ' ';
+enableNewDB = 'on';
 if nargin>=1
-    dbFile = varargin{1};
-    filename = getDBname(dbFile);
-    load(dbFile,'names_mog')
+    if ischar(varargin{1})
+        dbFile = varargin{1};
+        filename = getDBname(dbFile);
+        load(dbFile,'names_mog')
+    elseif isa(varargin{1},'MogUI')
+        names_mog = cell(1,length(varargin{1}.mogs));
+        for n=1:length(varargin{1}.mogs)
+            names_mog{n} = varargin{1}.mogs(n).name;
+        end
+        enableNewDB = 'off';
+    end
 end
 
 uicontrol('Style','pushbutton',...
@@ -58,6 +67,7 @@ uicontrol('Style','pushbutton',...
     'Units',units,...
     'Fontsize',fs,...
     'Callback',@db,...
+    'Enable',enableNewDB,...
     'Position',[width/4 2*vBorder+2*vSize width/2 vSize],...
     'Parent',f);
 

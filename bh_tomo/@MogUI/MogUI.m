@@ -117,7 +117,10 @@ classdef MogUI < handle
             end
         end
     end
-    
+
+    methods (Static,Access=private)
+        [x,y,z,c] = projectBorehole(fdata,prof,nom)
+    end
     methods (Access=private)
         addComponents(obj)
         resizeUI(obj,varargin)
@@ -131,7 +134,6 @@ classdef MogUI < handle
         spectra(obj,varargin)
         zop(obj,varargin)
         mergeMogs(obj,varargin)
-        [x,y,z,c] = projectBorehole(fdata,prof,nom)
         
         function removeMog(obj,varargin)
             no = obj.handles.listMogs.Value;

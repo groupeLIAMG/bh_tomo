@@ -31,6 +31,8 @@ function [x, y, z, c] = projectBorehole(fdata, prof, name)
 % along with this program.  If not, see <http://www.gnu.org/licenses/>.
 % 
 % 
+
+
 npts = length(prof);
 x = zeros(1,npts);
 y = zeros(1,npts);

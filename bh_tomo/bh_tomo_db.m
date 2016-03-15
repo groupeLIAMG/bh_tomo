@@ -2186,36 +2186,43 @@ if sum(done)==0
 	return
 end
 
-if strcmp( mogs(no).data.tunits,'ns' )==1
-    av = air( mogs(no).av );
-    ap = air( mogs(no).ap );
-    if mogs(no).data.synthetique==1
-        t0 = zeros(1,length(mogs(no).tt));
-        fac_dt_av = 1;
-        fac_dt_ap = 1;
-    else
-        [t0, fac_dt_av, fac_dt_ap] = corr_t0(length(mogs(no).tt), av, ap, true);
-    end
-    if ~isempty(av), air( mogs(no).av ).fac_dt = fac_dt_av; end
-    if ~isempty(ap), air( mogs(no).ap ).fac_dt = fac_dt_ap; end
-    if mogs(no).user_fac_dt==0
-        if fac_dt_av~=1 && fac_dt_ap ~= 1
-            mogs(no).fac_dt = 0.5*(fac_dt_av+fac_dt_ap);
-        elseif fac_dt_av~=1
-            mogs(no).fac_dt = fac_dt_av;
-        elseif fac_dt_ap~=1
-            mogs(no).fac_dt = fac_dt_ap;
-        else
-            mogs(no).fac_dt = 1;
+button = questdlg('Export raw data or t_0 corrected travel times?','Export tt data','Raw','t0 corrected','Raw');
+
+switch button
+    case 'Raw'
+        tt = tt(ind);
+    case 't0 corrected'
+        if strcmp( mogs(no).data.tunits,'ns' )==1
+            av = air( mogs(no).av );
+            ap = air( mogs(no).ap );
+            if mogs(no).data.synthetique==1
+                t0 = zeros(1,length(mogs(no).tt));
+                fac_dt_av = 1;
+                fac_dt_ap = 1;
+            else
+                [t0, fac_dt_av, fac_dt_ap] = corr_t0(length(mogs(no).tt), av, ap, true);
+            end
+            if ~isempty(av), air( mogs(no).av ).fac_dt = fac_dt_av; end
+            if ~isempty(ap), air( mogs(no).ap ).fac_dt = fac_dt_ap; end
+            if mogs(no).user_fac_dt==0
+                if fac_dt_av~=1 && fac_dt_ap ~= 1
+                    mogs(no).fac_dt = 0.5*(fac_dt_av+fac_dt_ap);
+                elseif fac_dt_av~=1
+                    mogs(no).fac_dt = fac_dt_av;
+                elseif fac_dt_ap~=1
+                    mogs(no).fac_dt = fac_dt_ap;
+                else
+                    mogs(no).fac_dt = 1;
+                end
+                set(handles.edit_fac_dt,'String',num2str(mogs(no).fac_dt));
+            end
         end
-        set(handles.edit_fac_dt,'String',num2str(mogs(no).fac_dt));
-    end
+        setappdata(handles.fig_bh_tomo_db,'air', air);
+        setappdata(handles.fig_bh_tomo_db,'mogs', mogs);
+        
+        tt = mogs(no).fac_dt*(tt(ind)-t0(ind));
 end
-setappdata(handles.fig_bh_tomo_db,'air', air);
-setappdata(handles.fig_bh_tomo_db,'mogs', mogs);
 
-
-tt = mogs(no).fac_dt*(tt(ind)-t0(ind));
 et = et(ind);
 
 data = [mogs(no).data.Tx_x(ind)' mogs(no).data.Tx_y(ind)' mogs(no).data.Tx_z(ind)' ...

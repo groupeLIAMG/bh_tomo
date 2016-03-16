@@ -659,12 +659,11 @@ if isempty(h.fdom)
 	inc_wb = 100;
     for n=1:nt
         trace = traces(:,n);
-        %snr(n) = 1/rmsv(trace(1:win_snr));
-%		if h.snr(n) < 50
-			h.fdom(n) = get_fdom(filter(b,a,trace), dt, f0, fmin, fmax);
-%		else
-%			h.fdom(n) = get_fdom(trace, dt, f0, fmin, fmax);
-%		end
+        if any(isfinite(trace))
+            h.fdom(n) = get_fdom(filter(b,a,trace), dt, f0, fmin, fmax);
+        else
+            h.fdom(n) = -1;
+        end
         if rem(n, inc_wb)==0, waitbar(n/nt,hwb), end
     end
 	close(hwb)

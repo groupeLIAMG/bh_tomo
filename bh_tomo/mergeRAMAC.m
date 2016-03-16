@@ -7,13 +7,14 @@ function mergeRAMAC(outFile,prefix,nos,varargin)
 %                     DAT_0151_A1.rad
 %                     DAT_0033_A1.rad
 %
-% function mergeRAMAC(outFile, prefix, nos, postfix, format)
+% function mergeRAMAC(outFile, prefix, nos, postfix, format, sort)
 %
 %  outfile: name of output file
 %  prefix:  characters preceeding the number ('DAT_' for the case above)
 %  nos:     list of numbers   ([50 51 151 33] for the case above)
 %  postfix: characters after the number (optional, '_A1' for the case above)
 %  format:  formatting of numbers (optional, '%04d' for the case above)
+%  sort:    boolean (sort traces as fct of Tx depth, optional, false by default) 
 
 % Copyright (C) 2007 Bernard Giroux
 %
@@ -39,6 +40,10 @@ end
 format = '%d';
 if nargin>=5
     format=varargin{2};
+end
+doDort = false;
+if nargin>=6
+    doSort = varargin{3};
 end
 
 rdata = [];
@@ -66,10 +71,11 @@ for n=1:length(nos)
   Rx_z = [Rx_z pos.Rx_z];
 end
 
-[Tx_z, ind] = sort(Tx_z);
-Rx_z = Rx_z(ind);
-rdata = rdata(:,ind);
-
+if doSort
+    [Tx_z, ind] = sort(Tx_z);
+    Rx_z = Rx_z(ind);
+    rdata = rdata(:,ind);
+end
 
 fid=fopen([outFile,'.rd3'],'w','ieee-le');
 fwrite(fid,rdata,'int16');

@@ -598,6 +598,7 @@ if (get(handles.radiobutton_data,'Value')==1)
     Rx_x = mog.data.Rx_x(h.no_trace);
     Rx_y = mog.data.Rx_y(h.no_trace);
     Rx_z = mog.data.Rx_z(h.no_trace);
+    Tx_d = mog.Tx_z_orig(h.no_trace);
 	in = mog.in;
 elseif (get(handles.radiobutton_av,'Value')==1)
     Tx_x = av.data.Tx_x(h.no_trace);
@@ -606,6 +607,7 @@ elseif (get(handles.radiobutton_av,'Value')==1)
     Rx_x = av.data.Rx_x(h.no_trace);
     Rx_y = av.data.Rx_y(h.no_trace);
     Rx_z = av.data.Rx_z(h.no_trace);
+    Tx_d = av.Tx_z_orig(h.no_trace);
 	in = av.in;
 elseif (get(handles.radiobutton_ap,'Value')==1)
     Tx_x = ap.data.Tx_x(h.no_trace);
@@ -614,13 +616,14 @@ elseif (get(handles.radiobutton_ap,'Value')==1)
     Rx_x = ap.data.Rx_x(h.no_trace);
     Rx_y = ap.data.Rx_y(h.no_trace);
     Rx_z = ap.data.Rx_z(h.no_trace);
+    Tx_d = ap.Tx_z_orig(h.no_trace);
 	in = ap.in;
 end
 texte{1} = '';
 texte{2} = 'Positions Tx -- Rx';
 texte{3} = '';
 texte{4} = '       x        y        z';
-texte{5} = ['Tx:   ',num2str(Tx_x,'%5.2f'),'   ',num2str(Tx_y, '%5.2f'),'   ',num2str(Tx_z,'%5.2f')];
+texte{5} = ['Tx:   ',num2str(Tx_x,'%5.2f'),'   ',num2str(Tx_y, '%5.2f'),'   ',num2str(Tx_z,'%5.2f'),' (',num2str(Tx_d),')'];
 texte{6} = ['Rx:   ',num2str(Rx_x,'%5.2f'),'   ',num2str(Rx_y, '%5.2f'),'   ',num2str(Rx_z,'%5.2f')];
 texte{7} = [num2str(sum(in)), ' traces, (', num2str(size(h.proc_data,2)),' total)'];
 texte{8} = '';

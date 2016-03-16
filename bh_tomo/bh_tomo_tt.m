@@ -39,7 +39,7 @@ function varargout = bh_tomo_tt(varargin)
 
 % Edit the above text to modify the response to help bh_tomo_tt
 
-% Last Modified by GUIDE v2.5 19-May-2013 21:04:14
+% Last Modified by GUIDE v2.5 16-Mar-2016 11:31:29
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -715,7 +715,11 @@ while pointe_actif
 		sauve_mat(handles,true)
 	end
 	
-	next = prochaine_trace(handles, h.no_trace, h.no_trace+1);
+    if get(handles.checkbox_jump,'Value')==1
+        next = prochaine_trace(handles, h.no_trace, h.no_trace+1);
+    else
+        next = h.no_trace+1;
+    end
 	if  next == h.no_trace
 		pointe_actif=0;
 	else
@@ -791,9 +795,13 @@ while pointe_actif
 	n_trace_traite = n_trace_traite+1;
 	if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
 		sauve_mat(handles,true)
-	end
+    end
 	
-	next = prochaine_trace(handles, h.no_trace, h.no_trace+1);
+    if get(handles.checkbox_jump,'Value')==1
+        next = prochaine_trace(handles, h.no_trace, h.no_trace+1);
+    else
+        next = h.no_trace+1;
+    end
 	if  next == h.no_trace
 		pointe_actif=0;
 	else
@@ -1779,3 +1787,12 @@ function dynALim_Callback(hObject, eventdata, handles)
 % --- Executes on button press in checkbox_pickTx.
 function checkbox_pickTx_Callback(hObject, eventdata, handles)
 update_tout(hObject, eventdata, handles)
+
+
+% --- Executes on button press in checkbox_jump.
+function checkbox_jump_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_jump (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_jump

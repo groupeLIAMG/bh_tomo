@@ -54,9 +54,9 @@ else
 	end
 	hold(ha,'off')
 	set(ha, 'DataAspectRatio',[1 1 1])
-	caxis([rmin rmax])
-%	colormap(cmr)
-	hb=colorbar;
+	colormap(jet)
+	hb=colorbar(ha);
+	caxis(ha,[rmin rmax])
 	set(get(hb,'Title'),'String','Residuals')
     set(gcf,'renderer','opengl'); 
 end

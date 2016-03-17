@@ -1229,7 +1229,8 @@ hold off
 set(gca,'DataAspectRatio',[1 1 1],'YDir','normal')
 axis tight
 caxis([rmin rmax])
-hb=colorbar(jet);
+colormap jet
+hb=colorbar;
 set(get(hb,'Title'),'String','App. Vel. (m/ns)')
 xlabel(h.str.s119)
 ylabel(h.str.s120)

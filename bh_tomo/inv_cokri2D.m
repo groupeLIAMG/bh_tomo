@@ -249,6 +249,12 @@ for noIter=1:param.nbreitrd+param.nbreitrc+param.nbreitra
         
         if  ~isempty(g_handles)
             set(g_handles{3},'DataAspectRatio',[1 1 1],'YDir','normal')
+            if param.tomo_amp==0
+                imagesc(gridx,gridz,1./reshape((ss+l_moy),n,m),'Parent',g_handles{3})
+            else
+                imagesc(gridx,gridz,reshape((ss+l_moy),n,m),'Parent',g_handles{3})
+            end
+            set(g_handles{3},'DataAspectRatio',[1 1 1],'YDir','normal')
             title(g_handles{3},str.s230,'FontSize',14)
             xlabel(g_handles{3},str.s119)
             ylabel(g_handles{3},str.s120)

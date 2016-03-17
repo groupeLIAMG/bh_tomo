@@ -607,7 +607,7 @@ elseif (get(handles.radiobutton_av,'Value')==1)
     Rx_x = av.data.Rx_x(h.no_trace);
     Rx_y = av.data.Rx_y(h.no_trace);
     Rx_z = av.data.Rx_z(h.no_trace);
-    Tx_d = av.Tx_z_orig(h.no_trace);
+    Tx_d = av.d_TxRx(h.no_trace);
 	in = av.in;
 elseif (get(handles.radiobutton_ap,'Value')==1)
     Tx_x = ap.data.Tx_x(h.no_trace);
@@ -616,7 +616,7 @@ elseif (get(handles.radiobutton_ap,'Value')==1)
     Rx_x = ap.data.Rx_x(h.no_trace);
     Rx_y = ap.data.Rx_y(h.no_trace);
     Rx_z = ap.data.Rx_z(h.no_trace);
-    Tx_d = ap.Tx_z_orig(h.no_trace);
+    Tx_d = ap.d_TxRx(h.no_trace);
 	in = ap.in;
 end
 texte{1} = '';
@@ -1229,7 +1229,7 @@ hold off
 set(gca,'DataAspectRatio',[1 1 1],'YDir','normal')
 axis tight
 caxis([rmin rmax])
-hb=colorbar;
+hb=colorbar(jet);
 set(get(hb,'Title'),'String','App. Vel. (m/ns)')
 xlabel(h.str.s119)
 ylabel(h.str.s120)

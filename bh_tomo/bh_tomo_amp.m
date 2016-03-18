@@ -467,7 +467,7 @@ while pointe_actif
 		if tmin==-1
 			tmin = t1;
 			tmax = t1;
-			update_images(hObject, eventdata, handles, tmin, tmax)
+			update_images_while_picking(hObject, eventdata, handles, tmin, tmax)
 			[t2,a,button] = ginput(1);
 			if gca ~= handles.trace || t2<xlim(1) || t2>xlim(2) || a<ylim(1) || a>ylim(2)
 				%pointe_actif=0;
@@ -498,7 +498,7 @@ while pointe_actif
 		else
 			tmax=t;
 		end
-		update_images(hObject, eventdata, handles, tmin, tmax)
+		update_images_while_picking(hObject, eventdata, handles, tmin, tmax)
 		[t,a,button] = ginput(1);
 		if gca ~= handles.trace || t<xlim(1) || t>xlim(2) || a<ylim(1) || a>ylim(2)
 			%pointe_actif=0;
@@ -506,11 +506,11 @@ while pointe_actif
 			return
 		end
   end
-  if button==3
+  if button==2
 		mog.amp_done(h.no_trace) = true;
 		mog.amp_tmin(h.no_trace) = tmin;
 		mog.amp_tmax(h.no_trace) = tmax;
-  elseif button==2
+  elseif button==3
 		mog.amp_done(h.no_trace) = true;
 		mog.amp_tmin(h.no_trace) = -1;
 		mog.amp_tmax(h.no_trace) = -1;
@@ -602,7 +602,7 @@ end
 %
 % --------------------------------------------------------------------
 %
-function update_images(hObject, eventdata, handles, tmin, tmax)
+function update_images_while_picking(hObject, eventdata, handles, tmin, tmax)
 
 %h = getappdata(handles.fig_bh_amp, 'h');
 update_trace_simple(hObject, eventdata, handles)

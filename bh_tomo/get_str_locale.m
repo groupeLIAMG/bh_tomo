@@ -131,8 +131,8 @@ if findstr(locale, 'fr')==1
 			 '';
 			 'Le pointé s''effectue dans la fenêtre du haut';
 			 ' -> bouton de gauche: pointe';
-			 ' -> bouton de millieu: rejète la trace et passe à la suivante';
-			 ' -> bouton de droite: accepte le pointé et passe à la trace suivante';
+			 ' -> bouton du milieu: accepte le pointé et passe à la trace suivante';
+			 ' -> bouton de droite: rejète la trace et passe à la suivante';
 			 ''};
   str.s76 = 'Fichier RAMAC en format Matlab *.mat';
   str.s77 = 'Fréquence';
@@ -498,8 +498,8 @@ else
 			 '';
 			 'Picking is done in upper window';
 			 ' -> left button: pick';
-			 ' -> center button: reject trace and go to next one';
-			 ' -> right button: accept pick and go to next trace';
+			 ' -> center button: accept pick and go to next trace';
+			 ' -> right button: reject trace and go to next one';
 			 ''};
   str.s76 = 'RAMAC file in Matlab format *.mat';
   str.s77 = 'Frequency';

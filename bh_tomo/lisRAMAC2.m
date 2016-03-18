@@ -28,7 +28,7 @@ if d.rdata==-1
   return
 end
 
-pos = lisTLF( basename );
+pos = lisTLF( basename, d.ntrace );
 if isstruct(pos)
   d.Tx_z = pos.Tx_z;
   d.Rx_z = pos.Rx_z;

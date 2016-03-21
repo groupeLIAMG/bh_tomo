@@ -34,9 +34,10 @@ p = zeros(1,length(plans));
 for n=1:size(data,1)
     for nn=1:length(plans)
         r = plans(nn).x0-data(n,:);           % vecteur pointant de data vers x0
-        p(nn) = abs(dot(plans(nn).a, r));          % distance entre data et le plan
+        p(nn) = abs(dot(plans(nn).a, r));     % distance entre data et le plan
     end
     [~,no] = min(p);
+    % on va garder le plan pour lequel la distance est la plus faible
     p_data(n,:) = data(n,:) + p(no)*plans(no).a;  % coord de data projete sur le plan
     no_plan(n) = no;
 end

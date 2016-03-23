@@ -462,10 +462,10 @@ g.Rx(:,1) = g.Rx(:,1)-xmin;
 xmin = 0;
 xmax = max([g.Tx(:,1);g.Rx(:,1)]);
 
-l_orig = sqrt( sum( (data.Tx-data.Rx).^2,2 ) );
-l_new = sqrt( sum( (h.Tx-h.Rx).^2,2 ) );
 
 if false
+    l_orig = sqrt( sum( (data.Tx-data.Rx).^2,2 ) );
+    l_new = sqrt( sum( (h.Tx-h.Rx).^2,2 ) );
 	diff = 100*(l_orig - l_new)./l_orig;
 	figure
 	plot(diff)
@@ -478,8 +478,8 @@ end
 %     zf(n) = data.boreholes(n).Z;
 % end
 
-dx = str2num(get(handles.edit_dx,'String'));
-dz = str2num(get(handles.edit_dz,'String'));
+dx = str2double(get(handles.edit_dx,'String'));
+dz = str2double(get(handles.edit_dz,'String'));
 
 zmin = min([g.Tx(:,3);g.Rx(:,3)]);
 zmax = max([g.Tx(:,3);g.Rx(:,3)]);
@@ -489,10 +489,10 @@ zmax = origine(3) + ceil( (zmax-origine(3))/dz )*dz;
 
 nx = ceil((xmax-xmin)/dx);
 nz = ceil((zmax-zmin)/dz);
-nxm = str2num(get(handles.edit_nxm,'String'));
-nxp = str2num(get(handles.edit_nxp,'String'));
-nzm = str2num(get(handles.edit_nzm,'String'));
-nzp = str2num(get(handles.edit_nzp,'String'));
+nxm = str2double(get(handles.edit_nxm,'String'));
+nxp = str2double(get(handles.edit_nxp,'String'));
+nzm = str2double(get(handles.edit_nzm,'String'));
+nzp = str2double(get(handles.edit_nzp,'String'));
 g.grx = xmin+dx*((0-nxm):(nx+nxp));
 g.grz = zmin+dz*((0-nzm):(nz+nzp));
 g.grx=g.grx';

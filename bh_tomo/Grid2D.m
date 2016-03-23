@@ -2,6 +2,7 @@ classdef Grid2D < Grid
     properties
         flip
         borehole_x0
+        x0
     end
     properties (Access = private, Hidden = true)
         mexObj   % Handle to the underlying C++ class instance
@@ -12,8 +13,10 @@ classdef Grid2D < Grid
     methods
         % Constructor
         function obj = Grid2D(grx,grz,varargin)
-            obj.grx = grx(:);
-            obj.grz = grz(:);
+            if nargin>0
+                obj.grx = grx(:);
+                obj.grz = grz(:);
+            end
             if nargin>=3
                 obj.nthreads = varargin{1};
             else

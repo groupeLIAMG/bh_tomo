@@ -78,14 +78,16 @@ classdef Grid3D < Grid
     methods
         % Constructor - Create a new C++ class instance
         function obj = Grid3D(grx,gry,grz,varargin)
-            obj.grx = grx(:);
-            obj.gry = gry(:);
-            obj.grz = grz(:);
-            dx=grx(2)-grx(1);
-            dy=gry(2)-gry(1);
-            dz=grz(2)-grz(1);
-            if dx~=dy || dx~=dz || dy~=dz
-                error('Grid step size should be equal in all directions')
+            if nargin>0
+                obj.grx = grx(:);
+                obj.gry = gry(:);
+                obj.grz = grz(:);
+                dx=grx(2)-grx(1);
+                dy=gry(2)-gry(1);
+                dz=grz(2)-grz(1);
+                if dx~=dy || dx~=dz || dy~=dz
+                    error('Grid step size should be equal in all directions')
+                end
             end
             if nargin>=4
                 obj.nthreads = varargin{1};

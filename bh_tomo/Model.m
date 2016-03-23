@@ -16,6 +16,7 @@ classdef Model < handle
     methods
         function obj = Model(n)
             obj.name = n;
+            obj.grid = Grid.empty;
         end
         function set.name(obj, n)
             if ischar(n)

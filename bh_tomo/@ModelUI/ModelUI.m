@@ -67,6 +67,7 @@ classdef ModelUI < handle
     end
    
     methods (Access=private)
+        g = gridEditor(obj,varargin)
         function addComponents(obj)
             
             obj.handles.addModel = uicontrol('Style','pushbutton',...
@@ -115,7 +116,6 @@ classdef ModelUI < handle
             obj.handles.listMOGs = uicontrol('Style','listbox',...
                 'Max',1,'Min',0,...
                 'Units','points',...
-                'Callback',@obj.listMOGs,...
                 'Parent',obj.handles.mogs);
 
         end
@@ -144,8 +144,8 @@ classdef ModelUI < handle
             vBorderTop = 45*vFac;
             vBorder = 15*vFac;
 
-            obj.handles.addModel.Position = [hBorder height-vBorderTop 1.5*hSize vSize];
-            obj.handles.removeModel.Position = [hBorder+2*hSpace+1.5*hSize height-vBorderTop 1.5*hSize vSize];
+            obj.handles.addModel.Position = [hBorder height-1.2*vBorderTop 1.5*hSize vSize];
+            obj.handles.removeModel.Position = [hBorder+2*hSpace+1.5*hSize height-1.2*vBorderTop 1.5*hSize vSize];
             
             obj.handles.listModels.Position = [1.5*hBorder 3*vSpace+vBorder+2.5*vSize 2*hSpace+3*hSize-hBorder height-2*vBorder-vBorderTop-3.5*vSize];
             
@@ -192,16 +192,50 @@ classdef ModelUI < handle
             obj.notify('modelDeleted')
         end
         function createGrid(obj,varargin)
+            no = obj.handles.listModels.Value;
+            if no>0 && no<=numel(obj.models)
+                g = obj.gridEditor(no);
+                if ~isempty(g)
+                    obj.models(no).grid = g;
+                end
+            end
         end
         function editGrid(obj,varargin)
+            no = obj.handles.listModels.Value;
+            if no>0 && no<=numel(obj.models)
+                obj.gridEditor(no,obj.models(no).grid);
+            end
         end
         function addMOG(obj,varargin)
+            no = obj.handles.listModels.Value;
+            if no>0 && no<=numel(obj.models)
+                no_mog = chooseMOG(obj.mogUI);
+                for n=1:numel(obj.models(no).mogs)
+                    if obj.mogUI.mogs(no_mog).ID == obj.mogUI.mogs(obj.models(no).mogs(n)).ID 
+                        warndlg('MOG already added to model')
+                        return
+                    end
+                end
+                obj.models(no).mogs(end+1) = no_mog;
+                obj.models(no).boreholes = unique([obj.models(no).boreholes ...
+                    obj.mogUI.mogs(no_mog).Tx obj.mogUI.mogs(no_mog).Rx]);
+                obj.updateListMog()
+                obj.notify('modelEdited')
+            end            
         end
         function removeMOG(obj,varargin)
+            no = obj.handles.listModels.Value;
+            if no>0 && no<=numel(obj.models)
+                no_mog = obj.handles.listMogs.Value;
+                ind=1:length(obj.models(no).mogs);
+                ind = ind~=no_mog;
+                obj.models(no).mogs = obj.models(no).mogs(ind);
+                obj.updateListMog()
+                obj.notify('modelEdited')
+            end
         end
         function listModels(obj,varargin)
-        end
-        function listMOGs(obj,varargin)
+            obj.updateListMog();
         end
         
         function updateList(obj,varargin)
@@ -222,6 +256,17 @@ classdef ModelUI < handle
             end
             if ~isempty(value)
                 obj.handles.listModels.Value = value;
+            end
+            obj.updateListMog()
+        end
+        function updateListMog(obj,varargin)
+            no = obj.handles.listModels.Value;
+            if no>0 && no<=numel(obj.models)
+                names_mog = cell(1,length(obj.models(no).mogs));
+                for n=1:length(obj.models(no).mogs)
+                    names_mog{n} = obj.mogUI.mogs( obj.models(no).mogs(n) ).name;
+                end
+                obj.handles.listMOGs.String = names_mog;
             end
         end
         

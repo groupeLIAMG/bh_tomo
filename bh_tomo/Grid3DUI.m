@@ -1,7 +1,7 @@
 classdef Grid3DUI < handle
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
-    
+
     properties (Dependent)
         Position
     end
@@ -22,10 +22,10 @@ classdef Grid3DUI < handle
     events
         gridEdited
     end
-    
+
     methods
         function obj = Grid3DUI(f,type,fs,g,data)
-                    
+
             obj.type = type;
             if isempty(g)
                 obj.grid = Grid3D();
@@ -37,7 +37,7 @@ classdef Grid3DUI < handle
                 end
             end
             obj.data = data;
-            
+
             if isempty(g.grx) % grid not initialized yet
                 obj.dx = 1;
                 obj.dy = 1;
@@ -47,13 +47,13 @@ classdef Grid3DUI < handle
                 obj.dy = g.gry(2)-g.gry(1);
                 obj.dz = g.grz(2)-g.grz(1);
             end
-      
+
             obj.addComponents(f,fs)
             obj.handles.params.Visible = 'on';
             obj.axPanel.Visible = 'on';
-            
+
             obj.updateGrid()
-            
+
         end
         function set.Position(obj,p)
             obj.handles.params.Position = p;
@@ -80,7 +80,7 @@ classdef Grid3DUI < handle
             end
         end
     end
-    
+
     methods (Static)
         function [grid] = buildGrid(data)
             grid = Grid3D();
@@ -90,9 +90,10 @@ classdef Grid3DUI < handle
             grid.in = data.in;
             grid.TxCosDir = data.TxCosDir;
             grid.RxCosDir = data.RxCosDir;
+            grid.type = '3D';
         end
     end
-    
+
     methods (Access=private)
         function addComponents(obj,f,fs)
             obj.handles.params = uipanel(f,'Title','Grid Parameters',...
@@ -190,8 +191,8 @@ classdef Grid3DUI < handle
                 'Units','points',...
                 'Callback',@obj.inputEdit,...
                 'Parent',obj.handles.params);
-            
-            
+
+
             obj.axPanel = uipanel(f,'Title','Grid View',...
                 'FontSize',fs+1,...
                 'Units','points',...
@@ -212,11 +213,11 @@ classdef Grid3DUI < handle
             obj.handles.params.Visible = 'off';
             width = obj.handles.params.Position(3);
             height= obj.handles.params.Position(4);
-            
+
             hSize = width/5;
             hSpace = width/60;
             hBorder = width/15;
-            
+
             vFac = 1;
             if ispc
                 vFac = 0.81*vFac;
@@ -225,7 +226,7 @@ classdef Grid3DUI < handle
             vSpace = 5*vFac;
             vBorderTop = 45*vFac;
             vBorder = 15*vFac;
-            
+
             obj.handles.padm.Position = [hBorder+hSize+hSpace height-vBorderTop hSize vSize];
             obj.handles.padp.Position = [hBorder+2*hSize+2*hSpace height-vBorderTop hSize vSize];
             obj.handles.step.Position = [hBorder+3*hSize+3*hSpace height-vBorderTop hSize vSize];
@@ -234,7 +235,7 @@ classdef Grid3DUI < handle
             obj.handles.nxm.Position = [hBorder+hSize+hSpace height-vBorderTop-vSize hSize vSize];
             obj.handles.nxp.Position = [hBorder+2*hSize+2*hSpace height-vBorderTop-vSize hSize vSize];
             obj.handles.dx.Position = [hBorder+3*hSize+3*hSpace height-vBorderTop-vSize hSize vSize];
-            
+
             obj.handles.y.Position = [hBorder height-vBorderTop-2*vSize-vSpace hSize vSize];
             obj.handles.nym.Position = [hBorder+hSize+hSpace height-vBorderTop-2*vSize-vSpace hSize vSize];
             obj.handles.nyp.Position = [hBorder+2*hSize+2*hSpace height-vBorderTop-2*vSize-vSpace hSize vSize];
@@ -244,7 +245,7 @@ classdef Grid3DUI < handle
             obj.handles.nzm.Position = [hBorder+hSize+hSpace height-vBorderTop-3*vSize-2*vSpace hSize vSize];
             obj.handles.nzp.Position = [hBorder+2*hSize+2*hSpace height-vBorderTop-3*vSize-2*vSpace hSize vSize];
             obj.handles.dz.Position = [hBorder+3*hSize+3*hSpace height-vBorderTop-3*vSize-2*vSpace hSize vSize];
-            
+
             obj.handles.params.Visible = 'on';
         end
         function resizeAx(obj,varargin)
@@ -253,7 +254,7 @@ classdef Grid3DUI < handle
             height= obj.axPanel.Position(4);
 
             axBorder = obj.haxes.Position(2);
-            
+
             obj.haxes.Position = [axBorder axBorder width-1.5*axBorder height-2*axBorder];
             hSize = 2*obj.haxView.Extent(3);
             vSize = 1.5*obj.haxView.Extent(4);
@@ -270,9 +271,9 @@ classdef Grid3DUI < handle
             obj.grid.bord(4) = str2double( obj.handles.nyp.String );
             obj.grid.bord(5) = str2double( obj.handles.nzm.String );
             obj.grid.bord(6) = str2double( obj.handles.nzp.String );
-            
+
             obj.updateGrid()
-            
+
             obj.notify('gridEdited')
         end
         function updateGrid(obj)
@@ -287,21 +288,21 @@ classdef Grid3DUI < handle
             zmin = min([obj.grid.Tx(obj.grid.in,3);obj.grid.Rx(obj.grid.in,3)]) - 0.5*obj.dz;
             zmax = max([obj.grid.Tx(obj.grid.in,3);obj.grid.Rx(obj.grid.in,3)]) + 0.5*obj.dz;
             nz = ceil((zmax-zmin)/obj.dz);
-            
+
             nxm = obj.grid.bord(1);
             nxp = obj.grid.bord(2);
             nym = obj.grid.bord(3);
             nyp = obj.grid.bord(4);
             nzm = obj.grid.bord(5);
             nzp = obj.grid.bord(6);
-            
+
             obj.grid.grx = xmin+obj.dx*((0-nxm):(nx+nxp));
             obj.grid.gry = ymin+obj.dy*((0-nym):(ny+nyp));
             obj.grid.grz = zmin+obj.dz*((0-nzm):(nz+nzp));
             obj.grid.grx = obj.grid.grx';
             obj.grid.gry = obj.grid.gry';
             obj.grid.grz = obj.grid.grz';
-            
+
             obj.axView()
         end
         function axView(obj,varargin)
@@ -340,7 +341,7 @@ classdef Grid3DUI < handle
                     xl = 'Y';
                     yl = 'Z';
             end
-            
+
             plot(obj.haxes,xx1, zz1,'Color',[0.5 0.5 0.5])
             xlabel(obj.haxes,xl)
             ylabel(obj.haxes,yl)
@@ -349,4 +350,3 @@ classdef Grid3DUI < handle
         end
     end
 end
-

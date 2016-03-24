@@ -7,6 +7,7 @@ if nargin>=3
         g = varargin{2};
     end
 end
+previousGrid = g.copy;
 
 fs = 11;
 if ispc
@@ -54,18 +55,18 @@ hdone = uicontrol('Style','pushbutton',...
     'String','Done',...
     'Units','points',...
     'FontSize',fs,...
-    'Callback',@saveAndQuit,...
+    'Callback',@closeWindow,...
     'Parent',f);
 
 hcancel = uicontrol('Style','pushbutton',...
     'String','Cancel',...
     'Units','points',...
     'FontSize',fs,...
-    'Callback',@closeWindow,...
+    'Callback',@cancel,...
     'Parent',f);
-if ~isempty(g)
-    hcancel.Visible = 'off';  % we cannot cancel editing grid
-end
+% if ~isempty(g)
+%     hcancel.Visible = 'off';  % we cannot cancel editing grid
+% end
 
 hconstr = uicontrol('Style','pushbutton',...
     'String','Add/Edit Constraints',...
@@ -203,6 +204,12 @@ if isempty(g)
     end
 else
     type = g.type;
+    switch type
+        case '2D'
+            [~,data] = Grid2DUI.buildGrid(data);
+        case '2D+'
+            [~,data] = Grid2DplusUI.buildGrid(data);
+    end
 end
 
 switch type
@@ -279,11 +286,12 @@ uiwait(f)
                 view(haxes1,3)
         end
     end
-    function saveAndQuit(varargin)
-        
+    function cancel(varargin)
+        g = previousGrid.copy;
         closeWindow()
     end
     function constraints(varargin)
+        
     end
     function gridEdited(varargin)
         hinfoTxt.String{3} = num2str(g.getNumberOfCells());
@@ -292,8 +300,8 @@ uiwait(f)
     function data = prepareGridData()
         mogs = obj.mogUI.mogs;
         data.boreholes = [];
-        for n=1:length(model.boreholes)
-            data.boreholes = [data.boreholes boreholes(model.boreholes(n))];
+        for nn=1:length(model.boreholes)
+            data.boreholes = [data.boreholes boreholes(model.boreholes(nn))];
         end
         data.in = [];
         data.Tx = [];
@@ -302,18 +310,18 @@ uiwait(f)
         data.RxCosDir = [];
         data.Tx_Z_water = [];
         data.Rx_Z_water = [];
-        for nm=1:length(model.mogs)
-            data.in = [data.in; mogs(model.mogs(nm)).in'];
-            data.Tx = [data.Tx; [mogs(model.mogs(nm)).data.Tx_x' ...
-                mogs(model.mogs(nm)).data.Tx_y' ...
-                mogs(model.mogs(nm)).data.Tx_z'] ];
-            data.Rx = [data.Rx; [mogs(model.mogs(nm)).data.Rx_x' ...
-                mogs(model.mogs(nm)).data.Rx_y' ...
-                mogs(model.mogs(nm)).data.Rx_z'] ];
-            data.TxCosDir = [data.TxCosDir; mogs(model.mogs(nm)).TxCosDir];
-            data.RxCosDir = [data.RxCosDir; mogs(model.mogs(nm)).RxCosDir];
+        for nn=1:length(model.mogs)
+            data.in = [data.in; mogs(model.mogs(nn)).in'];
+            data.Tx = [data.Tx; [mogs(model.mogs(nn)).data.Tx_x' ...
+                mogs(model.mogs(nn)).data.Tx_y' ...
+                mogs(model.mogs(nn)).data.Tx_z'] ];
+            data.Rx = [data.Rx; [mogs(model.mogs(nn)).data.Rx_x' ...
+                mogs(model.mogs(nn)).data.Rx_y' ...
+                mogs(model.mogs(nn)).data.Rx_z'] ];
+            data.TxCosDir = [data.TxCosDir; mogs(model.mogs(nn)).TxCosDir];
+            data.RxCosDir = [data.RxCosDir; mogs(model.mogs(nn)).RxCosDir];
             
-            bh = boreholes(mogs(model.mogs(nm)).Tx);
+            bh = boreholes(mogs(model.mogs(nn)).Tx);
             if ~isnan(bh.Z_water)
                 x = interp1(bh.fdata(:,3), bh.fdata(:,1), bh.Z_water);
                 y = interp1(bh.fdata(:,3), bh.fdata(:,2), bh.Z_water);
@@ -323,7 +331,7 @@ uiwait(f)
             end
             data.Tx_Z_water = [data.Tx_Z_water; [x y bh.Z_water] ];
 
-            bh = boreholes(mogs(model.mogs(nm)).Rx);
+            bh = boreholes(mogs(model.mogs(nn)).Rx);
             if ~isnan(bh.Z_water)
                 x = interp1(bh.fdata(:,3), bh.fdata(:,1), bh.Z_water);
                 y = interp1(bh.fdata(:,3), bh.fdata(:,2), bh.Z_water);

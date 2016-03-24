@@ -75,6 +75,7 @@ classdef Grid2DplusUI <handle
             grid = Grid2D();
             grid.bord = [1 1 1 1];
             grid.flip = 0;
+            grid.type = '2D+';
             data.order_boreholes = Grid.boreholes_order( data.boreholes );
             data.n_planes = length(data.boreholes)-1;
             data.order_planes = 1:data.n_planes;
@@ -337,9 +338,9 @@ classdef Grid2DplusUI <handle
                 no_plan = obj.data.order_planes(n);
                 ind = obj.data.Tx_no_plan==no_plan;
                 oo = [obj.data.boreholes(no_f).X obj.data.boreholes(no_f).Y 0];
-                obj.grid.Tx(ind,:) = transl_rotat(obj.data.Tx(ind,:), oo,...
+                obj.grid.Tx(ind,:) = Grid.transl_rotat(obj.data.Tx(ind,:), oo,...
                     az(no_plan), dip(no_plan));
-                obj.grid.TxCosDir(ind,:) = transl_rotat(obj.data.TxCosDir(ind,:),...
+                obj.grid.TxCosDir(ind,:) = Grid.transl_rotat(obj.data.TxCosDir(ind,:),...
                     [0 0 0], az(no_plan), dip(no_plan));
                 if n>1
                     obj.grid.Tx(ind,1) = obj.grid.Tx(ind,1)+obj.data.planes(n-1).l;
@@ -355,9 +356,9 @@ classdef Grid2DplusUI <handle
                 %     hold on
                 
                 ind = obj.data.Rx_no_plan==no_plan;
-                obj.grid.Rx(ind,:) = transl_rotat(obj.data.Rx(ind,:), oo,...
+                obj.grid.Rx(ind,:) = Grid.transl_rotat(obj.data.Rx(ind,:), oo,...
                     az(no_plan), dip(no_plan));
-                obj.grid.RxCosDir(ind,:) = transl_rotat(obj.data.RxCosDir(ind,:),...
+                obj.grid.RxCosDir(ind,:) = Grid.transl_rotat(obj.data.RxCosDir(ind,:),...
                     [0 0 0], az(no_plan), dip(no_plan));
                 if n>1
                     obj.grid.Rx(ind,1) = obj.grid.Rx(ind,1)+obj.data.planes(n-1).l;

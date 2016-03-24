@@ -1,4 +1,4 @@
-classdef Grid < handle
+classdef Grid < matlab.mixin.Copyable
     %GRID Base class for 2D and 3D grids
     
     properties
@@ -14,6 +14,7 @@ classdef Grid < handle
         Tx_Z_water
         Rx_Z_water
         in
+        type
     end
     methods
         function set.grx(obj,g)
@@ -205,6 +206,30 @@ classdef Grid < handle
                 no_plan(n) = no;
             end
         end
+        function m_data = transl_rotat(data, origine, az, dip)
+            % m_data = transl_rotat(data, origine, az, dip)
+            
+            % translation p/r origine
+            m_data = data-repmat(origine,size(data,1),1);
+            % rotation p/r azimuth
+            if abs(az) > (pi/720)  % si plus grand que 1/4 degre
+                rot = [cos(az) -sin(az); sin(az) cos(az)];
+                for n=1:size(m_data,1)
+                    m_data(n,1:2) = m_data(n,1:2)*rot';
+                end
+                % data(n,1:2)*rot' est egal a (rot*data(n,1:2)')'
+            end
+            
+            % rotation p/r pendage
+            if abs(dip) > (pi/720)
+                rot = [cos(dip) -sin(dip); sin(dip) cos(dip)];
+                for n=1:size(m_data,1)
+                    m_data(n,2:3) = m_data(n,2:3)*rot';
+                end
+                % data(n,2:3)*rot' est egal a (rot*data(n,2:3)')'
+            end
+        end
+        
     end
     %     methods (Abstract)
     %         varargout = raytrace(obj, varargin)

@@ -98,7 +98,7 @@ classdef ModelUI < handle
             obj.handles.editGrid = uicontrol('Style','pushbutton',...
                 'String','Edit',...
                 'Units','points',...
-                'Callback',@obj.createGrid,...
+                'Callback',@obj.editGrid,...
                 'Parent',obj.handles.grid);
             
             obj.handles.mogs = uipanel(obj.handles.hp,'Title','MOGs',...
@@ -203,7 +203,10 @@ classdef ModelUI < handle
         function editGrid(obj,varargin)
             no = obj.handles.listModels.Value;
             if no>0 && no<=numel(obj.models)
-                obj.gridEditor(no,obj.models(no).grid);
+                g = obj.gridEditor(no,obj.models(no).grid);
+                if ~isempty(g)
+                    obj.models(no).grid = g;
+                end
             end
         end
         function addMOG(obj,varargin)

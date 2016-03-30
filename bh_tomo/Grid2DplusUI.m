@@ -100,8 +100,8 @@ classdef Grid2DplusUI <handle
                 data.planes(np).l = sqrt( (data.boreholes(n2).X-data.boreholes(n1).X)^2 +...
                     (data.boreholes(n2).Y-data.boreholes(n1).Y)^2 );
             end
-            [~, data.Tx_no_plan] = proj_plans(data.Tx, data.planes);
-            [~, data.Rx_no_plan] = proj_plans(data.Rx, data.planes);
+            [~, data.Tx_no_plan] = Grid.proj_planes(data.Tx, data.planes);
+            [~, data.Rx_no_plan] = Grid.proj_planes(data.Rx, data.planes);
         end
     end
     
@@ -405,7 +405,7 @@ classdef Grid2DplusUI <handle
             obj.grid.grz = obj.grid.grz';
 
             if obj.grid.flip==1
-                obj.grid.grx = -obj.grid.grx;
+                obj.grid.grx = flipud(-obj.grid.grx);
                 obj.grid.Tx(obj.grid.in,1) = -obj.grid.Tx(obj.grid.in,1);
                 obj.grid.Rx(obj.grid.in,1) = -obj.grid.Rx(obj.grid.in,1);
                 obj.grid.TxCosDir(obj.grid.in,1) = -obj.grid.TxCosDir(obj.grid.in,1);

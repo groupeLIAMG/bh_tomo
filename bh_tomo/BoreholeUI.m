@@ -184,12 +184,12 @@ classdef BoreholeUI < handle
                 'Parent',obj.handles.hp);
 
             obj.handles.contS = uicontrol('Style','pushbutton',...
-                'String','Constraints slown.',...
+                'String','Constraints Veloc.',...
                 'Units','points',...
                 'Callback',@obj.contS,...
                 'Parent',obj.handles.hp);
             obj.handles.contA = uicontrol('Style','pushbutton',...
-                'String','Constraints atten.',...
+                'String','Constraints Atten.',...
                 'Units','points',...
                 'Callback',@obj.contA,...
                 'Parent',obj.handles.hp);
@@ -450,7 +450,7 @@ classdef BoreholeUI < handle
         function contS(obj, varargin)
             no = obj.handles.listBH.Value;
             if no>0 && no<=length(obj.boreholes)
-                [file, rep] = uigetfile('*.con','Constraints file - Slowness');
+                [file, rep] = uigetfile('*.con','Constraints file - Velocity');
                 if file==0
                     return
                 end
@@ -458,9 +458,10 @@ classdef BoreholeUI < handle
                 scont.x = obj.boreholes(no).X;    % vertical straight boreholes
                 scont.y = obj.boreholes(no).Y;
                 scont.z = obj.boreholes(no).Z - cont(:,1);
-                scont.valeur = cont(:,2);
+                scont.valeur = 1./cont(:,2);  % we want slowness
                 if size(cont,2)==3
-                    scont.variance = cont(:,3);
+                    % http://math.stackexchange.com/questions/269216/inverse-of-random-variable
+                    scont.variance = cont(:,3)./cont(:,2).^4;
                 else
                     scont.variance = zeros(size(cont(:,2)));
                 end

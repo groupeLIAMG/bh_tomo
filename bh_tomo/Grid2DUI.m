@@ -337,14 +337,6 @@ classdef Grid2DUI < handle
             obj.grid.grx = obj.grid.grx';
             obj.grid.grz = obj.grid.grz';
 
-            if obj.grid.flip==1
-                obj.grid.grx = -obj.grid.grx;
-                obj.grid.Tx(obj.grid.in,1) = -obj.grid.Tx(obj.grid.in,1);
-                obj.grid.Rx(obj.grid.in,1) = -obj.grid.Rx(obj.grid.in,1);
-                obj.grid.TxCosDir(obj.grid.in,1) = -obj.grid.TxCosDir(obj.grid.in,1);
-                obj.grid.RxCosDir(obj.grid.in,1) = -obj.grid.RxCosDir(obj.grid.in,1);
-            end
-
             % show grid
 
             xlim = [min(obj.grid.grx) max(obj.grid.grx)];

@@ -17,6 +17,9 @@ classdef Grid < matlab.mixin.Copyable
         type
     end
     methods
+        function obj = Grid()
+            obj.cont = Constraints();
+        end
         function set.grx(obj,g)
             if ~isnumeric(g)
                 error('Grid coordinates must be numeric')
@@ -180,8 +183,8 @@ classdef Grid < matlab.mixin.Copyable
                 p_data(n,:) = data(n,:) + p*a;   % coord de data projete sur le plan
             end
         end
-        function [p_data,no_plan] = proj_planes(data, plans)
-            %  p_data = proj_plan(data, x0, a)
+        function [p_data,no_plane] = proj_planes(data, planes)
+            %  p_data = proj_planes(data, planes)
             %
             % data : coordonnees a projeter (nx3)
             % plans: vecteur des plans, contenant struct
@@ -193,17 +196,17 @@ classdef Grid < matlab.mixin.Copyable
             %
             %
             p_data = data;
-            no_plan = zeros(1,size(data,1));
-            p = zeros(1,length(plans));
+            no_plane = zeros(1,size(data,1));
+            p = zeros(1,length(planes));
             for n=1:size(data,1)
-                for nn=1:length(plans)
-                    r = plans(nn).x0-data(n,:);           % vecteur pointant de data vers x0
-                    p(nn) = abs(dot(plans(nn).a, r));     % distance entre data et le plan
+                for nn=1:length(planes)
+                    r = planes(nn).x0-data(n,:);           % vecteur pointant de data vers x0
+                    p(nn) = abs(dot(planes(nn).a, r));     % distance entre data et le plan
                 end
                 [~,no] = min(p);
                 % on va garder le plan pour lequel la distance est la plus faible
-                p_data(n,:) = data(n,:) + p(no)*plans(no).a;  % coord de data projete sur le plan
-                no_plan(n) = no;
+                p_data(n,:) = data(n,:) + p(no)*planes(no).a;  % coord de data projete sur le plan
+                no_plane(n) = no;
             end
         end
         function m_data = transl_rotat(data, origine, az, dip)

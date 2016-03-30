@@ -115,4 +115,71 @@ classdef Borehole < handle
         end
     end
     
+    methods (Static)
+        function [x,y,z,c] = project(fdata,depth,name)
+            % function [x,y,z,c] = project(fdata,depth,name)
+            %  Project measurements points on borehole trajectory
+            %
+            % fdata: matrix [n x 3]
+            %          borehole trajectory (x,y,elev),
+            %          sorted from top to bottom of borehole
+            % depth: vector [1 x n2]
+            %          depth of the n2 measurement points (from top to
+            %          bottom)
+            % name:  name of borehole
+            %
+            % x:     x coordinates of measurement points [1 x n2]
+            % y:     y coordinates of measurement points [1 x n2]
+            % z:     elevation of measurement points [1 x n2]
+            % c:     direction cosines at meas .points [n2 x 3], pointing
+            %           downwards
+            %
+            
+            npts = length(depth);
+            x = zeros(1,npts);
+            y = zeros(1,npts);
+            z = zeros(1,npts);
+            c = zeros(npts,3);
+            
+            depthBH = [0; cumsum(sqrt(sum( (diff(fdata,1)).^2, 2)))];
+            
+            for n=1:npts
+                % trajectory is cut into segments
+                % start index of segment in which the point is
+                i1 = find(depth(n)>=depthBH);
+                if isempty(i1)
+                    errordlg(['Measurement pt outside borehole: ',name])
+                    x = zeros(1,npts);
+                    y = zeros(1,npts);
+                    z = zeros(1,npts);
+                    c = zeros(npts,3);
+                    return
+                end
+                i1 = i1(end);
+                % end index of segment
+                i2 = find(depth(n)<depthBH);
+                if isempty(i2)
+                    errordlg(['Measurement pt outside borehole: ',name])
+                    x = zeros(1,npts);
+                    y = zeros(1,npts);
+                    z = zeros(1,npts);
+                    c = zeros(npts,3);
+                    return
+                end
+                i2 = i2(1);
+                
+                d = sqrt(sum((fdata(i2,1:3)-fdata(i1,1:3)).^2));
+                % direction cosine of the segment
+                l = (fdata(i2,1:3)-fdata(i1,1:3))./d;
+                
+                % distance between start of segment and measurement point
+                d2 = depth(n) - depthBH(i1);
+                
+                x(n) = fdata(i1,1) + d2*l(1);
+                y(n) = fdata(i1,2) + d2*l(2);
+                z(n) = fdata(i1,3) + d2*l(3);
+                c(n,:) = l;
+            end
+        end
+    end
 end

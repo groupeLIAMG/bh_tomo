@@ -118,9 +118,6 @@ classdef MogUI < handle
         end
     end
 
-    methods (Static,Access=private)
-        [x,y,z,c] = projectBorehole(fdata,prof,nom)
-    end
     methods (Access=private)
         addComponents(obj)
         resizeUI(obj,varargin)

@@ -67,7 +67,8 @@ classdef ModelUI < handle
     end
    
     methods (Access=private)
-        g = gridEditor(obj,varargin)
+        g = gridEditor(obj,no,varargin)
+        c = constraintsEditor(obj,varargin)
         function addComponents(obj)
             
             obj.handles.addModel = uicontrol('Style','pushbutton',...

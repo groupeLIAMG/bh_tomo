@@ -315,14 +315,14 @@ classdef BoreholeUI < handle
             if isempty(obj.boreholes), return, end
 
             figure
-            for n=1:length(obj.boreholes)
-                plot3(obj.boreholes(n).fdata(:,1),...
-                    obj.boreholes(n).fdata(:,2),...
-                    obj.boreholes(n).fdata(:,3),'g','LineWidth',2)
+            for b=obj.boreholes
+                plot3(b.fdata(:,1),...
+                    b.fdata(:,2),...
+                    b.fdata(:,3),'g','LineWidth',2)
                 hold on
-                plot3(obj.boreholes(n).X, obj.boreholes(n).Y, obj.boreholes(n).Z_surf,'ro')
-                text(obj.boreholes(n).X, obj.boreholes(n).Y, ...
-                    obj.boreholes(n).Z_surf, obj.boreholes(n).name)
+                plot3(b.X, b.Y, b.Z_surf,'ro')
+                text(b.X, b.Y, ...
+                    b.Z_surf, b.name)
             end
             grid on
             hold off
@@ -455,9 +455,11 @@ classdef BoreholeUI < handle
                     return
                 end
                 cont = load([rep,file]);
-                scont.x = obj.boreholes(no).X;    % vertical straight boreholes
-                scont.y = obj.boreholes(no).Y;
-                scont.z = obj.boreholes(no).Z - cont(:,1);
+                [scont.x,scont.y,scont.z,~] = Borehole.project(obj.boreholes(no).fdata,...
+                    cont(:,1),obj.boreholes(no).name);
+                scont.x = scont.x(:);
+                scont.y = scont.y(:);
+                scont.z = scont.z(:);
                 scont.valeur = 1./cont(:,2);  % we want slowness
                 if size(cont,2)==3
                     % http://math.stackexchange.com/questions/269216/inverse-of-random-variable
@@ -477,9 +479,8 @@ classdef BoreholeUI < handle
                     return
                 end
                 cont = load([rep,file]);
-                acont.x = obj.boreholes(no).X;    % vertical straight boreholes
-                acont.y = obj.boreholes(no).Y;
-                acont.z = obj.boreholes(no).Z - cont(:,1);
+                [acont.x,acont.y,acont.z,~] = Borehole.project(obj.boreholes(no).fdata,...
+                    cont(:,1),obj.boreholes(no).name);
                 acont.valeur = cont(:,2);
                 if size(cont,2)==3
                     acont.variance = cont(:,3);

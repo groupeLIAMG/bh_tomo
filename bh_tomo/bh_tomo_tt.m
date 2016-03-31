@@ -308,6 +308,11 @@ update_tout(hObject, eventdata, handles)
 function update_tout(hObject, eventdata, handles)
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 set(handles.trace_traite,'String',num2str(h.no_trace))
+if h.pick_et(h.no_trace) ~= -1
+    set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace)),' ± ',num2str(h.pick_et(h.no_trace))])
+else
+    set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace))])
+end
 update_trace_simple(hObject, eventdata, handles)
 update_traces_contigues(hObject, eventdata, handles)
 update_positions_info(hObject, eventdata, handles)
@@ -588,10 +593,8 @@ update_trace_simple(hObject, eventdata, handles)
 %
 function update_positions_info(hObject, eventdata, handles)
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
-mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
-av = getappdata(handles.fig_bh_tomo_tt, 'av');
-ap = getappdata(handles.fig_bh_tomo_tt, 'ap');
 if (get(handles.radiobutton_data,'Value')==1)
+    mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
     Tx_x = mog.data.Tx_x(h.no_trace);
     Tx_y = mog.data.Tx_y(h.no_trace);
     Tx_z = mog.data.Tx_z(h.no_trace);
@@ -601,6 +604,7 @@ if (get(handles.radiobutton_data,'Value')==1)
     Tx_d = mog.Tx_z_orig(h.no_trace);
 	in = mog.in;
 elseif (get(handles.radiobutton_av,'Value')==1)
+    av = getappdata(handles.fig_bh_tomo_tt, 'av');
     Tx_x = av.data.Tx_x(h.no_trace);
     Tx_y = av.data.Tx_y(h.no_trace);
     Tx_z = av.data.Tx_z(h.no_trace);
@@ -610,6 +614,7 @@ elseif (get(handles.radiobutton_av,'Value')==1)
     Tx_d = av.d_TxRx(h.no_trace);
 	in = av.in;
 elseif (get(handles.radiobutton_ap,'Value')==1)
+    ap = getappdata(handles.fig_bh_tomo_tt, 'ap');
     Tx_x = ap.data.Tx_x(h.no_trace);
     Tx_y = ap.data.Tx_y(h.no_trace);
     Tx_z = ap.data.Tx_z(h.no_trace);
@@ -638,9 +643,9 @@ function pointe(hObject, eventdata, handles)
 if get(handles.checkbox_pickTx,'Value') == 1
     pointe_simple(hObject, eventdata, handles)
 elseif get(handles.action,'Value') == 1
-  pointe_ecart_type(hObject, eventdata, handles)
+    pointe_ecart_type(hObject, eventdata, handles)
 elseif get(handles.action,'Value') == 2
-  pointe_simple(hObject, eventdata, handles)
+    pointe_simple(hObject, eventdata, handles)
 end
 update_tout(hObject, eventdata, handles)
 set(handles.pushbutton_active_pointe,'Value',0)
@@ -701,7 +706,12 @@ while pointe_actif
 		elseif button==3
 			et = abs(t1-tt);
 			update_images(hObject, eventdata, handles, tt, et)
-		end
+        end
+        if et ~= -1
+            set(handles.text_tt_info,'String',['Picked Time: ',num2str(tt),' ± ',num2str(et)])
+        else
+            set(handles.text_tt_info,'String',['Picked Time: ',num2str(tt)])
+        end
 		[t1,a,button] = ginput(1);
 		pushOnce=false;
 	end
@@ -772,19 +782,20 @@ ylim = get(handles.trace_simple,'YLim');
 n_trace_traite = 0;
 tt = pick(h.no_trace);
 while pointe_actif
-	update_tout(hObject, eventdata, handles)
-	[t1,a,button] = ginput(1);
-	pushOnce=true;
-	while button ~= 2
-		if gca ~= handles.trace_simple || t1<xlim(1) || t1>xlim(2) || a<ylim(1) || a>ylim(2)
-			%pointe_actif=0;
-			setappdata(handles.fig_bh_tomo_tt, 'h', h)
-			return
-		end
-		if button==1
+    update_tout(hObject, eventdata, handles)
+    [t1,a,button] = ginput(1);
+    pushOnce=true;
+    while button ~= 2
+        if gca ~= handles.trace_simple || t1<xlim(1) || t1>xlim(2) || a<ylim(1) || a>ylim(2)
+            %pointe_actif=0;
+            setappdata(handles.fig_bh_tomo_tt, 'h', h)
+            return
+        end
+        if button==1
 			tt = t1;
 			update_images(hObject, eventdata, handles, tt, -1)
-		end
+        end
+        set(handles.text_tt_info,'String',['Picked Time: ',num2str(tt)])
 		[t1,a,button] = ginput(1);
 		pushOnce=false;
 	end
@@ -1474,6 +1485,7 @@ while pointe_actif
 		set(handles.trace_traite,'String',num2str(h.no_trace))
 		setappdata(handles.fig_bh_tomo_tt, 'h', h)
 		update_tout(hObject, eventdata, handles)
+        set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace))])
 		n_trace_traite = n_trace_traite+1;
 		if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
 			sauve_mat(handles,true)
@@ -1541,6 +1553,12 @@ while pointe_actif==1
 	set(handles.trace_traite,'String',num2str(h.no_trace))
 	setappdata(handles.fig_bh_tomo_tt, 'h', h)
 	update_tout(hObject, eventdata, handles)
+    if h.pick_et(h.no_trace) ~= -1
+        set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace)),' ± ',num2str(h.pick_et(h.no_trace))])
+    else
+        set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace))])
+    end
+
 	n_trace_traite = n_trace_traite+1;
 	if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
 	  sauve_mat(handles,true)

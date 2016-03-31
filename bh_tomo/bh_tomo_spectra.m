@@ -213,13 +213,13 @@ imagesc(timestp, z, traces')
 xlabel(['Time [',h.mog.data.tunits,']'],'FontSize',12)
 ylabel(['Rx elevation [',h.mog.data.cunits,']'],'FontSize',12)
 title('Normalized amplitudes','FontSize',14)
-
+set(handles.axes1,'YDir','normal')
 	
 axes(handles.axes2)
 imagesc(freq/fac_f, z, log10(Pxx'))
 xlabel('Frequency [MHz]','FontSize',12)
 title('log_{10} Power spectra','FontSize',14)
-set(handles.axes2, 'XLim', [0 fmax])
+set(handles.axes2, 'XLim', [0 fmax],'YDir','normal')
 if get(handles.checkbox_fdom,'Value') == 1
 	hold(handles.axes2,'on')
 	ind = fdom~=-1;

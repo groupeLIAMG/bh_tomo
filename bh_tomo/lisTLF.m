@@ -1,4 +1,4 @@
-function d = lisTLF( basename )
+function d = lisTLF( basename, ntrace )
 % d = lisTLF( basename )
 
 % Copyright (C) 2005 Bernard Giroux
@@ -26,9 +26,8 @@ if fid < 2
 	fichier = [basename,'.TLF'];
 	[fid,mesg]=fopen(fichier,'rt');
 	if fid < 2
-%	  disp(['Fichier TLF absent: ',basename])
-	  d = -1;
-	  return
+        d = tlfInputdlg(ntrace);
+        return
 	end
   end
 end

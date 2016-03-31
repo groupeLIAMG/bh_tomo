@@ -231,10 +231,8 @@ uiwait(f)
             for nc=1:size(tdata,1)
                 if tdata{nc,1}==true
                     % look for MOG with good ID
-                    for no=1:length(obj.mogs)
-                        if ids(nc) == obj.mogs(no).ID
-                            
-                            mog = obj.mogs(no);
+                    for mog=obj.mogs
+                        if ids(nc) == mog.ID
                             
                             newMog.data.rdata = [newMog.data.rdata mog.data.rdata];
                             newMog.data.ntrace = newMog.data.ntrace + mog.data.ntrace;

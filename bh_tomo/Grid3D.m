@@ -150,17 +150,7 @@ classdef Grid3D < Grid
         
         % for saving in mat-files
         function s = saveobj(obj)
-            s.xmin = grid3d_mex('get_xmin', obj.mexObj);
-            s.ymin = grid3d_mex('get_ymin', obj.mexObj);
-            s.zmin = grid3d_mex('get_zmin', obj.mexObj);
-            s.dx = grid3d_mex('get_dx', obj.mexObj);
-            s.dy = grid3d_mex('get_dy', obj.mexObj);
-            s.dz = grid3d_mex('get_dz', obj.mexObj);
-            s.nx = grid3d_mex('get_nx', obj.mexObj);
-            s.ny = grid3d_mex('get_ny', obj.mexObj);
-            s.nz = grid3d_mex('get_nz', obj.mexObj);
-            s.nthreads = grid3d_mex('get_nthreads', obj.mexObj);
-            
+            s.nthreads = obj.nthreads;
             s.grx = obj.grx;
             s.gry = obj.gry;
             s.grz = obj.grz;
@@ -174,6 +164,7 @@ classdef Grid3D < Grid
             s.Tx_Z_water = obj.Tx_Z_water;
             s.Rx_Z_water = obj.Rx_Z_water;
             s.in = obj.in;
+            s.type = obj.type;
         end
     end
     methods(Static)
@@ -192,6 +183,7 @@ classdef Grid3D < Grid
                 obj.Tx_Z_water = s.Tx_Z_water;
                 obj.Rx_Z_water = s.Rx_Z_water;
                 obj.in = s.in;
+                obj.type = s.type;
             else
                 error('Wrong input arguments')
             end

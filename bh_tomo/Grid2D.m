@@ -74,14 +74,7 @@ classdef Grid2D < Grid
         
         % for saving in mat-files
         function s = saveobj(obj)
-            s.xmin = grid2d_mex('get_xmin', obj.mexObj);
-            s.zmin = grid2d_mex('get_zmin', obj.mexObj);
-            s.dx = grid2d_mex('get_dx', obj.mexObj);
-            s.dz = grid2d_mex('get_dz', obj.mexObj);
-            s.nx = grid2d_mex('get_nx', obj.mexObj);
-            s.nz = grid2d_mex('get_nz', obj.mexObj);
-            s.nthreads = grid2d_mex('get_nthreads', obj.mexObj);
-            
+            s.nthreads = obj.nthreads;
             s.nsnx = obj.nsnx;
             s.nsnz = obj.nsnz;
             s.grx = obj.grx;
@@ -98,6 +91,7 @@ classdef Grid2D < Grid
             s.Tx_Z_water = obj.Tx_Z_water;
             s.Rx_Z_water = obj.Rx_Z_water;
             s.in = obj.in;
+            s.type = obj.type;
         end
     end
     methods(Static)
@@ -120,6 +114,7 @@ classdef Grid2D < Grid
                 obj.Tx_Z_water = s.Tx_Z_water;
                 obj.Rx_Z_water = s.Rx_Z_water;
                 obj.in = s.in;
+                obj.type = s.type;
             else
                 error('Wrong input arguments')
             end

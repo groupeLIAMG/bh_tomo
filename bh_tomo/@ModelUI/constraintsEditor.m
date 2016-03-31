@@ -319,7 +319,6 @@ uiwait(f)
         contEdited = true;
     end
     function import(varargin)
-        uiwait(warndlg('Importing constraitns will overwrite current values'))
         switch hprop.Value
             case 1
                 str = 'File with Velocity Constraints';
@@ -333,8 +332,8 @@ uiwait(f)
                 str = 'File with Tilt Angle Constraints';
         end
         
-        [file, rep, index] = uigetfile('*.con',str);
-        if file==0 || index==0
+        [file, rep] = uigetfile('*.con',str);
+        if file==0
             return
         end
         icont = load([rep,file]);
@@ -350,76 +349,104 @@ uiwait(f)
             case '2D'
                 % Project on plane
                 
-                % TODO: compute distance from plane, add cutoff distance
-                % for points too far
-                coord = Grid.proj_plane(icont(:,1:3),gUI.data.x0,gUI.data.a);
-                [az,dip] = gUI.get_azimuth_dip();
-                coord = Grid.transl_rotat(coord, grid.x0, az, dip);
-                icont = [coord(:,3) coord(:,1) icont(:,4:5)];
+                [coord,dist] = gUI.project(icont(:,1:3));
+                fd=figure;
+                plot(dist,'*')
+                xlabel('Point Number')
+                ylabel('Distance')
+                title('Distance of projected point from grid plane')
+                
+                cutoff = myinputdlg('Enter cutoff distance');
+                close(fd)
+                if ~isempty(cutoff)
+                    ind = dist<str2double(cutoff);
+                else
+                    ind = 1:length(dist);
+                end
+                icont = [coord(ind,3) coord(ind,1) icont(ind,4:5)];
                 
                 switch hprop.Value
                     case 1
-                        c.slowness.data = [icont(:,1:2) 1./icont(:,3) ...
-                            icont(:,4)./icont(:,3).^4];
+                        c.slowness.data = [c.slowness.data; ...
+                            [icont(:,1:2) 1./icont(:,3) ...
+                            icont(:,4)./icont(:,3).^4]];
+                        c.slowness.data = unique(c.slowness.data,'rows');
                     case 2
-                        c.attenuation.data = icont;
+                        c.attenuation.data = [c.attenuation.data; icont];
+                        c.attenuation.data = unique(c.attenuation.data,'rows');
                     case 3
-                        c.ind_reservoir = icont;
+                        c.ind_reservoir = [c.ind_reservoir; icont];
+                        c.ind_reservoir = unique(c.ind_reservoir,'rows');
                     case 4
-                        c.slowness.data_xi = icont;
+                        c.slowness.data_xi = [c.slowness.data_xi; icont];
+                        c.slowness.data_xi = unique(c.slowness.data_xi,'rows');
                     case 5
-                        c.slowness.data_theta = icont;
+                        c.slowness.data_theta = [c.slowness.data_theta; icont];
+                        c.slowness.data_theta = unique(c.slowness.data_theta,'rows');
                 end
                 
             case '2D+'
                 % Project on planes
-                coord = icont(:,1:3);
-                [~,no_plane] = Grid.proj_planes(coord,gUI.data.planes);
-                [az,dip] = gUI.get_azimuth_dip();
-                z0 = grid.x0(3);
-                for n=1:gUI.data.n_planes
-                    no_f = gUI.data.order_boreholes(n);
-                    no_plan = gUI.data.order_planes(n);
-                    ind = no_plane==no_plan;
-                    oo = [obj.data.boreholes(no_f).X obj.data.boreholes(no_f).Y 0];
-                    coord(ind,:) = Grid.transl_rotat(coord(ind,:), oo,...
-                        az(no_plan), dip(no_plan));
+                [coord,dist] = gUI.project(icont(:,1:3));
+                fd=figure;
+                plot(dist,'*')
+                xlabel('Point Number')
+                ylabel('Distance')
+                title('Distance of projected point from grid plane')
+                
+                cutoff = myinputdlg('Enter cutoff distance');
+                close(fd)
+                if ~isempty(cutoff)
+                    ind = dist<str2double(cutoff);
+                else
+                    ind = 1:length(dist);
                 end
-                coord(:,3) = coord(:,3)+z0;
-                icont = [coord(:,3) coord(:,1) icont(:,4:5)];
+                icont = [coord(ind,3) coord(ind,1) icont(ind,4:5)];
                 
                 switch hprop.Value
                     case 1
-                        c.slowness.data = [icont(:,1:2) 1./icont(:,3) ...
-                            icont(:,4)./icont(:,3).^4];
+                        c.slowness.data = [c.slowness.data;...
+                            [icont(:,1:2) 1./icont(:,3) ...
+                            icont(:,4)./icont(:,3).^4]];
+                        c.slowness.data = unique(c.slowness.data,'rows');
                     case 2
-                        c.attenuation.data = icont;
+                        c.attenuation.data = [c.attenuation.data; icont];
+                        c.attenuation.data = unique(c.attenuation.data,'rows');
                     case 3
-                        c.ind_reservoir = icont;
+                        c.ind_reservoir = [c.ind_reservoir; icont];
+                        c.ind_reservoir = unique(c.ind_reservoir,'rows');
                     case 4
-                        c.slowness.data_xi = icont;
+                        c.slowness.data_xi = [c.slowness.data_xi; icont];
+                        c.slowness.data_xi = unique(c.slowness.data_xi,'rows');
                     case 5
-                        c.slowness.data_theta = icont;
+                        c.slowness.data_theta = [c.slowness.data_theta; icont];
+                        c.slowness.data_theta = unique(c.slowness.data_theta,'rows');
                 end
                 
             case '3D'
                 switch hprop.Value
                     case 1
-                        c.slowness.data = [icont(:,1:3) 1./icont(:,4) ...
-                            icont(:,5)./icont(:,4).^4];
+                        c.slowness.data = [c.slowness.data;...
+                            [icont(:,1:3) 1./icont(:,4) ...
+                            icont(:,5)./icont(:,4).^4]];
+                        c.slowness.data = unique(c.slowness.data,'rows');
                     case 2
-                        c.attenuation.data = icont;
+                        c.attenuation.data = [c.attenuation.data; icont];
+                        c.attenuation.data = unique(c.attenuation.data,'rows');
                     case 3
-                        c.ind_reservoir = icont;
+                        c.ind_reservoir = [c.ind_reservoir; icont];
+                        c.ind_reservoir = unique(c.ind_reservoir,'rows');
                     case 4
-                        c.slowness.data_xi = icont;
+                        c.slowness.data_xi = [c.slowness.data_xi; icont];
+                        c.slowness.data_xi = unique(c.slowness.data_xi,'rows');
                     case 5
-                        c.slowness.data_theta = icont;
+                        c.slowness.data_theta = [c.slowness.data_theta; icont];
+                        c.slowness.data_theta = unique(c.slowness.data_theta,'rows');
                 end
         end
         
         fillValues()
-        updageFig()
+        updateFig()
         
         contEdited = true;
     end

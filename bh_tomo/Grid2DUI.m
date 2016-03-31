@@ -64,8 +64,9 @@ classdef Grid2DUI < handle
                 error('Cell size should be numeric')
             end
         end
-        function xyz_p = project(obj,xyz)
+        function [xyz_p,dist] = project(obj,xyz)
             xyz_p = Grid.proj_plane(xyz, obj.data.x0, obj.data.a);
+            dist = sqrt(sum((xyz-xyz_p).^2,2));
             [az,dip] = obj.get_azimuth_dip();
             xyz_p = Grid.transl_rotat(xyz_p, obj.grid.x0, az, dip);
         end

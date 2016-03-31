@@ -69,9 +69,9 @@ classdef Grid2DplusUI <handle
                 error('Cell size should be numeric')
             end
         end
-        function xyz_p = project(obj,xyz)
-            xyz_p = xyz;
-            [~, xyz_no_plan] = Grid.proj_planes(xyz_p, obj.data.planes);
+        function [xyz_p,dist] = project(obj,xyz)
+            [xyz_p, xyz_no_plan] = Grid.proj_planes(xyz, obj.data.planes);
+            dist = sqrt(sum((xyz-xyz_p).^2,2));
             [az,dip] = obj.get_azimuth_dip();
             for n=1:obj.data.n_planes
                 no_f = obj.data.order_boreholes(n);

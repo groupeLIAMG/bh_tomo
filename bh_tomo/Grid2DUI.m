@@ -64,6 +64,11 @@ classdef Grid2DUI < handle
                 error('Cell size should be numeric')
             end
         end
+        function xyz_p = project(obj,xyz)
+            xyz_p = Grid.proj_plane(xyz, obj.data.x0, obj.data.a);
+            [az,dip] = obj.get_azimuth_dip();
+            xyz_p = Grid.transl_rotat(xyz_p, obj.grid.x0, az, dip);
+        end
     end
 
     methods (Static)
@@ -305,6 +310,15 @@ classdef Grid2DUI < handle
 
             obj.notify('gridEdited')
         end
+        function [az,dip] = get_azimuth_dip(obj)
+            d = sum( obj.data.x0 .* obj.data.a );
+            x = d/obj.data.a(1);
+            y = d/obj.data.a(2);
+            az = atan2(y,x);
+            dip = asin(obj.data.a(3));
+            flip = obj.handles.flip.Value;
+            az = az + flip*pi;
+        end
         function updateProj(obj,varargin)
             [az,dip] = obj.get_azimuth_dip();
             obj.grid.Tx = Grid.transl_rotat(obj.data.Tx_p, obj.grid.x0, az, dip);
@@ -358,15 +372,6 @@ classdef Grid2DUI < handle
             xlabel(obj.haxes,'X')
             ylabel(obj.haxes,'Z')
 
-        end
-        function [az,dip] = get_azimuth_dip(obj,varargin)
-            d = sum( obj.data.x0 .* obj.data.a );
-            x = d/obj.data.a(1);
-            y = d/obj.data.a(2);
-            az = atan2(y,x);
-            dip = asin(obj.data.a(3));
-            flip = obj.handles.flip.Value;
-            az = az + flip*pi;
         end
         function showFit(obj,varargin)
             figure

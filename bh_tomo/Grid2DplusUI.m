@@ -20,6 +20,7 @@ classdef Grid2DplusUI <handle
         order_boreholes
         n_planes
         order_planes
+        xshift
     end
     events
         gridEdited
@@ -67,6 +68,22 @@ classdef Grid2DplusUI <handle
             else
                 error('Cell size should be numeric')
             end
+        end
+        function xyz_p = project(obj,xyz)
+            xyz_p = xyz;
+            [~, xyz_no_plan] = Grid.proj_planes(xyz_p, obj.data.planes);
+            [az,dip] = obj.get_azimuth_dip();
+            for n=1:obj.data.n_planes
+                no_f = obj.data.order_boreholes(n);
+                no_plan = obj.data.order_planes(n);
+                ind = xyz_no_plan==no_plan;
+                oo = [obj.data.boreholes(no_f).X obj.data.boreholes(no_f).Y 0];
+                xyz_p(ind,:) = Grid.transl_rotat(xyz_p(ind,:), oo, az(no_plan), dip(no_plan));
+                if n>1
+                    xyz_p(ind,1) = xyz_p(ind,1)+obj.data.planes(n-1).l;
+                end
+            end
+            xyz_p(:,1) = xyz_p(:,1)-obj.xshift;
         end
     end
     
@@ -381,9 +398,9 @@ classdef Grid2DplusUI <handle
             
             obj.grid.in = obj.data.in;
             
-            xmin = min([obj.grid.Tx(:,1);obj.grid.Rx(:,1)]);
-            obj.grid.Tx(:,1) = obj.grid.Tx(:,1)-xmin;
-            obj.grid.Rx(:,1) = obj.grid.Rx(:,1)-xmin;
+            obj.xshift = min([obj.grid.Tx(:,1);obj.grid.Rx(:,1)]);
+            obj.grid.Tx(:,1) = obj.grid.Tx(:,1)-obj.xshift;
+            obj.grid.Rx(:,1) = obj.grid.Rx(:,1)-obj.xshift;
             xmin = 0;
             xmax = max([obj.grid.Tx(:,1);obj.grid.Rx(:,1)]);
             

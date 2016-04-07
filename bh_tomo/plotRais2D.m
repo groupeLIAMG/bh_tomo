@@ -37,7 +37,10 @@ else
 	
 	rmin = min(res);
 	rmax = max(res);
-	c=jet;%cmr;
+	%c=jet;
+    
+    c = [0 0 1;0.8 0.8 0.8;1 0 0];
+    c = interp1((-1:1)',c,(-1:0.02:1)');
 
 	m = (size(c,1)-1)/(rmax-rmin);
 	b = 1-rmin*m;
@@ -54,7 +57,7 @@ else
 	end
 	hold(ha,'off')
 	set(ha, 'DataAspectRatio',[1 1 1])
-	colormap(jet)
+	colormap(c)%jet)
 	hb=colorbar(ha);
 	caxis(ha,[rmin rmax])
 	set(get(hb,'Title'),'String','Residuals')

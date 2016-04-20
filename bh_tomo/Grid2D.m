@@ -35,6 +35,24 @@ classdef Grid2D < Grid
         
         % raytrace
         function varargout = raytrace(obj, varargin)
+            
+            % check if we have to raytrace in anisotropic media
+            % possible arguments are:
+            %   slowness, Tx, Rx, t0              -> isotropic
+            %   slowness, xi, Tx, Rx, t0          -> elliptical anisotropy
+            %   slowness, xi, theta, Tx, Rx, t0   -> tilted elliptical
+            % in all cases t0 is optional
+            if size(varargin{1}) ~= size(varargin{2})
+                % second argument not same size as slowness: must be Tx
+                type = 'iso';
+            elseif size(varargin{1}) ~= size(varargin{3})
+                % second arg same size as slowness but third not equal
+                type = 'elliptical';
+            else
+                type = 'tilted';
+            end
+            
+            
             if isempty(obj.mexObj)
                 s.xmin = obj.grx(1);
                 s.zmin = obj.grz(1);
@@ -44,15 +62,19 @@ classdef Grid2D < Grid
                 s.nz = length(obj.grz)-1;
                 s.nsnx = obj.nsnx;
                 s.nsnz = obj.nsnz;
-                obj.mexObj = grid2d_mex('new', s, obj.nthreads);
+                obj.mexObj = grid2d_mex('new', s, type, obj.nthreads);
             else
                 % check that mexObj is consistent with current obj values
+                % (in bh_tomo, this should not happen)
                 if abs(grid2d_mex('get_xmin', obj.mexObj)-obj.grx(1))>10*eps || ...
                         abs(grid2d_mex('get_zmin', obj.mexObj)-obj.grz(1))>10*eps || ...
                         abs(grid2d_mex('get_dx', obj.mexObj)-(obj.grx(2)-obj.grx(1)))>10*eps || ...
                         abs(grid2d_mex('get_dz', obj.mexObj)-(obj.grz(2)-obj.grz(1)))>10*eps || ...
                         abs(grid2d_mex('get_nx', obj.mexObj)-(length(obj.grx)-1))>10*eps || ...
-                        abs(grid2d_mex('get_nz', obj.mexObj)-(length(obj.grz)-1))>10*eps
+                        abs(grid2d_mex('get_nz', obj.mexObj)-(length(obj.grz)-1))>10*eps || ...
+                        strcmp(grid2d_mex('get_type', obj.mexObj), type)~=1
+                    
+                    % (in bh_tomo, we should not get here)
                     
                     % delete old instance
                     grid2d_mex('delete', obj.mexObj);
@@ -66,7 +88,7 @@ classdef Grid2D < Grid
                     s.nz = length(obj.grz)-1;
                     s.nsnx = obj.nsnx;
                     s.nsnz = obj.nsnz;
-                    obj.mexObj = grid2d_mex('new', s, obj.nthreads);
+                    obj.mexObj = grid2d_mex('new', s, type, obj.nthreads);
                 end
             end
             [varargout{1:nargout}] = grid2d_mex('raytrace', obj.mexObj, varargin{:});

@@ -17,22 +17,22 @@ http://www.mathworks.com/matlabcentral/fileexchange/38964-example-matlab-class-w
 template<class base> class class_handle
 {
 public:
-	class_handle(base *ptr) : ptr_m(ptr), name_m(typeid(base).name()) {
+	class_handle(base *ptr) : ptr_m(ptr) {//, name_m(typeid(base).name()) {
 		signature_m = CLASS_HANDLE_SIGNATURE;
 	}
   
 	~class_handle() { signature_m = 0; delete ptr_m; }
 	
 	bool isValid() {
-		return ((signature_m == CLASS_HANDLE_SIGNATURE) &&
-						!strcmp(name_m.c_str(), typeid(base).name()));
+		return ((signature_m == CLASS_HANDLE_SIGNATURE) && dynamic_cast<base*>(ptr_m)!=nullptr);
+//						!strcmp(name_m.c_str(), typeid(base).name()));
 	}
     
 	base *ptr() { return ptr_m; }
 
 private:
     uint32_t signature_m;
-    std::string name_m;
+//    std::string name_m;
     base *ptr_m;
 };
 

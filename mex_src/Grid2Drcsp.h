@@ -49,8 +49,8 @@
 #include "Grid2Drc.h"
 #include "Node2Dcsp.h"
 
-template<typename T1, typename T2>
-class Grid2Drcsp : public Grid2Drc<T1,T2,Node2Dcsp<T1,T2>> {
+template<typename T1, typename T2, typename CELL>
+class Grid2Drcsp : public Grid2Drc<T1,T2,Node2Dcsp<T1,T2>,CELL> {
 public:
     Grid2Drcsp(const T2 nx, const T2 nz, const T1 ddx, const T1 ddz,
            const T1 minx, const T1 minz, const T2 nnx, const T2 nnz,
@@ -93,18 +93,6 @@ public:
                  std::vector<std::vector<siv<double>>>& l_data,
 				 const size_t threadNo=0) const;
 	
-	int fmm(const std::vector<sxz<T1>>& Tx,
-			const std::vector<T1>& t0,
-			const std::vector<sxz<T1>>& Rx,
-			std::vector<T1>& traveltimes,
-			const size_t threadNo=0) const;
-    
-    int fmm(const std::vector<sxz<T1>>&,
-			const std::vector<T1>&,
-			const std::vector<const std::vector<sxz<T1>>*>&,
-			std::vector<std::vector<T1>*>&,
-			const size_t=0) const;
-    
     const T2 getNsnx() const { return nsnx; }
     const T2 getNsnz() const { return nsnz; }
     
@@ -123,13 +111,6 @@ protected:
                    std::vector<bool>& frozen,
 				   const size_t threadNo) const;
 	
-    void propagate_fmm(std::priority_queue<Node2Dcsp<T1,T2>*,
-					   std::vector<Node2Dcsp<T1,T2>*>,
-					   CompareNodePtr<T1>>&,
-					   std::vector<bool>&,
-					   std::vector<bool>&,
-					   const size_t) const;
-    
     void initQueue(const std::vector<sxz<T1>>& Tx,
                    const std::vector<T1>& t0, 
                    std::priority_queue<Node2Dcsp<T1,T2>*,
@@ -159,7 +140,7 @@ protected:
 					const size_t threadNo) const;
 
 	T1 get_tt_corr(const siv<T1>& cell,
-				  const Grid2Drcsp<T1,T2> *grid,
+				  const Grid2Drcsp<T1,T2,CELL> *grid,
 				  const size_t i) const {
 		return cell.v*(this->slowness[cell.i] - grid->slowness[i]);
 	}
@@ -167,24 +148,24 @@ protected:
 	
 private:
     Grid2Drcsp() {}
-    Grid2Drcsp(const Grid2Drcsp<T1,T2>& g) {}
-    Grid2Drcsp<T1,T2>& operator=(const Grid2Drcsp<T1,T2>& g) {}
+    Grid2Drcsp(const Grid2Drcsp<T1,T2,CELL>& g) {}
+    Grid2Drcsp<T1,T2,CELL>& operator=(const Grid2Drcsp<T1,T2,CELL>& g) {}
     
 };
 
-template<typename T1, typename T2>
-Grid2Drcsp<T1,T2>::Grid2Drcsp(const T2 nx, const T2 nz, const T1 ddx, const T1 ddz,
+template<typename T1, typename T2, typename CELL>
+Grid2Drcsp<T1,T2,CELL>::Grid2Drcsp(const T2 nx, const T2 nz, const T1 ddx, const T1 ddz,
                   const T1 minx, const T1 minz, const T2 nnx, const T2 nnz,
 				  const size_t nt) :
-Grid2Drc<T1,T2,Node2Dcsp<T1,T2>>(nx,nz,ddx,ddz,minx,minz,nt),
+Grid2Drc<T1,T2,Node2Dcsp<T1,T2>,CELL>(nx,nz,ddx,ddz,minx,minz,nt),
 nsnx(nnx), nsnz(nnz), nsgx(0), nsgz(0)
 {
     buildGridNodes();
     this->buildGridNeighbors();
 }
 
-template<typename T1, typename T2>
-void Grid2Drcsp<T1,T2>::buildGridNodes() {
+template<typename T1, typename T2, typename CELL>
+void Grid2Drcsp<T1,T2,CELL>::buildGridNodes() {
     
     this->nodes.resize( // noeuds secondaires
                        this->ncx*nsnx*(this->ncz+1) +
@@ -315,8 +296,8 @@ void Grid2Drcsp<T1,T2>::buildGridNodes() {
 
 
 
-template<typename T1, typename T2>
-void Grid2Drcsp<T1,T2>::initQueue(const std::vector<sxz<T1>>& Tx,
+template<typename T1, typename T2, typename CELL>
+void Grid2Drcsp<T1,T2,CELL>::initQueue(const std::vector<sxz<T1>>& Tx,
 								const std::vector<T1>& t0,
 								std::priority_queue<Node2Dcsp<T1,T2>*,
 								std::vector<Node2Dcsp<T1,T2>*>,
@@ -354,8 +335,8 @@ void Grid2Drcsp<T1,T2>::initQueue(const std::vector<sxz<T1>>& Tx,
 }
 
 
-template<typename T1, typename T2>
-void Grid2Drcsp<T1,T2>::initBand(const std::vector<sxz<T1>>& Tx,
+template<typename T1, typename T2, typename CELL>
+void Grid2Drcsp<T1,T2,CELL>::initBand(const std::vector<sxz<T1>>& Tx,
 								const std::vector<T1>& t0,
 								std::priority_queue<Node2Dcsp<T1,T2>*,
 								std::vector<Node2Dcsp<T1,T2>*>,
@@ -383,7 +364,7 @@ void Grid2Drcsp<T1,T2>::initBand(const std::vector<sxz<T1>>& Tx,
 						for ( size_t k=0; k< this->neighbors[cellNo].size(); ++k ) {
 							T2 neibNo = this->neighbors[cellNo][k];
 							if ( neibNo == nn ) continue;
-							T1 dt = computeDt(this->nodes[nn], this->nodes[neibNo], cellNo);
+							T1 dt = this->cells.computeDt(this->nodes[nn], this->nodes[neibNo], cellNo);
 							
 							if ( t0[n]+dt < this->nodes[neibNo].getTT(threadNo) ) {
 								this->nodes[neibNo].setTT( t0[n]+dt, threadNo );
@@ -410,7 +391,7 @@ void Grid2Drcsp<T1,T2>::initBand(const std::vector<sxz<T1>>& Tx,
                 T2 neibNo = this->neighbors[cellNo][k];
 				
 				// compute dt
-                T1 dt = computeDt(this->nodes[neibNo], Tx[n], cellNo);
+                T1 dt = this->cells.computeDt(this->nodes[neibNo], Tx[n], cellNo);
 				
 				this->nodes[neibNo].setTT( t0[n]+dt, threadNo );
                 narrow_band.push( &(this->nodes[neibNo]) );
@@ -424,8 +405,8 @@ void Grid2Drcsp<T1,T2>::initBand(const std::vector<sxz<T1>>& Tx,
 }
 
 
-template<typename T1, typename T2>
-int Grid2Drcsp<T1,T2>::raytrace(const std::vector<sxz<T1>>& Tx,
+template<typename T1, typename T2, typename CELL>
+int Grid2Drcsp<T1,T2,CELL>::raytrace(const std::vector<sxz<T1>>& Tx,
                         const std::vector<T1>& t0, 
                         const std::vector<sxz<T1>>& Rx,
                         std::vector<T1>& traveltimes,
@@ -460,8 +441,8 @@ int Grid2Drcsp<T1,T2>::raytrace(const std::vector<sxz<T1>>& Tx,
     return 0;
 }
 
-template<typename T1, typename T2>
-int Grid2Drcsp<T1,T2>::raytrace(const std::vector<sxz<T1>>& Tx,
+template<typename T1, typename T2, typename CELL>
+int Grid2Drcsp<T1,T2,CELL>::raytrace(const std::vector<sxz<T1>>& Tx,
                               const std::vector<T1>& t0,
                               const std::vector<const std::vector<sxz<T1>>*>& Rx,
                               std::vector<std::vector<T1>*>& traveltimes,
@@ -499,8 +480,8 @@ int Grid2Drcsp<T1,T2>::raytrace(const std::vector<sxz<T1>>& Tx,
 	
 }
 
-template<typename T1, typename T2>
-int Grid2Drcsp<T1,T2>::raytrace(const std::vector<sxz<T1>>& Tx,
+template<typename T1, typename T2, typename CELL>
+int Grid2Drcsp<T1,T2,CELL>::raytrace(const std::vector<sxz<T1>>& Tx,
 							  const std::vector<T1>& t0,
 							  const std::vector<sxz<T1>>& Rx,
 							  std::vector<T1>& traveltimes,
@@ -592,8 +573,8 @@ int Grid2Drcsp<T1,T2>::raytrace(const std::vector<sxz<T1>>& Tx,
     return 0;
 }
 
-template<typename T1, typename T2>
-int Grid2Drcsp<T1,T2>::raytrace(const std::vector<sxz<T1>>& Tx,
+template<typename T1, typename T2, typename CELL>
+int Grid2Drcsp<T1,T2,CELL>::raytrace(const std::vector<sxz<T1>>& Tx,
                               const std::vector<T1>& t0,
                               const std::vector<const std::vector<sxz<T1>>*>& Rx,
                               std::vector<std::vector<T1>*>& traveltimes,
@@ -712,8 +693,8 @@ int Grid2Drcsp<T1,T2>::raytrace(const std::vector<sxz<T1>>& Tx,
     
 }
 
-template<typename T1, typename T2>
-int Grid2Drcsp<T1,T2>::raytrace(const std::vector<sxz<T1>>& Tx,
+template<typename T1, typename T2, typename CELL>
+int Grid2Drcsp<T1,T2,CELL>::raytrace(const std::vector<sxz<T1>>& Tx,
 							  const std::vector<T1>& t0, 
 							  const std::vector<sxz<T1>>& Rx,
 							  std::vector<T1>& traveltimes,
@@ -844,92 +825,8 @@ int Grid2Drcsp<T1,T2>::raytrace(const std::vector<sxz<T1>>& Tx,
     return 0;
 }
 
-template<typename T1, typename T2>
-int Grid2Drcsp<T1,T2>::fmm(const std::vector<sxz<T1>>& Tx,
-						 const std::vector<T1>& t0,
-						 const std::vector<sxz<T1>>& Rx,
-						 std::vector<T1>& traveltimes,
-						 const size_t threadNo) const {
-	
-	if ( nsnx>0 || nsnz>0 ) {
-		std::cerr << "Error: fast marching method should not be used with secondary nodes.\n";
-		return 1;
-	}
-	if ( checkPts(Tx) == 1 ) return 1;
-    if ( checkPts(Rx) == 1 ) return 1;
-    
-    for ( size_t n=0; n<this->nodes.size(); ++n ) {
-        this->nodes[n].reinit( threadNo );
-    }
-    
-    CompareNodePtr<T1> cmp(threadNo);
-    std::priority_queue< Node2Dcsp<T1,T2>*, std::vector<Node2Dcsp<T1,T2>*>,
-    CompareNodePtr<T1>> narrow_band( cmp );
-
-	std::vector<Node2Dcsp<T1,T2>> txNodes;
-    std::vector<bool> inBand( this->nodes.size(), false );
-    std::vector<bool> frozen( this->nodes.size(), false );
-    
-    initBand(Tx, t0, narrow_band, txNodes, inBand, frozen, threadNo);
-    
-    propagate_fmm(narrow_band, inBand, frozen, threadNo);
-    
-    if ( traveltimes.size() != Rx.size() ) {
-        traveltimes.resize( Rx.size() );
-    }
-    
-    for (size_t n=0; n<Rx.size(); ++n) {
-        traveltimes[n] = getTraveltime(Rx[n], this->nodes, threadNo);
-    }
-	return 0;
-}
-
-template<typename T1, typename T2>
-int Grid2Drcsp<T1,T2>::fmm(const std::vector<sxz<T1>>& Tx,
-						 const std::vector<T1>& t0,
-						 const std::vector<const std::vector<sxz<T1>>*>& Rx,
-						 std::vector<std::vector<T1>*>& traveltimes,
-						 const size_t threadNo) const {
-
-	if ( nsnx>0 || nsnz>0 ) {
-		std::cerr << "Error: fast marching method should not be used with secondary nodes.\n";
-		return 1;
-	}
-	if ( checkPts(Tx) == 1 ) return 1;
-    for ( size_t n=0; n<Rx.size(); ++n )
-        if ( checkPts(*Rx[n]) == 1 ) return 1;
-    
-    for ( size_t n=0; n<this->nodes.size(); ++n ) {
-        this->nodes[n].reinit( threadNo );
-    }
-    
-    CompareNodePtr<T1> cmp(threadNo);
-    std::priority_queue< Node2Dcsp<T1,T2>*, std::vector<Node2Dcsp<T1,T2>*>,
-    CompareNodePtr<T1>> narrow_band( cmp );
-    
-    std::vector<Node2Dcsp<T1,T2>> txNodes;
-    std::vector<bool> inBand( this->nodes.size(), false );
-    std::vector<bool> frozen( this->nodes.size(), false );
-    
-    initBand(Tx, t0, narrow_band, txNodes, inBand, frozen, threadNo);
-    
-    propagate_fmm(narrow_band, inBand, frozen, threadNo);
-    
-    if ( traveltimes.size() != Rx.size() ) {
-        traveltimes.resize( Rx.size() );
-    }
-    
-    for (size_t nr=0; nr<Rx.size(); ++nr) {
-        traveltimes[nr]->resize( Rx[nr]->size() );
-        for (size_t n=0; n<Rx[nr]->size(); ++n)
-            (*traveltimes[nr])[n] = getTraveltime((*Rx[nr])[n], this->nodes, threadNo);
-    }
-    return 0;
-	
-}
-
-template<typename T1, typename T2>
-void Grid2Drcsp<T1,T2>::propagate( std::priority_queue<Node2Dcsp<T1,T2>*, std::vector<Node2Dcsp<T1,T2>*>,
+template<typename T1, typename T2, typename CELL>
+void Grid2Drcsp<T1,T2,CELL>::propagate( std::priority_queue<Node2Dcsp<T1,T2>*, std::vector<Node2Dcsp<T1,T2>*>,
                           CompareNodePtr<T1>>& queue,
                           std::vector<bool>& inQueue,
                           std::vector<bool>& frozen,
@@ -951,7 +848,7 @@ void Grid2Drcsp<T1,T2>::propagate( std::priority_queue<Node2Dcsp<T1,T2>*, std::v
                 }
                 
                 // compute dt
-                T1 dt = this->computeDt(*source, this->nodes[neibNo], cellNo);
+                T1 dt = this->cells.computeDt(*source, this->nodes[neibNo], cellNo);
 				
                 if ( source->getTT(threadNo)+dt < this->nodes[neibNo].getTT(threadNo) ) {
                     this->nodes[neibNo].setTT( source->getTT(threadNo)+dt, threadNo );
@@ -970,85 +867,8 @@ void Grid2Drcsp<T1,T2>::propagate( std::priority_queue<Node2Dcsp<T1,T2>*, std::v
 
 
 
-template<typename T1, typename T2>
-void Grid2Drcsp<T1,T2>::propagate_fmm( std::priority_queue<Node2Dcsp<T1,T2>*, std::vector<Node2Dcsp<T1,T2>*>,
-								CompareNodePtr<T1>>& narrow_band,
-								std::vector<bool>& inNarrowBand,
-								std::vector<bool>& frozen,
-								const size_t threadNo) const {
-    
-	static T1 dx2 = this->dx*this->dx;
-	static T1 dz2 = this->dz*this->dz;
-    while ( !narrow_band.empty() ) {
-        const Node2Dcsp<T1,T2>* source = narrow_band.top();
-        narrow_band.pop();
-        inNarrowBand[ source->getGridIndex() ] = false;
-		frozen[ source->getGridIndex() ] = true;   // marked as known
-        
-        for ( size_t no=0; no<source->getOwners().size(); ++no ) {
-            
-            T2 cellNo = source->getOwners()[no];
-            
-            for ( size_t k=0; k< this->neighbors[cellNo].size(); ++k ) {
-                T2 neibNo = this->neighbors[cellNo][k];
-                if ( neibNo == source->getGridIndex() || frozen[neibNo] ) {
-                    continue;
-                }
-                
-				// find i,j indices of node
-				T2 i = source->getGridIndex() / (this->ncz+1);
-				T2 j = source->getGridIndex() - i*(this->ncz+1);
-				
-				T1 t1, t2, t=this->nodes[neibNo].getTT(threadNo);
-				T1 s = this->slowness[cellNo];
-				if (i==0) {
-					t1 = this->nodes[j].getTT(threadNo) < this->nodes[(this->ncz+1)+j].getTT(threadNo) ?
-					this->nodes[j].getTT(threadNo) : this->nodes[(this->ncz+1)+j].getTT(threadNo);
-				} else if (i==this->ncx) {
-					t1 = this->nodes[(i-1)*(this->ncz+1)+j].getTT(threadNo) < this->nodes[this->ncx*(this->ncz+1)+j].getTT(threadNo) ?
-					this->nodes[(i-1)*(this->ncz+1)+j].getTT(threadNo) : this->nodes[this->ncx*(this->ncz+1)+j].getTT(threadNo);
-				} else {
-					t1 = this->nodes[(i-1)*(this->ncz+1)+j].getTT(threadNo) < this->nodes[(i+1)*(this->ncz+1)+j].getTT(threadNo) ?
-					this->nodes[(i-1)*(this->ncz+1)+j].getTT(threadNo) : this->nodes[(i+1)*(this->ncz+1)+j].getTT(threadNo);
-				}
-				
-				if (j==0) {
-					t2 = this->nodes[i*(this->ncz+1)].getTT(threadNo) < this->nodes[i*(this->ncz+1)+1].getTT(threadNo) ?
-					this->nodes[i*(this->ncz+1)].getTT(threadNo) : this->nodes[i*(this->ncz+1)+1].getTT(threadNo);
-				} else if (j==this->ncz) {
-					t2 = this->nodes[i*(this->ncz+1)+j-1].getTT(threadNo) < this->nodes[i*(this->ncz+1)+this->ncz].getTT(threadNo) ?
-					this->nodes[i*(this->ncz+1)+j-1].getTT(threadNo) : this->nodes[i*(this->ncz+1)+this->ncz].getTT(threadNo);
-				} else {
-					t2 = this->nodes[i*(this->ncz+1)+j-1].getTT(threadNo) < this->nodes[i*(this->ncz+1)+j+1].getTT(threadNo) ?
-					this->nodes[i*(this->ncz+1)+j-1].getTT(threadNo) : this->nodes[i*(this->ncz+1)+j+1].getTT(threadNo);
-				}
-                
-				
-				if ( t > (t1>t2?t1:t2) ) {
-					t = (dz2 * t1 + sqrt(dx2 * dz2 * ((dx2 + dz2) * s*s - (t1 - t2)*(t1 - t2))) +
-						 dx2 * t2)/(dx2 + dz2);
-				} else if ( t2>t && t>t1 ) {
-					t = t1 + this->dx*this->slowness[cellNo];
-				} else if ( t1>t && t>t2 ) {
-					t = t2 + this->dz*this->slowness[cellNo];
-				}
-				this->nodes[neibNo].setTT( t, threadNo );
-				
-				if ( !inNarrowBand[neibNo] ) {
-					narrow_band.push( &(this->nodes[neibNo]) );
-					inNarrowBand[neibNo] = true;
-				}
-				
-            }
-        }
-    }
-}
-
-
-
-
-template<typename T1, typename T2>
-T1 Grid2Drcsp<T1,T2>::getTraveltime(const sxz<T1>& Rx,
+template<typename T1, typename T2, typename CELL>
+T1 Grid2Drcsp<T1,T2,CELL>::getTraveltime(const sxz<T1>& Rx,
                            const std::vector<Node2Dcsp<T1,T2>>& nodes,
 						   const size_t threadNo) const {
     
@@ -1060,12 +880,12 @@ T1 Grid2Drcsp<T1,T2>::getTraveltime(const sxz<T1>& Rx,
     
     T2 cellNo = this->getCellNo( Rx );
     T2 neibNo = this->neighbors[cellNo][0];
-    T1 dt = this->computeDt(nodes[neibNo], Rx, cellNo);
+    T1 dt = this->cells.computeDt(nodes[neibNo], Rx, cellNo);
     
     T1 traveltime = nodes[neibNo].getTT(threadNo)+dt;
     for ( size_t k=1; k< this->neighbors[cellNo].size(); ++k ) {
         neibNo = this->neighbors[cellNo][k];
-        dt = this->computeDt(nodes[neibNo], Rx, cellNo);
+        dt = this->cells.computeDt(nodes[neibNo], Rx, cellNo);
         if ( traveltime > nodes[neibNo].getTT(threadNo)+dt ) {
             traveltime =  nodes[neibNo].getTT(threadNo)+dt;
         }
@@ -1074,8 +894,8 @@ T1 Grid2Drcsp<T1,T2>::getTraveltime(const sxz<T1>& Rx,
 }
 
 
-template<typename T1, typename T2>
-T1 Grid2Drcsp<T1,T2>::getTraveltime(const sxz<T1>& Rx,
+template<typename T1, typename T2, typename CELL>
+T1 Grid2Drcsp<T1,T2,CELL>::getTraveltime(const sxz<T1>& Rx,
                            const std::vector<Node2Dcsp<T1,T2>>& nodes,
                            T2& nodeParentRx, T2& cellParentRx,
 						   const size_t threadNo) const {
@@ -1090,14 +910,14 @@ T1 Grid2Drcsp<T1,T2>::getTraveltime(const sxz<T1>& Rx,
     
     T2 cellNo = this->getCellNo( Rx );
     T2 neibNo = this->neighbors[cellNo][0];
-    T1 dt = this->computeDt(nodes[neibNo], Rx, cellNo);
+    T1 dt = this->cells.computeDt(nodes[neibNo], Rx, cellNo);
     
     T1 traveltime = nodes[neibNo].getTT(threadNo)+dt;
     nodeParentRx = neibNo;
     cellParentRx = cellNo;
     for ( size_t k=1; k< this->neighbors[cellNo].size(); ++k ) {
         neibNo = this->neighbors[cellNo][k];
-        dt = this->computeDt(nodes[neibNo], Rx, cellNo);
+        dt = this->cells.computeDt(nodes[neibNo], Rx, cellNo);
         if ( traveltime > nodes[neibNo].getTT(threadNo)+dt ) {
             traveltime =  nodes[neibNo].getTT(threadNo)+dt;
             nodeParentRx = neibNo;

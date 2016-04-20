@@ -1,5 +1,5 @@
 //
-//  grid3d_mex.cpp
+//  grid2d_mex.cpp
 //  ttcr
 //
 //  Created by Bernard Giroux on 16-01-29.
@@ -27,11 +27,15 @@
 #include "mex.h"
 #include "class_handle.hpp"
 
+#include "Cell.h"
 #include "Grid2Drcsp.h"
 
 using namespace std;
 
-typedef Grid2Drcsp<double,uint32_t> grid;
+typedef Grid2D<double,uint32_t,sxz<double>> grid;
+typedef Grid2Drcsp<double,uint32_t,Cell<double,Node2Dcsp<double,uint32_t>,sxz<double>>> gridiso;
+typedef Grid2Drcsp<double,uint32_t,CellElliptical<double,Node2Dcsp<double,uint32_t>,sxz<double>>> gridaniso;
+typedef Grid2Drcsp<double,uint32_t,CellTiltedElliptical<double,Node2Dcsp<double,uint32_t>,sxz<double>>> gridtilted;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
@@ -47,8 +51,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if (nlhs != 1) {
             mexErrMsgTxt("New: One output expected.");
         }
-        if (nrhs > 3) {
-            mexErrMsgTxt("New: max 2 input arguments needed.");
+        if (nrhs > 4) {
+            mexErrMsgTxt("New: max 3 input arguments needed.");
         }
         // Return a handle to a new C++ instance
 
@@ -74,19 +78,26 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         nsnz_d  = static_cast<double*>( mxGetPr( mxGetField(prhs[1], 0, "nsnz") ) );
 
         // ------------------------------------------------------
+        // type
+        // ------------------------------------------------------
+
+        char type[64];
+        if (mxGetString(prhs[2], type, sizeof(type)))
+            mexErrMsgTxt("Second input should be a string less than 64 characters long.");
+        
+        // ------------------------------------------------------
         // number of threads
         // ------------------------------------------------------
         nthreads = 1;
-        if ( nrhs>2 ) {
-            size_t mrows = mxGetM(prhs[2]);
-            size_t ncols = mxGetN(prhs[2]);
-            if( !mxIsDouble(prhs[2]) || mxIsComplex(prhs[2]) ||
+        if ( nrhs>3 ) {
+            size_t mrows = mxGetM(prhs[3]);
+            size_t ncols = mxGetN(prhs[3]);
+            if( !mxIsDouble(prhs[3]) || mxIsComplex(prhs[3]) ||
                !(mrows==1 && ncols==1) ) {
-                mexErrMsgIdAndTxt( "MATLAB:timestwo:inputNotRealScalarDouble",
-                                  "Input must be a noncomplex scalar double.");
+                mexErrMsgTxt("Input must be a noncomplex scalar double.");
             }
 
-            double *dtmp = mxGetPr( prhs[2] );
+            double *dtmp = mxGetPr( prhs[3] );
             nthreads = round( *dtmp );
         }
 
@@ -95,11 +106,27 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         nsnx = uint32_t(round(*nsnx_d));
         nsnz = uint32_t(round(*nsnz_d));
 
-        plhs[0] = convertPtr2Mat<grid>(new grid(nx, nz,
-                                                *dx, *dz,
-                                                *xmin, *zmin,
-                                                nsnx, nsnz,
-                                                nthreads));
+        if ( strcmp(type, "iso")==0 ) {
+            plhs[0] = convertPtr2Mat<gridiso>(new gridiso(nx, nz,
+                    *dx, *dz,
+                    *xmin, *zmin,
+                    nsnx, nsnz,
+                    nthreads));
+        } else if ( strcmp(type, "elliptical")==0 ) {
+            plhs[0] = convertPtr2Mat<gridaniso>(new gridaniso(nx, nz,
+                    *dx, *dz,
+                    *xmin, *zmin,
+                    nsnx, nsnz,
+                    nthreads));
+        } else if ( strcmp(type, "tilted")==0 ) {
+            plhs[0] = convertPtr2Mat<gridtilted>(new gridtilted(nx, nz,
+                    *dx, *dz,
+                    *xmin, *zmin,
+                    nsnx, nsnz,
+                    nthreads));
+        } else {
+            mexErrMsgTxt("Type not defined.");
+        }
         return;
     }
 
@@ -161,7 +188,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     if (!strcmp("raytrace", cmd)) {
         // Check parameters
 
-        if ( nrhs != 5 && nrhs != 6 ) {
+        if ( nrhs < 5 && nrhs > 7 ) {
             mexErrMsgTxt("raytrace: Unexpected arguments.");
         }
         if (nlhs > 3) {
@@ -173,7 +200,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if (!(mxIsDouble(prhs[2]))) {
             mexErrMsgTxt("Slowness must be double precision.");
         }
-        double *slowness = static_cast<double*>( mxGetPr(prhs[2]) );
         mwSize number_of_dims = mxGetNumberOfDimensions(prhs[2]);
         if ( number_of_dims != 2 ) {
             mexErrMsgTxt("Slowness must be a vector (nSlowness by 1).");
@@ -183,45 +209,95 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         if ( dim_array[1] != 1 ) {
             mexErrMsgTxt("Slowness must be a vector (nSlowness by 1).");
         }
+        double *slowness = static_cast<double*>( mxGetPr(prhs[2]) );
         vector<double> s(nSlowness);
         for ( size_t n=0; n<s.size(); ++n ) s[n] = slowness[n];
         if ( grid_instance->setSlowness(s) == 1 ) {
             mexErrMsgTxt("Slowness values must be defined for each grid cell.");
         }
 
+        size_t itx=3;
+        size_t irx=4;
+        size_t it0=5;
+        
+        mexPrintf("itx = %zd\n", itx);
+        // check if next arg is xi (anisotropy ratio)
+        if (!(mxIsDouble(prhs[3]))) {
+            mexErrMsgTxt("Input must be double precision.");
+        }
+        number_of_dims = mxGetNumberOfDimensions(prhs[3]);
+        if ( number_of_dims != 2 ) {
+            mexErrMsgTxt("Input must be a vector.");
+        }
+        const mwSize *dim_array2 = mxGetDimensions(prhs[3]);
+        if ( dim_array2[0] == dim_array[0] && dim_array2[1] == dim_array[1] ) {
+            // size equal to slowness, we have xi
+            double *xi_p = static_cast<double*>( mxGetPr(prhs[3]) );
+            vector<double> xi(nSlowness);
+            for ( size_t n=0; n<xi.size(); ++n ) xi[n] = xi_p[n];
+            if ( grid_instance->setXi(xi) == 1 ) {
+                mexErrMsgTxt("Xi values must be defined for each grid cell.");
+            }
+            itx++;
+            irx++;
+            it0++;
+        }
+
+        // check if next arg is theta (anisotropy angle)
+        if (!(mxIsDouble(prhs[4]))) {
+            mexErrMsgTxt("Input must be double precision.");
+        }
+        number_of_dims = mxGetNumberOfDimensions(prhs[4]);
+        if ( number_of_dims != 2 ) {
+            mexErrMsgTxt("Input must be a vector.");
+        }
+        dim_array2 = mxGetDimensions(prhs[4]);
+        if ( dim_array2[0] == dim_array[0] && dim_array2[1] == dim_array[1] ) {
+            // size equal to slowness, we have theta
+            double *t_p = static_cast<double*>( mxGetPr(prhs[4]) );
+            vector<double> theta(nSlowness);
+            for ( size_t n=0; n<theta.size(); ++n ) theta[n] = t_p[n];
+            if ( grid_instance->setTiltAngle(theta) == 1 ) {
+                mexErrMsgTxt("theta values must be defined for each grid cell.");
+            }
+            itx++;
+            irx++;
+            it0++;
+        }
+        mexPrintf("itx = %zd\n", itx);
         //
         // Tx
         //
-        if (!(mxIsDouble(prhs[3]))) {
+        if (!(mxIsDouble(prhs[itx]))) {
             mexErrMsgTxt("Tx must be double precision.");
         }
-        number_of_dims = mxGetNumberOfDimensions(prhs[3]);
+        number_of_dims = mxGetNumberOfDimensions(prhs[itx]);
         if ( number_of_dims != 2 ){
             mexErrMsgTxt("Tx must be a rank 2 matrix.");
         }
-        dim_array = mxGetDimensions(prhs[3]);
+        dim_array = mxGetDimensions(prhs[itx]);
         size_t nTx = static_cast<size_t>( dim_array[0] );
         if ( dim_array[1] != 2 ) {
             mexErrMsgTxt("Tx: matrix nTx by 2.");
         }
-        double *Tx = static_cast<double*>( mxGetPr(prhs[3]) );
+        double *Tx = static_cast<double*>( mxGetPr(prhs[itx]) );
 
         //
         // Rx
         //
-        if (!(mxIsDouble(prhs[4]))) {
+        if (!(mxIsDouble(prhs[irx]))) {
             mexErrMsgTxt("Rx must be double precision.");
         }
-        number_of_dims = mxGetNumberOfDimensions(prhs[4]);
+        number_of_dims = mxGetNumberOfDimensions(prhs[irx]);
         if ( number_of_dims != 2 ){
             mexErrMsgTxt("Rx must be a rank 2 matrix.");
         }
-        dim_array = mxGetDimensions(prhs[4]);
+        dim_array = mxGetDimensions(prhs[irx]);
         size_t nRx = static_cast<size_t>( dim_array[0] );
         if ( dim_array[1] != 2 ) {
             mexErrMsgTxt("Rx: matrix nRx by 2.");
         }
-        double *Rx = static_cast<double*>( mxGetPr(prhs[4]) );
+        double *Rx = static_cast<double*>( mxGetPr(prhs[irx]) );
 
         if ( nTx != nRx ) {
             mexErrMsgTxt("nTx should be equal to nRx.");
@@ -231,20 +307,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         // t0
         //
         double *tTx;
-        if ( nrhs == 6 ) {
-            if (!(mxIsDouble(prhs[5]))) {
+        if ( nrhs == it0+1 ) {
+            if (!(mxIsDouble(prhs[it0]))) {
                 mexErrMsgTxt("t0 must be double precision.");
             }
-            number_of_dims = mxGetNumberOfDimensions(prhs[5]);
+            number_of_dims = mxGetNumberOfDimensions(prhs[it0]);
             if ( number_of_dims != 2 ){
                 mexErrMsgTxt("t0 must be a rank 2 matrix.");
             }
-            dim_array = mxGetDimensions(prhs[5]);
+            dim_array = mxGetDimensions(prhs[it0]);
             size_t nT0 = static_cast<size_t>( dim_array[0] );
             if ( dim_array[1] != 1 || nT0 != nTx ) {
                 mexErrMsgTxt("t0: matrix nTx by 1.");
             }
-            tTx = static_cast<double*>( mxGetPr(prhs[5]) );
+            tTx = static_cast<double*>( mxGetPr(prhs[it0]) );
         } else {
             tTx = new double [nTx];
             for ( size_t n=0; n<nTx; ++n ) tTx[n] = 0.0;
@@ -296,7 +372,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             }
         }
 
-        if ( nrhs == 5 ) {
+        if ( nrhs == it0 ) {
             delete [] tTx;
         }
 
@@ -617,6 +693,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         return;
     }
 
+    if (!strcmp("get_type", cmd)) {
+        if (dynamic_cast<gridiso*>(grid_instance)) {
+            plhs[0] = mxCreateString("iso");
+        } else if (dynamic_cast<gridaniso*>(grid_instance)) {
+            plhs[0] = mxCreateString("elliptical");
+        } else if (dynamic_cast<gridtilted*>(grid_instance)) {
+            plhs[0] = mxCreateString("tilted");
+        } else {
+            plhs[0] = mxCreateString("undefined");
+        }
+        return;
+    }
+    
 
     // Got here, so command not recognized
     mexErrMsgTxt("Command not recognized.");

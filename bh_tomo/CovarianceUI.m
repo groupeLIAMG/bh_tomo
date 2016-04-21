@@ -1,282 +1,215 @@
 classdef CovarianceUI < handle
     %COVARIANCEUI User interface for covariance models
     
+    properties
+        range
+        angle   % angle in degrees
+        sill
+        fixRange
+        fixAngle
+        fixSill
+    end
     properties (Access=private)
-        cov
-        guiHandles
-        facSpace  % vertical space factor between UI components
+        handles
+    end
+    events
+        covarianceEdited
     end
     
     methods
-        function obj = CovarianceUI(c)
-            if isa(c, 'Covariance')
-                obj.cov = c;
-            else
-                error('Covariance model needed as input')
-            end
-            obj.facSpace = 3;
-        end
-        
-        function hp = getUIpanel(obj, varargin)
-            %  Return a handle to the panel
-            obj.createUI(varargin)
-            hp = obj.guiHandles.hp;
-        end
-        function size = getPreferredSize(obj,varargin)
-            %  Return preferred size of panel in points units
-            if nargin>=2
-                tmp = varargin{1};
-            else
-                tmp = uicontrol('Style','edit',...
+        function obj = CovarianceUI(r,a,s,varargin)
+            if nargin > 0
+                
+                if numel(r)==2 && numel(a)~=1
+                    error('angle must be a scalar for 2D media')
+                elseif numel(r)==3 && numel(a)~=3
+                    error('3 angle values needed for 3D media')
+                end
+                
+                obj.range = r;
+                obj.angle = a;
+                obj.sill = s;
+                obj.fixRange = false(size(r));
+                obj.fixAngle = false(size(a));
+                obj.fixSill = false(size(s));
+                
+                obj.handles.hp = uipanel(varargin{:},...
                     'Visible','off',...
-                    'Units','points');
-            end
-            d = numel(obj.cov.range);
-            if d==2
-                numLines = 4;
-            else % d == 3
-                numLines = 7;
-            end
-           
-            vSizeAll = (numLines-1)*tmp.Position(4)/obj.facSpace + ...
-                (numLines+2.5)*tmp.Position(4);
+                    'BorderType','line');
             
-            hSpace = tmp.Position(1)/2;
-            hSize = tmp.Position(3);
-            hSizeAll = 5*hSpace + 2*hSize;
-            size = [hSizeAll vSizeAll];
+                obj.addComponents();
+                obj.handles.hp.Visible = 'on';
+            end
+        end
+        function setVisible(obj, viz)
+            obj.handles.hp.Visible = viz;
         end
     end
     
     methods (Access=private)
         function editRangeX(obj,varargin)
-            obj.cov.range(1) = str2double(obj.guiHandles.editRangeX.String);
+            obj.range(1) = str2double(obj.handles.editRangeX.String);
+            obj.notify('covarianceAdded')
         end
         function editRangeY(obj,varargin)
-            obj.cov.range(2) = str2double(obj.guiHandles.editRangeY.String);
+            obj.range(2) = str2double(obj.handles.editRangeY.String);
+            obj.notify('covarianceAdded')
         end
         function editRangeZ(obj,varargin)
-            obj.cov.range(end) = str2double(obj.guiHandles.editRangeZ.String);
+            obj.range(end) = str2double(obj.handles.editRangeZ.String);
+            obj.notify('covarianceAdded')
         end
         function editAngleX(obj,varargin)
-            obj.cov.angle(1) = str2double(obj.guiHandles.editAngleX.String);
+            obj.angle(1) = str2double(obj.handles.editAngleX.String);
+            obj.notify('covarianceAdded')
         end
         function editAngleY(obj,varargin)
-            obj.cov.angle(2) = str2double(obj.guiHandles.editAngleY.String);
+            obj.angle(2) = str2double(obj.handles.editAngleY.String);
+            obj.notify('covarianceAdded')
         end
         function editAngleZ(obj,varargin)
-            obj.cov.angle(3) = str2double(obj.guiHandles.editAngleZ.String);
+            obj.angle(3) = str2double(obj.handles.editAngleZ.String);
+            obj.notify('covarianceAdded')
         end
         function editSill(obj,varargin)
-            obj.cov.sill = str2double(obj.guiHandles.editSill.String);
+            obj.sill = str2double(obj.handles.editSill.String);
+            obj.notify('covarianceAdded')
         end
-        function createUI(obj, args)
-            obj.guiHandles.hp = uipanel(args{:},...
-                'Visible','off',...
-                'SizeChangedFcn',@obj.resizeUI);
+        
+        function fixRangeX(obj,varargin)
+            obj.fixRange(1) = obj.handles.fixRangeX.Value;
+        end
+        function fixRangeY(obj,varargin)
+            obj.fixRange(2) = obj.handles.fixRangeY.Value;
+        end
+        function fixRangeZ(obj,varargin)
+            obj.fixRange(end) = obj.handles.fixRangeZ.Value;
+        end
+        function fixAngleX(obj,varargin)
+            obj.fixAngle(1) = obj.handles.fixAngleX.Value;
+        end
+        function fixAngleY(obj,varargin)
+            obj.fixAngle(2) = obj.handles.fixAngleY.Value;
+        end
+        function fixAngleZ(obj,varargin)
+            obj.fixAngle(3) = obj.handles.fixAngleZ.Value;
+        end
+        function fixSillVal(obj,varargin)
+            obj.fixSill = obj.handles.fixSill.Value;
+        end
+        
+        function addComponents(obj)
+            d = numel(obj.range);
             
-            obj.guiHandles.textRangeX = uicontrol('Style','text',...
-                'String','Range X',...
-                'Units','points',...
-                'HorizontalAlignment','right',...
-                'Parent',obj.guiHandles.hp);
-            obj.guiHandles.editRangeX = uicontrol('Style','edit',...
-                'String',num2str(obj.cov.range(1)),...
-                'Units','points',...
+            nLines=4;
+            if d==3
+                nLines=7;
+            end
+            vSizeTot = nLines*22 + (nLines+1)*5;
+            vSize = 22/vSizeTot;
+            vSpace = 5/vSizeTot;
+            hSize = 0.7;
+            hSize2 = 0.2;
+            hSpace = 0.033333;
+            
+            obj.handles.editRangeX = uicontrol('Style','edit',...
+                'String',num2str(obj.range(1)),...
+                'Units','normalized',...
                 'Callback',@obj.editRangeX,...
-                'Parent',obj.guiHandles.hp);
-            
-            obj.guiHandles.textRangeZ = uicontrol('Style','text',...
-                'String','Range Z',...
-                'Units','points',...
-                'HorizontalAlignment','right',...
-                'Parent',obj.guiHandles.hp);
-            obj.guiHandles.editRangeZ = uicontrol('Style','edit',...
-                'String',num2str(obj.cov.range(end)),...
-                'Units','points',...
+                'Parent',obj.handles.hp);
+            obj.handles.editRangeZ = uicontrol('Style','edit',...
+                'String',num2str(obj.range(end)),...
+                'Units','normalized',...
                 'Callback',@obj.editRangeZ,...
-                'Parent',obj.guiHandles.hp);
-            
-            obj.guiHandles.textAngleX = uicontrol('Style','text',...
-                'String','Angle',...
-                'Units','points',...
-                'HorizontalAlignment','right',...
-                'Parent',obj.guiHandles.hp);
-            obj.guiHandles.editAngleX = uicontrol('Style','edit',...
-                'String',num2str(obj.cov.angle(1)),...
-                'Units','points',...
+                'Parent',obj.handles.hp);
+            obj.handles.editAngleX = uicontrol('Style','edit',...
+                'String',num2str(obj.angle(1)),...
+                'Units','normalized',...
                 'Callback',@obj.editAngleX,...
-                'Parent',obj.guiHandles.hp);
-
-            obj.guiHandles.textSill = uicontrol('Style','text',...
-                'String','Sill',...
-                'Units','points',...
-                'HorizontalAlignment','right',...
-                'Parent',obj.guiHandles.hp);
-            obj.guiHandles.editSill = uicontrol('Style','edit',...
-                'String',num2str(obj.cov.sill),...
-                'Units','points',...
+                'Parent',obj.handles.hp);
+            obj.handles.editSill = uicontrol('Style','edit',...
+                'String',num2str(obj.sill),...
+                'Units','normalized',...
                 'Callback',@obj.editSill,...
-                'Parent',obj.guiHandles.hp);
+                'Parent',obj.handles.hp);
+            
+            obj.handles.fixRangeX = uicontrol('Style','checkbox',...
+                'Units','normalized',...
+                'Callback',@obj.fixRangeX,...
+                'Parent',obj.handles.hp);
+            obj.handles.fixRangeZ = uicontrol('Style','checkbox',...
+                'Units','normalized',...
+                'Callback',@obj.fixRangeZ,...
+                'Parent',obj.handles.hp);
+            obj.handles.fixAngleX = uicontrol('Style','checkbox',...
+                'Units','normalized',...
+                'Callback',@obj.fixAngleX,...
+                'Parent',obj.handles.hp);
+            obj.handles.fixSill = uicontrol('Style','checkbox',...
+                'Units','normalized',...
+                'Callback',@obj.fixSillVal,...
+                'Parent',obj.handles.hp);
 
-            d = numel(obj.cov.range);
+            
             if d == 3
-                obj.guiHandles.textRangeY = uicontrol('Style','text',...
-                    'String','Range Y',...
-                    'Units','points',...
-                    'HorizontalAlignment','right',...
-                    'Parent',obj.guiHandles.hp);
-                obj.guiHandles.editRangeY = uicontrol('Style','edit',...
-                    'String',num2str(obj.cov.range(2)),...
-                    'Units','points',...
+                obj.handles.editRangeY = uicontrol('Style','edit',...
+                    'String',num2str(obj.range(2)),...
+                    'Units','normalized',...
+                    'Position',[hSpace 6*vSpace+5*vSize hSize vSize],...
                     'Callback',@obj.editRangeY,...
-                    'Parent',obj.guiHandles.hp);
-                
-                obj.guiHandles.textAngleX.String = 'Angle X';
-                
-                obj.guiHandles.textAngleY = uicontrol('Style','text',...
-                    'String','Angle Y',...
-                    'Units','points',...
-                    'HorizontalAlignment','right',...
-                    'Parent',obj.guiHandles.hp);
-                obj.guiHandles.editAngleY = uicontrol('Style','edit',...
-                    'String',num2str(obj.cov.angle(2)),...
-                    'Units','points',...
+                    'Parent',obj.handles.hp);
+                obj.handles.editAngleY = uicontrol('Style','edit',...
+                    'String',num2str(obj.angle(2)),...
+                    'Units','normalized',...
+                    'Position',[hSpace 3*vSpace+2*vSize hSize vSize],...
                     'Callback',@obj.editAngleY,...
-                    'Parent',obj.guiHandles.hp);
-
-                obj.guiHandles.textAngleZ = uicontrol('Style','text',...
-                    'String','Angle Z',...
-                    'Units','points',...
-                    'HorizontalAlignment','right',...
-                    'Parent',obj.guiHandles.hp);
-                obj.guiHandles.editAngleZ = uicontrol('Style','edit',...
-                    'String',num2str(obj.cov.angle(3)),...
-                    'Units','points',...
+                    'Parent',obj.handles.hp);
+                obj.handles.editAngleZ = uicontrol('Style','edit',...
+                    'String',num2str(obj.angle(3)),...
+                    'Units','normalized',...
+                    'Position',[hSpace 2*vSpace+  vSize hSize vSize],...
                     'Callback',@obj.editAngleZ,...
-                    'Parent',obj.guiHandles.hp);
+                    'Parent',obj.handles.hp);
                 
-                obj.guiHandles.hp.Visible = 'on';
+                obj.handles.fixRangeY = uicontrol('Style','checkbox',...
+                    'Units','normalized',...
+                    'Position',[2*hSpace+hSize 6*vSpace+5*vSize hSize2 vSize],...
+                    'Callback',@obj.fixRangeY,...
+                    'Parent',obj.handles.hp);
+                obj.handles.fixAngleY = uicontrol('Style','checkbox',...
+                    'Units','normalized',...
+                    'Position',[2*hSpace+hSize 3*vSpace+2*vSize hSize2 vSize],...
+                    'Callback',@obj.fixAngleY,...
+                    'Parent',obj.handles.hp);
+                obj.handles.fixAngleZ = uicontrol('Style','checkbox',...
+                    'Units','normalized',...
+                    'Position',[2*hSpace+hSize 2*vSpace+  vSize hSize2 vSize],...
+                    'Callback',@obj.fixAngleZ,...
+                    'Parent',obj.handles.hp);
+
+                obj.handles.editRangeX.Position = [hSpace 7*vSpace+6*vSize hSize vSize];
+                obj.handles.editRangeZ.Position = [hSpace 5*vSpace+4*vSize hSize vSize];
+                obj.handles.editAngleX.Position = [hSpace 4*vSpace+3*vSize hSize vSize];
+                obj.handles.editSill.Position =   [hSpace   vSpace         hSize vSize];
+
+                obj.handles.fixRangeX.Position = [2*hSpace+hSize 7*vSpace+6*vSize hSize2 vSize];
+                obj.handles.fixRangeZ.Position = [2*hSpace+hSize 5*vSpace+4*vSize hSize2 vSize];
+                obj.handles.fixAngleX.Position = [2*hSpace+hSize 4*vSpace+3*vSize hSize2 vSize];
+                obj.handles.fixSill.Position =   [2*hSpace+hSize   vSpace         hSize2 vSize];
+            else
+                obj.handles.editRangeX.Position = [hSpace 4*vSpace+3*vSize hSize vSize];
+                obj.handles.editRangeZ.Position = [hSpace 3*vSpace+2*vSize hSize vSize];
+                obj.handles.editAngleX.Position = [hSpace 2*vSpace+  vSize hSize vSize];
+                obj.handles.editSill.Position =   [hSpace   vSpace         hSize vSize];
+
+                obj.handles.fixRangeX.Position = [2*hSpace+hSize 4*vSpace+3*vSize hSize2 vSize];
+                obj.handles.fixRangeZ.Position = [2*hSpace+hSize 3*vSpace+2*vSize hSize2 vSize];
+                obj.handles.fixAngleX.Position = [2*hSpace+hSize 2*vSpace+  vSize hSize2 vSize];
+                obj.handles.fixSill.Position =   [2*hSpace+hSize   vSpace         hSize2 vSize];
             end
         end
-        function resizeUI(obj,varargin)
-            
-            if ~isempty(obj.guiHandles)
-
-                obj.guiHandles.hp.Visible = 'off';
-                obj.guiHandles.hp.Units = 'points';
-            
-                % Get figure width and height
-                pwidth = obj.guiHandles.hp.Position(3);
-                pheight = obj.guiHandles.hp.Position(4);
-                
-                d = numel(obj.cov.range);
-                if d==2
-                    numLines = 4;
-                else % d == 3
-                    numLines = 7;
-                end
-                
-                hSpace = obj.guiHandles.textRangeX.Position(1)/2;
-                hSize = obj.guiHandles.textRangeX.Position(3);
-                
-                size = obj.getPreferredSize(obj.guiHandles.textRangeX);
-
-                vSpace = obj.guiHandles.editRangeX.Position(4)/obj.facSpace;
-                vSize = obj.guiHandles.editRangeX.Position(4);
-                if size(2)>pheight
-                    vSize = obj.facSpace*pheight / (numLines-1+obj.facSpace*(numLines+1.5));
-                    obj.guiHandles.textRangeX.Position(4) = vSize;
-                    obj.guiHandles.textRangeZ.Position(4) = vSize;
-                    obj.guiHandles.textAngleX.Position(4) = vSize;
-                    obj.guiHandles.textSill.Position(4) = vSize;
-                    obj.guiHandles.editRangeX.Position(4) = vSize;
-                    obj.guiHandles.editRangeZ.Position(4) = vSize;
-                    obj.guiHandles.editAngleX.Position(4) = vSize;
-                    obj.guiHandles.editSill.Position(4) = vSize;
-                    if d==3
-                        obj.guiHandles.textRangeY.Position(4) = vSize;
-                        obj.guiHandles.textAngleY.Position(4) = vSize;
-                        obj.guiHandles.textAngleZ.Position(4) = vSize;
-                        obj.guiHandles.editRangeY.Position(4) = vSize;
-                        obj.guiHandles.editAngleY.Position(4) = vSize;
-                        obj.guiHandles.editAngleZ.Position(4) = vSize;
-                    end
-                    vSpace = vSize/obj.facSpace;
-                end
-                n=2.5;
-                obj.guiHandles.textRangeX.Position(2) = pheight-n*vSize;
-                obj.guiHandles.editRangeX.Position(2) = pheight-n*vSize;
-                if d==3
-                    n = n+1;
-                    obj.guiHandles.textRangeY.Position(2) = pheight-n*vSize-(n-2.5)*vSpace;
-                    obj.guiHandles.editRangeY.Position(2) = pheight-n*vSize-(n-2.5)*vSpace;
-                end
-                n = n+1;
-                obj.guiHandles.textRangeZ.Position(2) = pheight-n*vSize-(n-2.5)*vSpace;
-                obj.guiHandles.editRangeZ.Position(2) = pheight-n*vSize-(n-2.5)*vSpace;
-                n = n+1;
-                obj.guiHandles.textAngleX.Position(2) = pheight-n*vSize-(n-2.5)*vSpace;
-                obj.guiHandles.editAngleX.Position(2) = pheight-n*vSize-(n-2.5)*vSpace;
-                if d==3
-                    n = n+1;
-                    obj.guiHandles.textAngleY.Position(2) = pheight-n*vSize-(n-2.5)*vSpace;
-                    obj.guiHandles.editAngleY.Position(2) = pheight-n*vSize-(n-2.5)*vSpace;
-                    n = n+1;
-                    obj.guiHandles.textAngleZ.Position(2) = pheight-n*vSize-(n-2.5)*vSpace;
-                    obj.guiHandles.editAngleZ.Position(2) = pheight-n*vSize-(n-2.5)*vSpace;
-                end                    
-                n = n+1;
-                obj.guiHandles.textSill.Position(2) = pheight-n*vSize-(n-2.5)*vSpace;
-                obj.guiHandles.editSill.Position(2) = pheight-n*vSize-(n-2.5)*vSpace;
-
-                if size(1)>pwidth
-                    ratio = pwidth/size(1);
-                    hSpace = hSpace*ratio;
-                    hSize = hSize*ratio;
-
-                    obj.guiHandles.textRangeX.Position(3) = hSize;
-                    obj.guiHandles.textRangeZ.Position(3) = hSize;
-                    obj.guiHandles.textAngleX.Position(3) = hSize;
-                    obj.guiHandles.textSill.Position(3) = hSize;
-                    obj.guiHandles.editRangeX.Position(3) = hSize;
-                    obj.guiHandles.editRangeZ.Position(3) = hSize;
-                    obj.guiHandles.editAngleX.Position(3) = hSize;
-                    obj.guiHandles.editSill.Position(3) = hSize;
-
-                    obj.guiHandles.textRangeX.Position(1) = 2*hSpace;
-                    obj.guiHandles.textRangeZ.Position(1) = 2*hSpace;
-                    obj.guiHandles.textAngleX.Position(1) = 2*hSpace;
-                    obj.guiHandles.textSill.Position(1) = 2*hSpace;
-                    if d==3
-                        obj.guiHandles.textRangeY.Position(3) = hSize;
-                        obj.guiHandles.textAngleY.Position(3) = hSize;
-                        obj.guiHandles.textAngleZ.Position(3) = hSize;
-                        obj.guiHandles.editRangeY.Position(3) = hSize;
-                        obj.guiHandles.editAngleY.Position(3) = hSize;
-                        obj.guiHandles.editAngleZ.Position(3) = hSize;
-
-                        obj.guiHandles.textRangeY.Position(1) = 2*hSpace;
-                        obj.guiHandles.textAngleY.Position(1) = 2*hSpace;
-                        obj.guiHandles.textAngleZ.Position(1) = 2*hSpace;
-                        obj.guiHandles.editRangeY.Position(1) = 2*hSpace;
-                        obj.guiHandles.editAngleY.Position(1) = 2*hSpace;
-                        obj.guiHandles.editAngleZ.Position(1) = 2*hSpace;
-                    end
-                end
-                obj.guiHandles.editRangeX.Position(1) = 3*hSpace+hSize;
-                obj.guiHandles.editRangeZ.Position(1) = 3*hSpace+hSize;
-                obj.guiHandles.editAngleX.Position(1) = 3*hSpace+hSize;
-                obj.guiHandles.editSill.Position(1) = 3*hSpace+hSize;
-                if d==3
-                    obj.guiHandles.editRangeY.Position(1) = 3*hSpace+hSize;
-                    obj.guiHandles.editAngleY.Position(1) = 3*hSpace+hSize;
-                    obj.guiHandles.editAngleZ.Position(1) = 3*hSpace+hSize;
-                end
-                obj.guiHandles.hp.Visible = 'on';
-
-            end
-        end
+        
+        
     end
 end
 

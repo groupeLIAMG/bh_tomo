@@ -45,20 +45,20 @@ if no>0 && no<=length(obj.mogs)
             end
         end
         
-        air(n) = AirShots(char(name));
-        air(n).data = data;
-        air(n).tt = -1*ones(1,data.ntrace);        % temps d'arrivee
-        air(n).et = -1*ones(1,data.ntrace);        % ecart-type du temps d'arrivee
-        air(n).tt_done = false(1,data.ntrace);     % temps d'arrivee determine (booleen)
-        air(n).d_TxRx = d;
-        air(n).fac_dt = 1;
-        air(n).in = true(1,data.ntrace);
+        obj.air(n) = AirShots(char(name));
+        obj.air(n).data = data;
+        obj.air(n).tt = -1*ones(1,data.ntrace);        % temps d'arrivee
+        obj.air(n).et = -1*ones(1,data.ntrace);        % ecart-type du temps d'arrivee
+        obj.air(n).tt_done = false(1,data.ntrace);     % temps d'arrivee determine (booleen)
+        obj.air(n).d_TxRx = d;
+        obj.air(n).fac_dt = 1;
+        obj.air(n).in = true(1,data.ntrace);
         if length(d)==1
-            air(n).method = 'fixed_antenna';           % 'fixed_antenna' ou 'walkaway'
+            obj.air(n).method = 'fixed_antenna';           % 'fixed_antenna' ou 'walkaway'
         else
-            air(n).method = 'walkaway';
+            obj.air(n).method = 'walkaway';
         end
-        
+        obj.handles.textAirBefore.String = obj.air(n).name;
         obj.mogs(no).av = n;
     end
     

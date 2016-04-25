@@ -68,7 +68,7 @@ hlist = uicontrol('Style','popupmenu',...
     'Parent',f);
 if ~isempty(file)
     load([rep,file],'models')
-    names = cell(length(models));
+    names = cell(length(models),1);
     for n=1:length(models)
         names{n} = models(n).name;
     end
@@ -102,8 +102,13 @@ uiwait(f)
         if isequal(file2,0)
             return
         end
-        load([rep2,file2],'models')
-        names = cell(length(models));
+        try
+            load([rep2,file2],'models')
+        catch ME
+            errordlg(ME.message)
+            return
+        end
+        names = cell(length(models),1);
         for nn=1:length(models)
             names{nn} = models(nn).name;
         end
@@ -122,7 +127,7 @@ uiwait(f)
             file=file2;
             rep=rep2;
         end
-        modelNo = str2double(hlist.Value);
+        modelNo = hlist.Value;
         closeWindow()
     end
 end

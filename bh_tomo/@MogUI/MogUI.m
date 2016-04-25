@@ -421,9 +421,13 @@ classdef MogUI < handle
                 obj.handles.popupTx.Value = obj.mogs(no).Tx;
                 if ~isempty(obj.mogs(no).av)
                     obj.handles.textAirBefore.String = obj.air(obj.mogs(no).av).name;
+                else
+                    obj.handles.textAirBefore.String = '';
                 end
                 if ~isempty(obj.mogs(no).ap)
                     obj.handles.textAirAfter.String = obj.air(obj.mogs(no).ap).name;
+                else
+                    obj.handles.textAirAfter.String = '';
                 end
             end
         end

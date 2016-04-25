@@ -183,10 +183,10 @@ f.Visible = 'on';
             return
         end
         hborehole.boreholes = tmp.boreholes;
+        hmog.air = tmp.air;
         hmog.mogs = tmp.mogs;
         hmodel.models = tmp.models;
         
-        hmog.air = tmp.air;
         auto_pick = tmp.auto_pick; %#ok<SETNU>
         
         htextinfo.String{3} = ['Database: ',file];

@@ -13,7 +13,6 @@ if no>0 && no<=length(obj.mogs)
     obj.handles.editDtCorr.String = num2str( mog.fac_dt );
     et = mog.et(ind);
     tt = tt(ind);
-    t0 = t0(ind);
     
     hyp = sqrt( (mog.data.Tx_x(ind)-mog.data.Rx_x(ind)).^2 + ...
         (mog.data.Tx_y(ind)-mog.data.Rx_y(ind)).^2 + ...

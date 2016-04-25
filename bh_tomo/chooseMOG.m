@@ -99,9 +99,14 @@ uiwait(f);
         if isequal(file,0)
             return
         end
+        try
+            load([rep,file],'names_mog')
+        catch ME
+            errordlg(ME.message)
+            return
+        end
         dbFile = [rep,file];
         filename = getDBname(dbFile);
-        load(dbFile,'names_mog')
         hlist.String = names_mog;
         hdbname.String = file;
     end

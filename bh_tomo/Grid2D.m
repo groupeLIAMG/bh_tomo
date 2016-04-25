@@ -94,6 +94,33 @@ classdef Grid2D < Grid
             [varargout{1:nargout}] = grid2d_mex('raytrace', obj.mexObj, varargin{:});
         end
         
+        function L = getForwardStraightRays(obj,varargin)
+            aniso=false;
+            ind = true(size(obj.Tx,1),1);
+            if nargin>=2
+                ind = varargin{1};
+            end
+            if nargin>=3
+                aniso=varargin{2};
+            end
+            if aniso
+                L = Lsr2da(obj.Tx(ind,[1 3]),obj.Rx(ind,[1 3]),obj.grx,obj.grz);
+            else
+                L = Lsr2d(obj.Tx(ind,[1 3]),obj.Rx(ind,[1 3]),obj.grx,obj.grz);
+            end
+        end
+        function c = getCellCenter(obj)
+            dx = obj.grx(2)-obj.grx(1);
+            dz = obj.grz(2)-obj.grz(1);
+            xmin = obj.grx(1)+dx/2;
+            zmin = obj.grz(1)+dz/2;
+            nx = length(obj.grx)-1;
+            nz = length(obj.grz)-1;
+            c=[kron(ones(nz,1),(1:nx)'*dx), kron((1:nz)',ones(nx,1)*dz)];
+            c(:,1)=xmin+c(:,1)-dx;
+            c(:,2)=zmin+c(:,2)-dz;
+        end
+        
         % for saving in mat-files
         function s = saveobj(obj)
             s.nthreads = obj.nthreads;

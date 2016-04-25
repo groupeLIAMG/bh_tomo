@@ -53,6 +53,19 @@ classdef Grid < matlab.mixin.Copyable
                 nc = nc*(length(obj.gry)-1);
             end
         end
+        function d = dx(obj)
+            d=obj.grx(2)-obj.grx(1);
+        end
+        function d = dy(obj)
+            if isempty(obj.gry)
+                d = 0;
+            else
+                d=obj.gry(2)-obj.gry(1);
+            end
+        end
+        function d = dz(obj)
+            d=obj.grz(2)-obj.grz(1);
+        end
     end
     methods (Static)
         function [x0, a, d, normd] = lsplane(X)
@@ -234,9 +247,6 @@ classdef Grid < matlab.mixin.Copyable
         end
         
     end
-    %     methods (Abstract)
-    %         varargout = raytrace(obj, varargin)
-    %     end
     
 end
 

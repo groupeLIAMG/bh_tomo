@@ -148,6 +148,30 @@ classdef Grid3D < Grid
             [varargout{1:nargout}] = grid3d_mex('raytrace', obj.mexObj, varargin{:});
         end
         
+        function L = getForwardStraightRays(obj,varargin)
+            ind = true(size(obj.Tx,1),1);
+            if nargin>=2
+                ind = varargin{1};
+            end
+            L = Lsr3d(obj.Tx(ind,:),obj.Rx(ind,:),obj.grx,obj.gry,obj.grz);
+        end
+        function c = getCellCenter(obj)
+            dx = obj.grx(2)-obj.grx(1);
+            dy = obj.gry(2)-obj.gry(1);
+            dz = obj.grz(2)-obj.grz(1);
+            xmin = obj.grx(1)+dx/2;
+            ymin = obj.gry(1)+dy/2;
+            zmin = obj.grz(1)+dz/2;
+            nx = length(obj.grx)-1;
+            ny = length(obj.gry)-1;
+            nz = length(obj.grz)-1;
+            c=[kron(ones(ny*nz,1),(1:nx)'*dx) ...
+                kron(kron(ones(nz,1),(1:ny)'*dy),ones(nx,1)) ...
+                kron((1:nz)'*dz,ones(nx*ny,1))];
+            c(:,1)=xmin+c(:,1)-dx;
+            c(:,2)=ymin+c(:,2)-dy;
+            c(:,3)=zmin+c(:,3)-dz;
+        end
         % for saving in mat-files
         function s = saveobj(obj)
             s.nthreads = obj.nthreads;
@@ -159,7 +183,6 @@ classdef Grid3D < Grid
             s.Rx = obj.Rx;
             s.TxCosDir = obj.TxCosDir;
             s.RxCosDir = obj.RxCosDir;
-            s.x0 = obj.x0;
             s.bord = obj.bord;
             s.Tx_Z_water = obj.Tx_Z_water;
             s.Rx_Z_water = obj.Rx_Z_water;
@@ -178,7 +201,6 @@ classdef Grid3D < Grid
                 obj.Rx = s.Rx;
                 obj.TxCosDir = s.TxCosDir;
                 obj.RxCosDir = s.RxCosDir;
-                obj.x0 = s.x0;
                 obj.bord = s.bord;
                 obj.Tx_Z_water = s.Tx_Z_water;
                 obj.Rx_Z_water = s.Rx_Z_water;

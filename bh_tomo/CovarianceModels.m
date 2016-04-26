@@ -1,4 +1,4 @@
-classdef CovarianceModels
+classdef CovarianceModels < int8
     %COVARIANCEMODELS Admissible covariance models
     
     % Models taken from Covardm, which are:
@@ -15,8 +15,51 @@ classdef CovarianceModels
     %'cos(h*2*pi)                              '; effet de trou cosinusoidal
     
     enumeration
-        nugget, exponential, gaussian, spherical, linear, cubic, ...
-        thin_plate, gravimetric, magnetic, hole_effect_sine, ...
-        hole_effect_cosine
+        Cubic (1)
+        Spherical (2)
+        Gaussian (3)
+        Exponential (4)
+        Linear (5)
+        Thin_Plate (6)
+        Gravimetric (7)
+        Magnetic (8)
+        Hole_Effect_Sine (9)
+        Hole_Effect_Cosine (10)
+        Nugget (11)
+    end
+    methods (Static=true)
+        function c = buildCov(type,r,a,s)
+            switch(type)
+                case CovarianceModels.Cubic
+                    c = CovarianceCubic(r,a,s);
+                case CovarianceModels.Spherical
+                    c = CovarianceSpherical(r,a,s);
+                case CovarianceModels.Gaussian
+                    c = CovarianceGaussian(r,a,s);
+                case CovarianceModels.Exponential
+                    c = CovarianceExponential(r,a,s);
+                case CovarianceModels.Linear
+                    c = CovarianceLinear(r,a,s);
+                case CovarianceModels.Thin_Plate
+                    c = CovarianceThinPlate(r,a,s);
+                case CovarianceModels.Gravimetric
+                    c = CovarianceGravimetric(r,a,s);
+                case CovarianceModels.Magnetic
+                    c = CovarianceMagnetic(r,a,s);
+                case CovarianceModels.Hole_Effect_Sine
+                    c = CovarianceHoleEffectSine(r,a,s);
+                case CovarianceModels.Hole_Effect_Cosine
+                    c = CovarianceHoleEffectCosine(r,a,s);
+                case CovarianceModels.Nugget
+                    c = CovarianceNugget(s);
+            end
+                    
+        end
+        function c = getDefault2D()
+            c = CovarianceSpherical([4 4],0,1);
+        end
+        function c = getDefault3D()
+            c = CovarianceSpherical([4 4 4],[0 0 0],1);
+        end
     end
 end

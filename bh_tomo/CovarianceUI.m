@@ -13,67 +13,105 @@ classdef CovarianceUI < handle
         handles
     end
     events
-        covarianceEdited
+        covarianceEdited, typeChanged
     end
     
     methods
         function obj = CovarianceUI(r,a,s,varargin)
-            if nargin > 0
-                
-                if numel(r)==2 && numel(a)~=1
-                    error('angle must be a scalar for 2D media')
-                elseif numel(r)==3 && numel(a)~=3
-                    error('3 angle values needed for 3D media')
-                end
-                
-                obj.range = r;
-                obj.angle = a;
-                obj.sill = s;
-                obj.fixRange = false(size(r));
-                obj.fixAngle = false(size(a));
-                obj.fixSill = false(size(s));
-                
-                obj.handles.hp = uipanel(varargin{:},...
-                    'Visible','off',...
-                    'BorderType','line');
+            if numel(r)==2 && numel(a)~=1
+                error('angle must be a scalar for 2D media')
+            elseif numel(r)==3 && numel(a)~=3
+                error('3 angle values needed for 3D media')
+            end
             
-                obj.addComponents();
-                obj.handles.hp.Visible = 'on';
+            obj.range = r;
+            obj.angle = a;
+            obj.sill = s;
+            obj.fixRange = false(size(r));
+            obj.fixAngle = false(size(a));
+            obj.fixSill = false(size(s));
+            
+            obj.handles.hp = uipanel(varargin{:},...
+                'Visible','off',...
+                'BorderType','line');
+            
+            obj.addComponents();
+            obj.handles.hp.Visible = 'on';
+            obj.handles.hlist = [];
+        end
+        function delete(obj)
+            delete(obj.handles.hp)
+            delete(obj.handles.hlist)
+        end
+        function createList(obj,varargin)
+            [~,ll]=enumeration('CovarianceModels');
+            l=cell(numel(ll)-1,1); % we don't want nugget (last in enum list)
+            for n=1:numel(ll)-1;
+                l{n}=ll{n};
+            end
+            obj.handles.hlist = uicontrol('Style','popupmenu',...
+                'String',l,...
+                'callback',@obj.changeType,...
+                varargin{:});
+        end
+        function t = getType(obj)
+            if ~isempty(obj.handles.hlist)
+                types = enumeration('CovarianceModels');
+                t = types(obj.handles.hlist.Value);
+            else
+                t = CovarianceModels.empty;
             end
         end
-        function setVisible(obj, viz)
-            obj.handles.hp.Visible = viz;
+        function setType(obj,t)
+            obj.handles.hlist.Value = int8(t);
+        end
+        function setVisible(obj,v)
+            obj.handles.hp.Visible = v;
+            obj.handles.hlist.Visible = v;
+        end
+        function refresh(obj)
+            obj.handles.editRangeX.String = num2str(obj.range(1));
+            if length(obj.range)==3
+                obj.handles.editRangeY.String = num2str(obj.range(2));
+            end
+            obj.handles.editRangeZ.String = num2str(obj.range(end));
+            obj.handles.editAngleX.String = num2str(obj.angle(1));
+            if length(obj.angle)==3
+                obj.handles.editAngleY.String = num2str(obj.angle(2));
+                obj.handles.editAngleZ.String = num2str(obj.angle(3));
+            end
+            obj.handles.editSill.String = num2str(obj.sill);
         end
     end
     
     methods (Access=private)
         function editRangeX(obj,varargin)
             obj.range(1) = str2double(obj.handles.editRangeX.String);
-            obj.notify('covarianceAdded')
+            obj.notify('covarianceEdited')
         end
         function editRangeY(obj,varargin)
             obj.range(2) = str2double(obj.handles.editRangeY.String);
-            obj.notify('covarianceAdded')
+            obj.notify('covarianceEdited')
         end
         function editRangeZ(obj,varargin)
             obj.range(end) = str2double(obj.handles.editRangeZ.String);
-            obj.notify('covarianceAdded')
+            obj.notify('covarianceEdited')
         end
         function editAngleX(obj,varargin)
             obj.angle(1) = str2double(obj.handles.editAngleX.String);
-            obj.notify('covarianceAdded')
+            obj.notify('covarianceEdited')
         end
         function editAngleY(obj,varargin)
             obj.angle(2) = str2double(obj.handles.editAngleY.String);
-            obj.notify('covarianceAdded')
+            obj.notify('covarianceEdited')
         end
         function editAngleZ(obj,varargin)
             obj.angle(3) = str2double(obj.handles.editAngleZ.String);
-            obj.notify('covarianceAdded')
+            obj.notify('covarianceEdited')
         end
         function editSill(obj,varargin)
             obj.sill = str2double(obj.handles.editSill.String);
-            obj.notify('covarianceAdded')
+            obj.notify('covarianceEdited')
         end
         
         function fixRangeX(obj,varargin)
@@ -109,8 +147,8 @@ classdef CovarianceUI < handle
             vSize = 22/vSizeTot;
             vSpace = 5/vSizeTot;
             hSize = 0.7;
-            hSize2 = 0.2;
-            hSpace = 0.033333;
+            hSize2 = 0.21;
+            hSpace = 0.03;
             
             obj.handles.editRangeX = uicontrol('Style','edit',...
                 'String',num2str(obj.range(1)),...
@@ -208,8 +246,9 @@ classdef CovarianceUI < handle
                 obj.handles.fixSill.Position =   [2*hSpace+hSize   vSpace         hSize2 vSize];
             end
         end
-        
-        
+        function changeType(obj,varargin)
+            obj.notify('typeChanged')
+        end
     end
 end
 

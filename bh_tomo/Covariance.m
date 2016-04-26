@@ -5,6 +5,7 @@ classdef Covariance < matlab.mixin.Heterogeneous & handle
         range
         angle   % angle in degrees
         sill
+        type
     end
     methods
         function obj = Covariance(r,a,s)
@@ -20,6 +21,7 @@ classdef Covariance < matlab.mixin.Heterogeneous & handle
                 obj.angle = a;
                 obj.sill = s;
             end
+            obj.type = CovarianceModels.empty;
         end
         function set.range(obj, r)
             if isnumeric(r)

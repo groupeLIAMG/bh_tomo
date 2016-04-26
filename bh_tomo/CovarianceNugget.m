@@ -1,15 +1,11 @@
-classdef CovarianceNugget < Covariance
+classdef CovarianceNugget < Covariance & matlab.mixin.Copyable
     %UNTITLED2 Summary of this class goes here
     %   Detailed explanation goes here
-    
-    properties (SetAccess=private)
-        type
-    end
     
     methods
         function obj = CovarianceNugget(s)
             obj@Covariance([1 1],0,s);
-            obj.type = CovarianceModels.nugget;
+            obj.type = CovarianceModels.Nugget;
         end
         function k = compute(obj, x, x0)
             d=size(x,2);

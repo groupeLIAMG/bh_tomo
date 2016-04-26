@@ -1,15 +1,11 @@
-classdef CovarianceCubic < Covariance
+classdef CovarianceCubic < Covariance & matlab.mixin.Copyable
     %UNTITLED2 Summary of this class goes here
     %   Detailed explanation goes here
-    
-    properties (SetAccess=private)
-        type
-    end
     
     methods
         function obj = CovarianceCubic(r,a,s)
             obj@Covariance(r,a,s);
-            obj.type = CovarianceModels.cubic;
+            obj.type = CovarianceModels.Cubic;
         end
         function k = compute(obj, x, x0)
             h = obj.compute_h(x, x0);

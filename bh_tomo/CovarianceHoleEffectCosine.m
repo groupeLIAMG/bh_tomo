@@ -1,14 +1,10 @@
-classdef CovarianceHoleEffectCosine < Covariance
+classdef CovarianceHoleEffectCosine < Covariance & matlab.mixin.Copyable
     %UNTITLED2 Summary of this class goes here
-        
-    properties (SetAccess=private)
-        type
-    end
     
     methods
         function obj = CovarianceHoleEffectCosine(r,a,s)
             obj@Covariance(r,a,s);
-            obj.type = CovarianceModels.hole_effect_cosine;
+            obj.type = CovarianceModels.Hole_Effect_Cosine;
         end
         function k = compute(obj, x, x0)
             h = obj.compute_h(x, x0);

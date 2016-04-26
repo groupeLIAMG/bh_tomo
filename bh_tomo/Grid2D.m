@@ -97,25 +97,49 @@ classdef Grid2D < Grid
         function L = getForwardStraightRays(obj,varargin)
             aniso=false;
             ind = true(size(obj.Tx,1),1);
-            if nargin>=2
-                ind = varargin{1};
-            end
-            if nargin>=3
-                aniso=varargin{2};
-            end
-            if aniso
-                L = Lsr2da(obj.Tx(ind,[1 3]),obj.Rx(ind,[1 3]),obj.grx,obj.grz);
-            else
-                L = Lsr2d(obj.Tx(ind,[1 3]),obj.Rx(ind,[1 3]),obj.grx,obj.grz);
-            end
-        end
-        function c = getCellCenter(obj)
             dx = obj.grx(2)-obj.grx(1);
             dz = obj.grz(2)-obj.grz(1);
+            if nargin>=2
+                if ~isempty(varargin{1})
+                    ind = varargin{1};
+                end
+            end
+            if nargin>=3
+                if ~isempty(varargin{2}) && isfinite(varargin{2})
+                    dx = varargin{2};
+                end
+            end
+            % dy is ignored
+            if nargin>=5
+                if ~isempty(varargin{4}) && isfinite(varargin{4})
+                    dz = varargin{4};
+                end
+            end
+            if nargin>=6
+                aniso=varargin{5};
+            end
+            grx = obj.grx(1):dx:obj.grx(end);
+            grz = obj.grz(1):dz:obj.grz(end);
+            if aniso
+                L = Lsr2da(obj.Tx(ind,[1 3]),obj.Rx(ind,[1 3]),grx,grz);
+            else
+                L = Lsr2d(obj.Tx(ind,[1 3]),obj.Rx(ind,[1 3]),grx,grz);
+            end
+        end
+        function c = getCellCenter(obj,varargin)
+            dx = obj.grx(2)-obj.grx(1);
+            dz = obj.grz(2)-obj.grz(1);
+            if nargin==4
+                dx = varargin{1};
+                % dy is ignored
+                dz = varargin{3};
+            end
             xmin = obj.grx(1)+dx/2;
             zmin = obj.grz(1)+dz/2;
-            nx = length(obj.grx)-1;
-            nz = length(obj.grz)-1;
+            xmax = obj.grx(end)-dx/3;  % divide by 3 to avoid truncation error
+            zmax = obj.grz(end)-dz/3;
+            nx = ceil((xmax-xmin)/dx);
+            nz = ceil((zmax-zmin)/dz);
             c=[kron(ones(nz,1),(1:nx)'*dx), kron((1:nz)',ones(nx,1)*dz)];
             c(:,1)=xmin+c(:,1)-dx;
             c(:,2)=zmin+c(:,2)-dz;

@@ -150,21 +150,50 @@ classdef Grid3D < Grid
         
         function L = getForwardStraightRays(obj,varargin)
             ind = true(size(obj.Tx,1),1);
-            if nargin>=2
-                ind = varargin{1};
-            end
-            L = Lsr3d(obj.Tx(ind,:),obj.Rx(ind,:),obj.grx,obj.gry,obj.grz);
-        end
-        function c = getCellCenter(obj)
             dx = obj.grx(2)-obj.grx(1);
             dy = obj.gry(2)-obj.gry(1);
             dz = obj.grz(2)-obj.grz(1);
+            if nargin>=2
+                ind = varargin{1};
+            end
+            if nargin>=3
+                if ~isempty(varargin{2}) && isfinite(varargin{2})
+                    dx = varargin{2};
+                end
+            end
+            if nargin>=4
+                if ~isempty(varargin{3}) && isfinite(varargin{3})
+                    dy = varargin{3};
+                end
+            end
+            if nargin>=5
+                if ~isempty(varargin{4}) && isfinite(varargin{4})
+                    dz = varargin{4};
+                end
+            end
+            grx = obj.grx(1):dx:obj.grx(end);
+            gry = obj.gry(1):dy:obj.gry(end);
+            grz = obj.grz(1):dz:obj.grz(end);
+            L = Lsr3d(obj.Tx(ind,:),obj.Rx(ind,:),grx,gry,grz);
+        end
+        function c = getCellCenter(obj,varargin)
+            dx = obj.grx(2)-obj.grx(1);
+            dy = obj.gry(2)-obj.gry(1);
+            dz = obj.grz(2)-obj.grz(1);
+            if nargin==4
+                dx = varargin{1};
+                dy = varargin{2};
+                dz = varargin{3};
+            end
             xmin = obj.grx(1)+dx/2;
             ymin = obj.gry(1)+dy/2;
             zmin = obj.grz(1)+dz/2;
-            nx = length(obj.grx)-1;
-            ny = length(obj.gry)-1;
-            nz = length(obj.grz)-1;
+            xmax = obj.grx(end)-dx/3;  % divide by 3 to avoid truncation error
+            ymax = obj.gry(end)-dy/3;
+            zmax = obj.grz(end)-dz/3;
+            nx = ceil((xmax-xmin)/dx);
+            ny = ceil((ymax-ymin)/dy);
+            nz = ceil((zmax-zmin)/dz);
             c=[kron(ones(ny*nz,1),(1:nx)'*dx) ...
                 kron(kron(ones(nz,1),(1:ny)'*dy),ones(nx,1)) ...
                 kron((1:nz)'*dz,ones(nx*ny,1))];

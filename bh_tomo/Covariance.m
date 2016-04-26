@@ -1,6 +1,12 @@
 classdef Covariance < matlab.mixin.Heterogeneous & handle
     %COVARIANCE Base class for covariance models
     
+    % Code in part from covardm from Denis Marcotte
+    %
+    
+    % B. Giroux
+    % INRS-ETE
+    % 2016-04-26
     properties
         range
         angle   % angle in degrees
@@ -101,7 +107,7 @@ classdef Covariance < matlab.mixin.Heterogeneous & handle
             t2 = obj.trans(x0);
             h=0;
             for id=1:d
-                h=h+(t1(:,id)*ones(1,n2)-ones(n1,1)*t2(:,id)').^2;
+                h=h+(repmat(t1(:,id),1,n2)-repmat(t2(:,id)',n1,1)).^2;
             end
             h=sqrt(h);
         end

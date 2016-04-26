@@ -1,6 +1,9 @@
 classdef CovarianceHoleEffectCosine < Covariance & matlab.mixin.Copyable
     %UNTITLED2 Summary of this class goes here
     
+    % B. Giroux
+    % INRS-ETE
+    % 2016-04-26
     methods
         function obj = CovarianceHoleEffectCosine(r,a,s)
             obj@Covariance(r,a,s);

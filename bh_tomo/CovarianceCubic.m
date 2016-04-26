@@ -2,6 +2,9 @@ classdef CovarianceCubic < Covariance & matlab.mixin.Copyable
     %UNTITLED2 Summary of this class goes here
     %   Detailed explanation goes here
     
+    % B. Giroux
+    % INRS-ETE
+    % 2016-04-26
     methods
         function obj = CovarianceCubic(r,a,s)
             obj@Covariance(r,a,s);

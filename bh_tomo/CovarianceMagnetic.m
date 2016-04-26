@@ -2,6 +2,9 @@ classdef CovarianceMagnetic < Covariance & matlab.mixin.Copyable
     %UNTITLED2 Summary of this class goes here
     %   Cauchy with b=3/2
     
+    % B. Giroux
+    % INRS-ETE
+    % 2016-04-26
     methods
         function obj = CovarianceMagnetic(r,a,s)
             obj@Covariance(r,a,s);

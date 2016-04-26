@@ -14,6 +14,9 @@ classdef CovarianceModels < int8
     %'sin(max(eps,h*2*pi))./max(eps,h*2*pi)    '; effet de trou sinusoidal
     %'cos(h*2*pi)                              '; effet de trou cosinusoidal
     
+    % B. Giroux
+    % INRS-ETE
+    % 2016-04-26
     enumeration
         Cubic (1)
         Spherical (2)

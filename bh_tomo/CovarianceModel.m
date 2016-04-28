@@ -11,6 +11,8 @@ classdef CovarianceModel
         nugget_xi
         nugget_tilt
         use_c0
+        use_xi
+        use_tilt
     end
     
     methods
@@ -23,6 +25,8 @@ classdef CovarianceModel
             obj.nugget_xi = 0;
             obj.nugget_tilt = 0;
             obj.use_c0 = 0;
+            obj.use_xi = 0;
+            obj.use_tilt = 0;
         end
     end
     

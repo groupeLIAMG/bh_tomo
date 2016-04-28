@@ -377,9 +377,11 @@ end
 
 function pushbutton_inv_Callback(hObject, eventdata, handles)
 %%%%YH
-if get(handles.checkbox_use_Ldc,'Value')==1 && get(handles.checkbox_covar_aniso,'Value') && get(handles.checkbox_aniso_rot,'Value') 
-        msgbox('Inversion using rays for anisotropic with rotation not yet available.','Message','modal');
-        return;
+if get(handles.checkbox_use_Ldc,'Value')==1 && ...
+        get(handles.checkbox_covar_aniso,'Value') && ...
+        get(handles.checkbox_aniso_rot,'Value')
+    msgbox('Inversion using rays for anisotropic with rotation not yet available.','Message','modal');
+    return;
 end   %%%%%%%%
 if get(handles.popupmenu_type_inv,'Value')==1 && ...
 		isempty( get(handles.edit_model12,'String') )

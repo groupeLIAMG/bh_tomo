@@ -41,6 +41,7 @@ classdef Mog < handle
         TxCosDir
         RxCosDir
         pruneParams
+        useAirShots
     end
     properties (SetAccess=private)
         ID
@@ -91,7 +92,7 @@ classdef Mog < handle
             obj.pruneParams.zmax = 1e99;
             obj.pruneParams.thetaMin = -90;
             obj.pruneParams.thetaMax = 90;
-            
+            obj.useAirShots = 0;
             obj.ID = Mog.getID();
         end
         function set.name(obj, n)
@@ -119,7 +120,7 @@ classdef Mog < handle
             else
                 airBefore = air(obj.av);
                 airAfter = air(obj.ap);
-                [t0,fac_dt_av,fac_dt_ap] = corr_t0(length(obj.tt), ...
+                [t0,fac_dt_av,fac_dt_ap] = obj.corr_t0(length(obj.tt), ...
                     airBefore, airAfter, true);
             end
             if ~isempty(obj.av), air( obj.av ).fac_dt = fac_dt_av; end
@@ -175,7 +176,7 @@ classdef Mog < handle
     end
     
     methods (Access=private)
-        function [t0,fac_dt_av,fac_dt_ap] = corr_t0(ndata,before,after,varargin)
+        function [t0,fac_dt_av,fac_dt_ap] = corr_t0(obj,ndata,before,after,varargin)
             if nargin>=4
                 show = varargin{1};
             else
@@ -183,7 +184,10 @@ classdef Mog < handle
             end
             fac_dt_av = 1;
             fac_dt_ap = 1;
-            if isempty(before) && isempty(before)
+            if obj.useAirShots==0
+                t0 = zeros(1,ndata);
+                return
+            elseif isempty(before) && isempty(after) && obj.useAirShots==1
                 warndlg({'t0 correction not applied';
                     'Pick t0 before and t0 after for correction'})
                 t0 = zeros(1,ndata);
@@ -224,7 +228,14 @@ classdef Mog < handle
                 t0 = t0av+ddt0*(0:(ndata-1));
             end
         end
-        function t0 = get_t0_fixed(tir, v)
+    end
+    
+    methods (Static)
+        function obj = loadobj(a)
+            obj = a;
+            Mog.getID(obj.ID);  % we must update counter
+        end
+       function t0 = get_t0_fixed(tir, v)
             times = tir.tt(tir.tt_done);
             std_times = tir.et(tir.tt_done);
             ind = times~=-1;
@@ -292,14 +303,6 @@ classdef Mog < handle
                     hold off
                 end
             end
-        end
-                    
-    end
-    
-    methods (Static)
-        function obj = loadobj(a)
-            obj = a;
-            Mog.getID(obj.ID);  % we must update counter
         end
     end
     

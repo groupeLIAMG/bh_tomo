@@ -93,6 +93,7 @@ classdef MogUI < handle
             obj.handles.editDtCorr.FontSize = s;
             obj.handles.textMultFac.FontSize = s;
             obj.handles.editMultFac.FontSize = s;
+            obj.handles.checkUseAirShots = s;
         end
         function updateBHlist(obj,varargin)
             boreholes = obj.bhUI.boreholes;
@@ -386,6 +387,13 @@ classdef MogUI < handle
                 obj.notify('mogEdited')
             end
         end
+        function useAirShots(obj,varargin)
+            no = obj.handles.listMogs.Value;
+            if no>0 && no<=length(obj.mogs)
+                obj.mogs(no).useAirShots = obj.handles.useAirShots.Value;
+                obj.notify('mogEdited')
+            end
+        end
         function updateList(obj,varargin)
             value = [];
             if nargin==2
@@ -419,6 +427,7 @@ classdef MogUI < handle
                 obj.handles.popupType.Value = obj.mogs(no).type;
                 obj.handles.popupRx.Value = obj.mogs(no).Rx;
                 obj.handles.popupTx.Value = obj.mogs(no).Tx;
+                obj.handles.useAirShots.Value = obj.mogs(no).useAirShots;
                 if ~isempty(obj.mogs(no).av)
                     obj.handles.textAirBefore.String = obj.air(obj.mogs(no).av).name;
                 else

@@ -27,15 +27,16 @@ vBorder = 15*vFac;
 obj.handles.addMog.Position = [hBorder height-vBorderTop 1.5*hSize vSize];
 obj.handles.removeMog.Position = [hBorder+2*hSpace+1.5*hSize height-vBorderTop 1.5*hSize vSize];
 
-obj.handles.listMogs.Position = [1.5*hBorder vBorder+5*vSpace+5.5*vSize 2*hSpace+3*hSize-hBorder height-2*vBorder-vBorderTop-6.5*vSize];
+obj.handles.listMogs.Position = [1.5*hBorder vBorder+6*vSpace+6.5*vSize 2*hSpace+3*hSize-hBorder height-2*vBorder-vBorderTop-7.5*vSize];
 
-obj.handles.textType.Position = [hBorder vBorder+4*vSpace+4*vSize 1.25*hSize vSize];
-obj.handles.textTx.Position = [hBorder vBorder+3*vSpace+3*vSize 1.25*hSize vSize];
-obj.handles.textRx.Position = [hBorder vBorder+2*vSpace+2*vSize 1.25*hSize vSize];
-obj.handles.popupType.Position = [hBorder+2*hSpace+1.5*hSize vBorder+4*vSpace+4*vSize 1.5*hSize vSize];
-obj.handles.popupTx.Position = [hBorder+2*hSpace+1.5*hSize vBorder+3*vSpace+3*vSize 1.5*hSize vSize];
-obj.handles.popupRx.Position = [hBorder+2*hSpace+1.5*hSize vBorder+2*vSpace+2*vSize 1.5*hSize vSize];
+obj.handles.textType.Position = [hBorder vBorder+5*vSpace+5*vSize 1.25*hSize vSize];
+obj.handles.textTx.Position = [hBorder vBorder+4*vSpace+4*vSize 1.25*hSize vSize];
+obj.handles.textRx.Position = [hBorder vBorder+3*vSpace+3*vSize 1.25*hSize vSize];
+obj.handles.popupType.Position = [hBorder+2*hSpace+1.5*hSize vBorder+5*vSpace+5*vSize 1.5*hSize vSize];
+obj.handles.popupTx.Position = [hBorder+2*hSpace+1.5*hSize vBorder+4*vSpace+4*vSize 1.5*hSize vSize];
+obj.handles.popupRx.Position = [hBorder+2*hSpace+1.5*hSize vBorder+3*vSpace+3*vSize 1.5*hSize vSize];
 
+obj.handles.useAirShots.Position = [hBorder+0.25*hSize vBorder+2*vSpace+2*vSize 1.5*hSize vSize];
 obj.handles.airBefore.Position = [hBorder vBorder+vSpace+vSize 1.5*hSize vSize];
 obj.handles.airAfter.Position = [hBorder vBorder 1.5*hSize vSize];
 obj.handles.textAirBefore.Position = [hBorder+2*hSpace+1.5*hSize vBorder+vSpace+vSize 1.5*hSize vSize];

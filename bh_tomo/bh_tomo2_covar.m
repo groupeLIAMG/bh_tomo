@@ -973,33 +973,10 @@ f.Visible = 'on';
     end
     function [g,gt] = computeCov(varargin)
         
-        Cm = cm.covar(1).compute(xc,xc);
-        for n=2:numel(cm.covar)
-            Cm = Cm + cm.covar(n).compute(xc,xc);
-        end
-        if cm.nugget_m~=0
-            Cm = Cm + cm.nugget_m*speye(size(Cm,1));
-        end
-        if helliptical.Value==1
-            Cx = cm.covar_xi(1).compute(xc,xc);
-            for n=2:numel(cm.covar_xi)
-                Cx = Cx + cm.covar_xi(n).compute(xc,xc);
-            end
-            if cm.nugget_xi~=0
-                Cx = Cx + cm.nugget_xi*speye(size(Cx,1));
-            end
-            if htilted.Value==1
-                Ct = cm.covar_tilt(1).compute(xc,xc);
-                for n=2:numel(cm.covar_tilt)
-                    Ct = Ct + cm.covar_tilt(n).compute(xc,xc);
-                end
-                if cm.nugget_tilt~=0
-                    Ct = Ct + cm.nugget_tilt*speye(size(Ct,1));
-                end
-                Cm = sparse([Cm zeros(size(Cx)) zeros(size(Ct));
-                    zeros(size(Cm)) Cx zeros(size(Ct));
-                    zeros(size(Cm)) zeros(size(Cx)) Ct]);
-                %
+        Cm = cm.computeCm(xc,xc);
+        
+        if cm.use_xi==1
+            if cm.use_tilt==1
                 np = size(L,2)/2;
                 l = sqrt(L(:,1:np).^2 + L(:,(np+1):end).^2);
                 s0 = mean(data(:,1)./sum(l,2))+zeros(np,1);
@@ -1008,20 +985,16 @@ f.Visible = 'on';
                 J = calculJ2(L, [s0; xi0; theta0]);
                 Cm = J*Cm*J';
             else
-                Cm = sparse([Cm zeros(size(Cx));zeros(size(Cm)) Cx]);
-                % 
-                np = size(L,2)/2;
-                l = sqrt(L(:,1:np).^2 + L(:,(np+1):end).^2);
-                s0 = mean(data(:,1)./sum(l,2))+zeros(np,1);
-                xi0 = ones(np,1);
-                J = calculJ(L, [s0; xi0]);
-                Cm = J*Cm*J';
+                 np = size(L,2)/2;
+                 l = sqrt(L(:,1:np).^2 + L(:,(np+1):end).^2);
+                 s0 = mean(data(:,1)./sum(l,2))+zeros(np,1);
+                 xi0 = ones(np,1);
+                 J = calculJ(L, [s0; xi0]);
+                 Cm = J*Cm*J';
             end
         else
             Cm = L*Cm*L';
         end
-        
-        
         if cm.use_c0==1
             % use exp variance
             c0 = data(:,2).^2;
@@ -1367,6 +1340,7 @@ f.Visible = 'on';
         end
     end
     function doElliptical(varargin)
+        cm.use_xi = helliptical.Value;
         fillEllipticalUI()
         loadRays()
         computeCd()
@@ -1432,6 +1406,7 @@ f.Visible = 'on';
         end
     end
     function doTilted(varargin)
+        cm.use_tilt = htilted.Value;
         fillTiltUI()
         loadRays()
         computeCd()

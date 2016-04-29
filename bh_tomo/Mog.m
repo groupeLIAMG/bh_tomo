@@ -198,16 +198,16 @@ classdef Mog < handle
             t0ap = [];
             if ~isempty(before)
                 if strcmp(before.method, 'fixed_antenna')
-                    t0av = get_t0_fixed(before, v_air);
+                    t0av = Mog.get_t0_fixed(before, v_air);
                 elseif strcmp(before.method, 'walkaway')
-                    [t0av, fac_dt_av] = get_t0_wa(before, v_air, show);
+                    [t0av, fac_dt_av] = Mog.get_t0_wa(before, v_air, show);
                 end
             end
             if ~isempty(after)
                 if strcmp(after.method, 'fixed_antenna')
-                    t0ap = get_t0_fixed(after, v_air);
+                    t0ap = Mog.get_t0_fixed(after, v_air);
                 elseif strcmp(after.method, 'walkaway')
-                    [t0ap, fac_dt_ap] = get_t0_wa(after, v_air, show);
+                    [t0ap, fac_dt_ap] = Mog.get_t0_wa(after, v_air, show);
                 end
             end
             if isnan(t0av) || isnan(t0ap)

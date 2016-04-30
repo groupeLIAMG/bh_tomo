@@ -998,9 +998,9 @@ f.Visible = 'on';
         if cm.use_c0==1
             % use exp variance
             c0 = data(:,2).^2;
-            Cm = Cm + cm.nugget_d*sparse(diag(c0));
+            Cm = Cm + cm.nugget_d*diag(c0);
         else
-            Cm = Cm + cm.nugget_d*sparse(size(L,1));
+            Cm = Cm + cm.nugget_d*eye(size(L,1));
         end
         
         [Cm,ind] = sort(Cm(:),1,'descend');

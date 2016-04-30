@@ -43,12 +43,6 @@ K=[Css kts(:,indc)';kts(:,indc) ktt];
 K=K+eye(size(K))*1e-6;
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
-%Cokrigeage primal
-%tic
-Lambda = (K\[ks0;kts])';   %%%activé YH
-%sco = Lambda*[scont;dt];
-%toc
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 %Cokrigeage dual
@@ -60,6 +54,12 @@ sco = (Gamma*[ks0;kts])';
 S_sim=0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if mode==2
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+    %Cokrigeage primal
+    %tic
+    Lambda = (K\[ks0;kts])';   %%%activé YH
+    %sco = Lambda*[scont;dt];
+    %toc
     S_sim=zeros(length(sco),nsim);
     %  set(handle,'String',[str.s225,' - ',str.s233])
     %  drawnow

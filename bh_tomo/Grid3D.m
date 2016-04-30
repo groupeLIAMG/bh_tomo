@@ -150,30 +150,30 @@ classdef Grid3D < Grid
         
         function L = getForwardStraightRays(obj,varargin)
             ind = true(size(obj.Tx,1),1);
-            dx = obj.grx(2)-obj.grx(1);
-            dy = obj.gry(2)-obj.gry(1);
-            dz = obj.grz(2)-obj.grz(1);
+            grx = obj.grx;
+            gry = obj.gry;
+            grz = obj.grz;
             if nargin>=2
                 ind = varargin{1};
             end
             if nargin>=3
                 if ~isempty(varargin{2}) && isfinite(varargin{2})
                     dx = varargin{2};
+                    grx = obj.grx(1):dx:obj.grx(end);
                 end
             end
             if nargin>=4
                 if ~isempty(varargin{3}) && isfinite(varargin{3})
                     dy = varargin{3};
+                    gry = obj.gry(1):dy:obj.gry(end);
                 end
             end
             if nargin>=5
                 if ~isempty(varargin{4}) && isfinite(varargin{4})
                     dz = varargin{4};
+                    grz = obj.grz(1):dz:obj.grz(end);
                 end
             end
-            grx = obj.grx(1):dx:obj.grx(end);
-            gry = obj.gry(1):dy:obj.gry(end);
-            grz = obj.grz(1):dz:obj.grz(end);
             L = Lsr3d(obj.Tx(ind,:),obj.Rx(ind,:),grx,gry,grz);
         end
         function c = getCellCenter(obj,varargin)

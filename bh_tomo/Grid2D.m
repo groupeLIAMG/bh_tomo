@@ -97,8 +97,8 @@ classdef Grid2D < Grid
         function L = getForwardStraightRays(obj,varargin)
             aniso=false;
             ind = true(size(obj.Tx,1),1);
-            dx = obj.grx(2)-obj.grx(1);
-            dz = obj.grz(2)-obj.grz(1);
+            grx = obj.grx;
+            grz = obj.grz;
             if nargin>=2
                 if ~isempty(varargin{1})
                     ind = varargin{1};
@@ -107,19 +107,19 @@ classdef Grid2D < Grid
             if nargin>=3
                 if ~isempty(varargin{2}) && isfinite(varargin{2})
                     dx = varargin{2};
+                    grx = obj.grx(1):dx:obj.grx(end);
                 end
             end
             % dy is ignored
             if nargin>=5
                 if ~isempty(varargin{4}) && isfinite(varargin{4})
                     dz = varargin{4};
+                    grz = obj.grz(1):dz:obj.grz(end);
                 end
             end
             if nargin>=6
                 aniso=varargin{5};
             end
-            grx = obj.grx(1):dx:obj.grx(end);
-            grz = obj.grz(1):dz:obj.grz(end);
             if aniso
                 L = Lsr2da(obj.Tx(ind,[1 3]),obj.Rx(ind,[1 3]),grx,grz);
             else
@@ -140,7 +140,7 @@ classdef Grid2D < Grid
             zmax = obj.grz(end)-dz/3;
             nx = ceil((xmax-xmin)/dx);
             nz = ceil((zmax-zmin)/dz);
-            c=[kron(ones(nz,1),(1:nx)'*dx), kron((1:nz)',ones(nx,1)*dz)];
+            c=[kron((1:nx)',ones(nz,1)*dx), kron(ones(nx,1),(1:nz)'*dz)];
             c(:,1)=xmin+c(:,1)-dx;
             c(:,2)=zmin+c(:,2)-dz;
         end

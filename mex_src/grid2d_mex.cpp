@@ -220,7 +220,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         size_t irx=4;
         size_t it0=5;
         
-        mexPrintf("itx = %zd\n", itx);
         // check if next arg is xi (anisotropy ratio)
         if (!(mxIsDouble(prhs[3]))) {
             mexErrMsgTxt("Input must be double precision.");
@@ -264,7 +263,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             irx++;
             it0++;
         }
-        mexPrintf("itx = %zd\n", itx);
         //
         // Tx
         //
@@ -277,8 +275,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         }
         dim_array = mxGetDimensions(prhs[itx]);
         size_t nTx = static_cast<size_t>( dim_array[0] );
-        if ( dim_array[1] != 2 ) {
-            mexErrMsgTxt("Tx: matrix nTx by 2.");
+        if ( dim_array[1] != 3 ) {
+            mexErrMsgTxt("Tx: matrix nTx by 3.");
         }
         double *Tx = static_cast<double*>( mxGetPr(prhs[itx]) );
 
@@ -294,8 +292,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         }
         dim_array = mxGetDimensions(prhs[irx]);
         size_t nRx = static_cast<size_t>( dim_array[0] );
-        if ( dim_array[1] != 2 ) {
-            mexErrMsgTxt("Rx: matrix nRx by 2.");
+        if ( dim_array[1] != 3 ) {
+            mexErrMsgTxt("Rx: matrix nRx by 3.");
         }
         double *Rx = static_cast<double*>( mxGetPr(prhs[irx]) );
 
@@ -348,13 +346,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         vector<vector<size_t>> iTx;
         sxz<double> sxz_tmp;
         sxz_tmp.x = Tx[0];
-        sxz_tmp.z = Tx[nTx];
+        // y is ignored
+        sxz_tmp.z = Tx[2*nTx];
         vTx.push_back( vector<sxz<double> >(1, sxz_tmp) );
         t0.push_back( vector<double>(1, tTx[0]) );
         iTx.push_back( vector<size_t>(1, 0) );  // indices of Rx corresponding to current Tx
         for ( size_t ntx=1; ntx<nTx; ++ntx ) {
             sxz_tmp.x = Tx[ntx];
-            sxz_tmp.z = Tx[ntx+nTx];
+            sxz_tmp.z = Tx[ntx+2*nTx];
             bool found = false;
 
             for ( size_t nv=0; nv<vTx.size(); ++nv ) {
@@ -387,13 +386,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         vector<vector<siv<double> > > L_data(nTx);
         vector<vector<vector<siv<double> > > > l_data( vTx.size() );
 
+        
         if ( grid_instance->getNthreads() == 1 ) {
             for ( size_t nv=0; nv<vTx.size(); ++nv ) {
 
                 vRx.resize( 0 );
                 for ( size_t ni=0; ni<iTx[nv].size(); ++ni ) {
                     sxz_tmp.x = Rx[ iTx[nv][ni] ];
-                    sxz_tmp.z = Rx[ iTx[nv][ni]+nRx ];
+                    sxz_tmp.z = Rx[ iTx[nv][ni]+2*nRx ];
                     vRx.push_back( sxz_tmp );
                 }
 
@@ -430,7 +430,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                         vector<sxz<double>> vRx;
                         for ( size_t ni=0; ni<iTx[nv].size(); ++ni ) {
                             sxz_tmp.x = Rx[ iTx[nv][ni] ];
-                            sxz_tmp.z = Rx[ iTx[nv][ni]+nRx ];
+                            sxz_tmp.z = Rx[ iTx[nv][ni]+2*nRx ];
                             vRx.push_back( sxz_tmp );
                         }
                         if ( nlhs == 3 ) {
@@ -457,7 +457,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 vector<sxz<double>> vRx;
                 for ( size_t ni=0; ni<iTx[nv].size(); ++ni ) {
                     sxz_tmp.x = Rx[ iTx[nv][ni] ];
-                    sxz_tmp.z = Rx[ iTx[nv][ni]+nRx ];
+                    sxz_tmp.z = Rx[ iTx[nv][ni]+2*nRx ];
                     vRx.push_back( sxz_tmp );
                 }
                 if ( nlhs == 3 ) {
@@ -485,7 +485,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 t_arr[ iTx[nv][ni] ] = tt[nv][ni];
             }
         }
-
         if ( nlhs >= 2 ) {
             // 2rd arg: rays.
             plhs[1] = mxCreateCellMatrix(nRx, 1);
@@ -494,11 +493,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             for ( size_t nv=0; nv<vTx.size(); ++nv ) {
                 for ( size_t ni=0; ni<iTx[nv].size(); ++ni ) {
                     size_t npts = r_data[nv][ni].size();
-                    Rays[ iTx[nv][ni] ] = mxCreateDoubleMatrix(npts, 2, mxREAL);
+                    Rays[ iTx[nv][ni] ] = mxCreateDoubleMatrix(npts, 3, mxREAL);
                     double *rays_p = (double*) mxGetData(Rays[ iTx[nv][ni] ]);
                     for ( size_t np=0; np<npts; ++np ) {
                         rays_p[np] = r_data[nv][ni][np].x;
-                        rays_p[np+npts] = r_data[nv][ni][np].z;
+                        rays_p[np+npts] = 0.0;
+                        rays_p[np+2*npts] = r_data[nv][ni][np].z;
                     }
                     mxSetCell( plhs[1], iTx[nv][ni], Rays[ iTx[nv][ni] ] );
                 }

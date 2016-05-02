@@ -973,7 +973,7 @@ f.Visible = 'on';
     end
     function [g,gt] = computeCov(varargin)
         
-        Cm = cm.compute(xc,xc);
+        Cm = cm.computeCm(xc,xc);
         
         if cm.use_xi==1
             if cm.use_tilt==1

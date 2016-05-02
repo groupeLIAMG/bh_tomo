@@ -44,6 +44,12 @@ K=K+eye(size(K))*1e-6;
 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+%Cokrigeage dual
+%tic
+Gamma = (K\[scont;dt])';
+sco = (Gamma*[ks0;kts])';
+%toc
 
 S_sim=0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -52,7 +58,7 @@ if mode==2
     %Cokrigeage primal
     %tic
     Lambda = (K\[ks0;kts])';   %%%activé YH
-    sco = Lambda*[scont;dt];
+    %sco = Lambda*[scont;dt];
     %toc
     S_sim=zeros(length(sco),nsim);
     %  set(handle,'String',[str.s225,' - ',str.s233])
@@ -81,11 +87,4 @@ if mode==2
         S_sim(:,i)=sco+(szs-s_sim);
         
     end
-else
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
-    %Cokrigeage dual
-    %tic
-    Gamma = (K\[scont;dt])';
-    sco = (Gamma*[ks0;kts])';
-    %toc
 end

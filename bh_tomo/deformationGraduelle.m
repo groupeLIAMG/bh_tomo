@@ -22,9 +22,11 @@ function T = deformationGraduelle(S, L, c0, tobs, varargin)
 
 
 if nargin>=5
-    set(varargin{1}, 'String','Geostatistical Inversion - Gradual Deformation ...')
+    set(varargin{1}, 'String','Inversion par cokrigeage - Calcul des deformations graduelles ...')
 end
-n=log2(size(S,2));
+nn=log2(size(S,2));
+n=nn;
+%hh = waitbar(0, 'Calcul des deformations graduelles');
 
 if isempty( c0 )
 	w = 1;
@@ -33,6 +35,7 @@ else
 end
 
 while n>0
+    %waitbar((nn-n)/nn,hh)
     T = zeros(size(S,1), size(S,2)/2);
     ind=1;
     for k=1:2:2^n
@@ -44,3 +47,4 @@ while n>0
     S = T;
     n=n-1;
 end
+%close(hh)

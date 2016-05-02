@@ -29,13 +29,13 @@ classdef CovarianceModel
             obj.use_tilt = 0;
         end
         
-        function Cm = computeCm(obj,x,x0)
+        function Cm = compute(obj,x,x0)
             Cm = obj.covar(1).compute(x,x0);
             for n=2:numel(obj.covar)
                 Cm = Cm + obj.covar(n).compute(x,x0);
             end
             if obj.nugget_m~=0
-                Cm = Cm + obj.nugget_m*speye(size(Cm,1));
+                Cm = Cm + obj.nugget_m*eye(size(Cm,1));
             end
             if obj.use_xi==1
                 Cx = obj.covar_xi(1).compute(x,x0);
@@ -43,7 +43,7 @@ classdef CovarianceModel
                     Cx = Cx + obj.covar_xi(n).compute(x,x0);
                 end
                 if obj.nugget_xi~=0
-                    Cx = Cx + obj.nugget_xi*speye(size(Cx,1));
+                    Cx = Cx + obj.nugget_xi*eye(size(Cx,1));
                 end
                 if obj.use_tilt==1
                     Ct = obj.covar_tilt(1).compute(x,x0);
@@ -51,7 +51,7 @@ classdef CovarianceModel
                         Ct = Ct + obj.covar_tilt(n).compute(x,x0);
                     end
                     if obj.nugget_tilt~=0
-                        Ct = Ct + obj.nugget_tilt*speye(size(Ct,1));
+                        Ct = Ct + obj.nugget_tilt*eye(size(Ct,1));
                     end
                     Cm = sparse([Cm zeros(size(Cx)) zeros(size(Ct));
                         zeros(size(Cm)) Cx zeros(size(Ct));

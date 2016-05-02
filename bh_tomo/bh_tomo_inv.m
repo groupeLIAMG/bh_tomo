@@ -398,7 +398,7 @@ end %%%%%%%%%%%%
 h = getappdata(handles.fig_bh_inv, 'h');  
 %  selected mogs added in getPanneauData YH
 selected_mogs = get(handles.listbox_mogs,'Value');
-str_mogs = get(handles.listbox_mogs,'String'); 
+str_mogs = get(handles.listbox_mogs,'String');
 h.param.model_initial = h.model_initial;
 clim = [];
 if get(handles.popupmenu_type_data,'Value')==1

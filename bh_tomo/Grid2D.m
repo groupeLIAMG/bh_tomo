@@ -1,4 +1,7 @@
 classdef Grid2D < Grid
+    
+    % when building vectors from 2D grids, Z is the "fast" axis, i.e.
+    % indices are incremented for Z first: ind = (ix-1)*nz + iz
     properties
         flip
         borehole_x0
@@ -95,6 +98,7 @@ classdef Grid2D < Grid
         end
         
         function L = getForwardStraightRays(obj,varargin)
+            % L = obj.getForwardStraightRays(ind,dx,dy,dz,aniso)
             aniso=false;
             ind = true(size(obj.Tx,1),1);
             grx = obj.grx;
@@ -140,9 +144,156 @@ classdef Grid2D < Grid
             zmax = obj.grz(end)-dz/3;
             nx = ceil((xmax-xmin)/dx);
             nz = ceil((zmax-zmin)/dz);
+            % z is the "fast" axis
             c=[kron((1:nx)',ones(nz,1)*dx), kron(ones(nx,1),(1:nz)'*dz)];
             c(:,1)=xmin+c(:,1)-dx;
             c(:,2)=zmin+c(:,2)-dz;
+        end
+        function indc = getContIndices(obj,cont,varargin)
+            if nargin==3
+                x = varargin{1};
+            else
+                x = obj.getCellCenter();
+            end
+            indc = zeros(size(cont,1),1);
+            for i=1:size(cont,1)
+                ind11=findnear(cont(i,1),x(:,1));
+                ind22=findnear(cont(i,2),x(ind11,2));
+                indc(i)=min(ind11(ind22));
+            end
+        end
+        function [Dx,Dy,Dz] = derivative(obj,order)
+            % compute derivative operators for grid _cells_
+            nx=length(obj.grx)-1;
+            nz=length(obj.grz)-1;
+            Dy = [];
+            if order==1
+                idx = 1/obj.dx;
+                idz = 1/obj.dz;
+                
+                i = zeros(1,nz*nx*2);
+                j = zeros(1,nz*nx*2);
+                v = zeros(1,nz*nx*2);
+                % forward operator is (u_{i+1} - u_i)/dx
+                i(1:2*nz)=[1:nz 1:nz];
+                j(1:2*nz)=[1:nz nz+(1:nz)];
+                v(1:2*nz)=[-idx+zeros(1,nz) idx+zeros(1,nz)];
+                % centered operator is (u_{i+1} - u_{i-1})/(2dx)
+                for n=2:nx-1
+                    i((1:2*nz)+(n-1)*2*nz) = (n-1)*nz+[1:nz 1:nz];
+                    j((1:2*nz)+(n-1)*2*nz) = (n-1)*nz+[-nz+(1:nz) nz+(1:nz)];
+                    v((1:2*nz)+(n-1)*2*nz) = 0.5*[-idx+zeros(1,nz) idx+zeros(1,nz)];
+                end
+                % backward operator is (u_i - u_{i-1})/dx
+                i((1:2*nz)+(nx-1)*2*nz) = (nx-1)*nz+[1:nz 1:nz];
+                j((1:2*nz)+(nx-1)*2*nz) = (nx-1)*nz+[-nz+(1:nz) 1:nz];
+                v((1:2*nz)+(nx-1)*2*nz) = [-idx+zeros(1,nz) idx+zeros(1,nz)];
+                Dx = sparse(i,j,v);
+                
+                i = kron(1:nx*nz,ones(1,2));
+                jj = [[1 1:nz-1];[2 3:nz nz]];
+                jj = reshape(jj,1,numel(jj));
+                j = zeros(1,nz*nx*2);
+                for n=1:nx
+                    j((1:2*nz)+(n-1)*2*nz) = (n-1)*nz+jj;
+                end
+                v = [-idz idz repmat(0.5*[-idz idz],1,nz-2) -idz idz];
+                v = kron(ones(1,nx),v);
+                Dz = sparse(i,j,v);
+            else
+                % order==2
+                idx2 = 1/(obj.dx*obj.dx);
+                idz2 = 1/(obj.dz*obj.dz);
+                
+                i = zeros(1,nz*nx*3);
+                j = zeros(1,nz*nx*3);
+                v = zeros(1,nz*nx*3);
+                % forward operator is (u_i - 2u_{i+1} + u_{i+2})/dx^2
+                i(1:3*nz)=[1:nz 1:nz 1:nz];
+                j(1:3*nz)=[1:nz nz+(1:nz) 2*nz+(1:nz)];
+                v(1:3*nz)=[idx2+zeros(1,nz) -2*idx2+zeros(1,nz) idx2+zeros(1,nz)];
+                % centered operator is (u_{i-1} - 2u_i + u_{i+1})/dx^2
+                for n=2:nx-1
+                    i((1:3*nz)+(n-1)*3*nz) = (n-1)*nz+[1:nz 1:nz 1:nz];
+                    j((1:3*nz)+(n-1)*3*nz) = (n-1)*nz+[-nz+(1:nz) 1:nz nz+(1:nz)];
+                    v((1:3*nz)+(n-1)*3*nz)=[idx2+zeros(1,nz) -2*idx2+zeros(1,nz) idx2+zeros(1,nz)];
+                end
+                % backward operator is (u_{i-2} - 2u_{i-1} + u_i)/dx^2
+                i((1:3*nz)+(nx-1)*3*nz) = (nx-1)*nz+[1:nz 1:nz 1:nz];
+                j((1:3*nz)+(nx-1)*3*nz) = (nx-1)*nz+[-2*nz+(1:nz) -nz+(1:nz) 1:nz];
+                v((1:3*nz)+(nx-1)*3*nz)=[idx2+zeros(1,nz) -2*idx2+zeros(1,nz) idx2+zeros(1,nz)];
+                Dx = sparse(i,j,v);
+                
+                i=kron(1:nx*nz,ones(1,3));
+                jj=[[1 1:nz-2 nz-2];[2 2:nz-1 nz-1];[3 3:nz nz]];
+                jj = reshape(jj,1,numel(jj));
+                j = zeros(1,nz*nx*3);
+                for n=1:nx
+                    j((1:3*nz)+(n-1)*3*nz) = (n-1)*nz+jj;
+                end
+                v=kron(ones(1,nx*nz),idz2*[1 -2 1]);
+                Dz = sparse(i,j,v);
+            end
+        end
+        function G = preFFTMA(obj,cm)
+            small = 1e-6;
+            Nx = 2*length(obj.grx);
+            Nz = 2*length(obj.grz);
+            
+            Nx2 = Nx/2;
+            Nz2 = Nz/2;
+	
+            x = obj.dx*(0:Nx2-1);
+            x = [x fliplr(-x)]';
+            z = obj.dz*(0:Nz2-1);
+            z = [z fliplr(-z)]';
+	
+            x = kron(x, ones(Nz,1));
+            z = kron(ones(Nx,1), z);
+            
+            d = cm(1).compute([x z],[0 0]);
+            for n=2:numel(cm)
+                d = d + cm(n).compute([x z],[0 0]);
+            end
+            K = reshape(d,Nx,Nz)';  % transpose so that we get a Nz x Nx field
+            
+            mk=0;
+            if min(K(:,1))>small
+                % Enlarge grid to make sure that covariance falls to zero
+                Nz=5*Nz;
+                mk=1;
+            end
+            if min(K(1,:))>small
+                Nx=5*Nx;
+                mk=1;
+            end
+            if mk==1
+                Nx2 = Nx/2;
+                Nz2 = Nz/2;
+                
+                x = obj.dx*(0:Nx2-1);
+                x = [x fliplr(-x)]';
+                z = obj.dz*(0:Nz2-1);
+                z = [z fliplr(-z)]';
+                
+                x = kron(ones(Nz,1), x);
+                z = kron(z, ones(Nx,1));
+                
+                d = cm(1).compute([x z],[0 0]);
+                for n=2:numel(cm)
+                    d = d + cm(n).compute([x z],[0 0]);
+                end
+                K = reshape(d,Nx,Nz)';
+            end
+            G=fft2(K).^0.5;
+        end
+        function ms = FFTMA(obj,G)
+            [Nz,Nx] = size(G);
+            U=fft2(randn(size(G)));
+            GU=G.*U;
+            % Transformation de Fourier inverse donnant g*u et z
+            Z=real(ifft2(GU));
+            ms = Z((Nz+2)/2+1:(Nz+2)/2+length(obj.grz)-1,(Nx+2)/2+1:(Nx+2)/2+length(obj.grx)-1);
         end
         
         % for saving in mat-files

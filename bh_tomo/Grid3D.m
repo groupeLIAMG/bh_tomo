@@ -201,6 +201,222 @@ classdef Grid3D < Grid
             c(:,2)=ymin+c(:,2)-dy;
             c(:,3)=zmin+c(:,3)-dz;
         end
+        function indc = getContIndices(obj,cont,varargin)
+            if nargin==3
+                x = varargin{1};
+            else
+                x = obj.getCellCenter();
+            end
+            indc = zeros(length(cont(:,1)), 1);
+            for i=1:length(cont(:,1))
+                ind11=findnear(cont(i,1),x(:,1));
+                ind22=findnear(cont(i,2),x(ind11,2));
+                ind33=findnear(cont(i,3),x(ind11(ind22),3));
+                indc(i)=min(ind11(ind22(ind33)));
+            end
+        end
+        function [Dx,Dy,Dz] = derivative(obj,order)
+            % compute derivative operators for grid _cells_
+            
+            % x is "fastest" dimension, z is "slowest"
+            
+            nx=length(obj.grx)-1;
+            ny=length(obj.gry)-1;
+            nz=length(obj.grz)-1;
+            if order==1
+                idx = 1/obj.dx;
+                idy = 1/obj.dy;
+                idz = 1/obj.dz;
+                
+                i = kron(1:nx*ny*nz,ones(1,2));
+                jj = [[1 1:nx-1];[2 3:nx nx]];
+                jj = reshape(jj,1,numel(jj));
+                j = zeros(1,nz*ny*nx*2);
+                for n=1:nz*ny
+                    j((1:2*nx)+(n-1)*2*nx) = (n-1)*nx+jj;
+                end
+                v = [-idx idx repmat(0.5*[-idx idx],1,nx-2) -idx idx];
+                v = kron(ones(1,ny*nz),v);
+                Dx = sparse(i,j,v);
+
+                
+                nxy=nx*ny;
+                i = zeros(1,nz*nxy*2);
+                j = zeros(1,nz*nxy*2);
+                v = zeros(1,nz*nxy*2);
+                i(1:2*nx) = [1:nx 1:nx];
+                j(1:2*nx) = [1:nx nx+(1:nx)];
+                v(1:2*nx) = [-idy+zeros(1,nx) idy+zeros(1,nx)];
+                for n=2:ny-1
+                    i((1:2*nx)+(n-1)*2*nx) = (n-1)*nx+[1:nx 1:nx];
+                    j((1:2*nx)+(n-1)*2*nx) = (n-1)*nx+[-nx+(1:nx) nx+(1:nx)];
+                    v((1:2*nx)+(n-1)*2*nx) = 0.5*[-idy+zeros(1,nx) idy+zeros(1,nx)];
+                end
+                i((1:2*nx)+(ny-1)*2*nx) = (ny-1)*nx+[1:nx 1:nx];
+                j((1:2*nx)+(ny-1)*2*nx) = (ny-1)*nx+[-nx+(1:nx) 1:nx];
+                v((1:2*nx)+(ny-1)*2*nx) = [-idy+zeros(1,nx) idy+zeros(1,nx)];
+                for n=2:nz
+                    i((1:2*nxy)+(n-1)*2*nxy) = (n-1)*nxy+i(1:2*nxy);
+                    j((1:2*nxy)+(n-1)*2*nxy) = (n-1)*nxy+j(1:2*nxy);
+                    v((1:2*nxy)+(n-1)*2*nxy) = v(1:2*nxy);
+                end
+                Dy = sparse(i,j,v);
+                
+                i = zeros(1,nz*nxy*2);
+                j = zeros(1,nz*nxy*2);
+                v = zeros(1,nz*nxy*2);
+                % forward operator is (u_{i+1} - u_i)/dx
+                i(1:2*nxy) = [1:nxy 1:nxy];
+                j(1:2*nxy) = [1:nxy nxy+(1:nxy)];
+                v(1:2*nxy) = [-idz+zeros(1,nxy) idz+zeros(1,nxy)];
+                % centered operator is (u_{i+1} - u_{i-1})/(2dx)
+                for n=2:nz-1
+                    i((1:2*nxy)+(n-1)*2*nxy) = (n-1)*nxy+[1:nxy 1:nxy];
+                    j((1:2*nxy)+(n-1)*2*nxy) = (n-1)*nxy+[-nxy+(1:nxy) nxy+(1:nxy)];
+                    v((1:2*nxy)+(n-1)*2*nxy) = 0.5*[-idz+zeros(1,nxy) idz+zeros(1,nxy)];
+                end
+                % backward operator is (u_i - u_{i-1})/dx
+                i((1:2*nxy)+(nz-1)*2*nxy) = (nz-1)*nxy+[1:nxy 1:nxy];
+                j((1:2*nxy)+(nz-1)*2*nxy) = (nz-1)*nxy+[-nxy+(1:nxy) 1:nxy];
+                v((1:2*nxy)+(nz-1)*2*nxy) = [-idz+zeros(1,nxy) idz+zeros(1,nxy)];
+                Dz = sparse(i,j,v);
+            else
+                % order = 2
+                idx2 = 1/(obj.dx*obj.dx);
+                idy2 = 1/(obj.dy*obj.dy);
+                idz2 = 1/(obj.dz*obj.dz);
+                
+                i = kron(1:nx*ny*nz,ones(1,3));
+                jj = [[1 1:nx-2 nx-2];[2 2:nx-1 nx-1];[3 3:nx nx]];
+                jj = reshape(jj,1,numel(jj));
+                j = zeros(1,nz*ny*nx*3);
+                for n=1:nz*ny
+                    j((1:3*nx)+(n-1)*3*nx) = (n-1)*nx+jj;
+                end
+                v = kron(ones(1,nx*ny*nz),idx2*[1 -2 1]);
+                Dx = sparse(i,j,v);
+
+                
+                nxy=nx*ny;
+                i = zeros(1,nz*nxy*3);
+                j = zeros(1,nz*nxy*3);
+                v = zeros(1,nz*nxy*3);
+                i(1:3*nx) = [1:nx 1:nx 1:nx];
+                j(1:3*nx) = [1:nx nx+(1:nx) 2*nx+(1:nx)];
+                v(1:3*nx) = [idy2+zeros(1,nx) -2*idy2+zeros(1,nx) idy2+zeros(1,nx)];
+                for n=2:ny-1
+                    i((1:3*nx)+(n-1)*3*nx) = (n-1)*nx+[1:nx 1:nx 1:nx];
+                    j((1:3*nx)+(n-1)*3*nx) = (n-1)*nx+[-nx+(1:nx) 1:nx nx+(1:nx)];
+                    v((1:3*nx)+(n-1)*3*nx) = [idy2+zeros(1,nx) -2*idy2+zeros(1,nx) idy2+zeros(1,nx)];
+                end
+                i((1:3*nx)+(ny-1)*3*nx) = (ny-1)*nx+[1:nx 1:nx 1:nx];
+                j((1:3*nx)+(ny-1)*3*nx) = (ny-1)*nx+[-2*nx+(1:nx) -nx+(1:nx) 1:nx];
+                v((1:3*nx)+(ny-1)*3*nx) = [idy2+zeros(1,nx) -2*idy2+zeros(1,nx) idy2+zeros(1,nx)];
+                for n=2:nz
+                    i((1:3*nxy)+(n-1)*3*nxy) = (n-1)*nxy+i(1:3*nxy);
+                    j((1:3*nxy)+(n-1)*3*nxy) = (n-1)*nxy+j(1:3*nxy);
+                    v((1:3*nxy)+(n-1)*3*nxy) = v(1:3*nxy);
+                end
+                Dy = sparse(i,j,v);
+
+                
+                i = zeros(1,nz*nxy*3);
+                j = zeros(1,nz*nxy*3);
+                v = zeros(1,nz*nxy*3);
+                % forward operator is (u_{i+1} - u_i)/dx
+                i(1:3*nxy)=[1:nxy 1:nxy 1:nxy];
+                j(1:3*nxy)=[1:nxy nxy+(1:nxy) 2*nxy+(1:nxy)];
+                v(1:3*nxy)=[idz2+zeros(1,nxy) -2*idz2+zeros(1,nxy) idz2+zeros(1,nxy)];
+                % centered operator is (u_{i+1} - u_{i-1})/(2dx)
+                for n=2:nz-1
+                    i((1:3*nxy)+(n-1)*3*nxy) = (n-1)*nxy+[1:nxy 1:nxy 1:nxy];
+                    j((1:3*nxy)+(n-1)*3*nxy) = (n-1)*nxy+[-nxy+(1:nxy) 1:nxy nxy+(1:nxy)];
+                    v((1:3*nxy)+(n-1)*3*nxy) = [idz2+zeros(1,nxy) -2*idz2+zeros(1,nxy) idz2+zeros(1,nxy)];
+                end
+                i((1:3*nxy)+(nz-1)*3*nxy) = (nz-1)*nxy+[1:nxy 1:nxy 1:nxy];
+                j((1:3*nxy)+(nz-1)*3*nxy) = (nz-1)*nxy+[-2*nxy+(1:nxy) -nxy+(1:nxy) 1:nxy];
+                v((1:3*nxy)+(nz-1)*3*nxy) = [idz2+zeros(1,nxy) -2*idz2+zeros(1,nxy) idz2+zeros(1,nxy)];
+                Dz = sparse(i,j,v);
+            end
+        end
+        function G = preFFTMA(obj,cm)
+            small = 1e-6;
+            Nx = 2*length(obj.grx);
+            Ny = 2*length(obj.gry);
+            Nz = 2*length(obj.grz);
+            
+            Nx2 = Nx/2;
+            Ny2 = Ny/2;
+            Nz2 = Nz/2;
+            
+            x = obj.dx*(0:Nx2-1);
+            x = [x fliplr(-x)]';
+            y = obj.dy*(0:Ny2-1);
+            y = [y fliplr(-y)]';
+            z = obj.dz*(0:Nz2-1);
+            z = [z fliplr(-z)]';
+            
+            x = kron(ones(Ny*Nz,1), x);
+            y = kron(kron(ones(Nz,1), y),ones(Nx,1));
+            z = kron(z, ones(Nx*Ny,1));
+            
+            d = cm(1).compute([x y z],[0 0 0]);
+            for n=2:numel(cm)
+                d = d + cm(n).compute([x y z],[0 0 0]);
+            end
+            K = reshape(d,Nx,Ny,Nz);
+            
+            mk=0;
+            tmp = K(:,:,1);
+            if min(tmp(:))>small
+                Nz=5*Nz;
+                mk=1;
+            end
+            tmp = K(:,1,:);
+            if min(tmp(:))>small
+                Ny=5*Ny;
+                mk=1;
+            end
+            tmp = K(1,:,:);
+            if min(tmp)>small
+                Nx=5*Nx;
+                mk=1;
+            end
+            
+            if mk==1;
+                Nx2 = Nx/2;
+                Ny2 = Ny/2;
+                Nz2 = Nz/2;
+                
+                x = obj.dx*(0:Nx2-1);
+                x = [x fliplr(-x)]';
+                y = obj.dy*(0:Ny2-1);
+                y = [y fliplr(-y)]';
+                z = obj.dz*(0:Nz2-1);
+                z = [z fliplr(-z)]';
+                
+                x = kron(ones(Ny*Nz,1), x);
+                y = kron(kron(ones(Nz,1), y),ones(Nx,1));
+                z = kron(z, ones(Nx*Ny,1));
+                
+                d = cm(1).compute([x y z],[0 0 0]);
+                for n=2:numel(cm)
+                    d = d + cm(n).compute([x y z],[0 0 0]);
+                end
+                K = reshape(d,Nx,Ny,Nz);
+            end
+            G=fftn(K).^0.5;
+        end
+        function ms = FFTMA(obj,G)
+            [Nx,Ny,Nz] = size(G);
+            U=fftn(randn(size(G)));
+            GU=G.*U;
+            % Transformation de Fourier inverse donnant g*u et z
+            Z=real(ifftn(GU));
+            ms = Z((Nx+2)/2+1:(Nx+2)/2+length(obj.grx)-1,...
+                (Ny+2)/2+1:(Ny+2)/2+length(obj.gry)-1,...
+                (Nz+2)/2+1:(Nz+2)/2+length(obj.grz)-1);
+        end
         % for saving in mat-files
         function s = saveobj(obj)
             s.nthreads = obj.nthreads;

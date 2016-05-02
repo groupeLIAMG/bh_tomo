@@ -298,13 +298,13 @@ uiwait(f)
                         coord = [boreholes(nn).scont.x boreholes(nn).scont.y boreholes(nn).scont.z];
                         [coord,~] = gUI.project(coord);
                         g.cont.slowness.data = [g.cont.slowness.data;
-                            [coord(:,3) coord(:,1) boreholes(nn).scont.valeur boreholes(nn).scont.variance]];
+                            [coord(:,1) coord(:,3) boreholes(nn).scont.valeur boreholes(nn).scont.variance]];
                         g.cont.slowness.data = unique(g.cont.slowness.data,'rows');
                     case '2D+'
                         coord = [boreholes(nn).scont.x boreholes(nn).scont.y boreholes(nn).scont.z];
                         [coord,~] = gUI.project(coord);
                         g.cont.slowness.data = [g.cont.slowness.data;
-                            [coord(:,3) coord(:,1) boreholes(nn).scont.valeur boreholes(nn).scont.variance]];
+                            [coord(:,1) coord(:,3) boreholes(nn).scont.valeur boreholes(nn).scont.variance]];
                         g.cont.slowness.data = unique(g.cont.slowness.data,'rows');
                     case '3D'
                         g.cont.slowness.data = [g.cont.slowness.data;
@@ -321,13 +321,13 @@ uiwait(f)
                         coord = [boreholes(nn).acont.x boreholes(nn).acont.y boreholes(nn).acont.z];
                         [coord,~] = gUI.project(coord);
                         g.cont.attenuation.data = [g.cont.attenuation.data;
-                            [coord(:,3) coord(:,1) boreholes(nn).acont.valeur boreholes(nn).acont.variance]];
+                            [coord(:,1) coord(:,3) boreholes(nn).acont.valeur boreholes(nn).acont.variance]];
                         g.cont.attenuation.data = unique(g.cont.attenuation.data,'rows');
                     case '2D+'
                         coord = [boreholes(nn).acont.x boreholes(nn).acont.y boreholes(nn).acont.z];
                         [coord,~] = gUI.project(coord);
                         g.cont.attenuation.data = [g.cont.attenuation.data;
-                            [coord(:,3) coord(:,1) boreholes(nn).acont.valeur boreholes(nn).acont.variance]];
+                            [coord(:,1) coord(:,3) boreholes(nn).acont.valeur boreholes(nn).acont.variance]];
                         g.cont.attenuation.data = unique(g.cont.attenuation.data,'rows');
                     case '3D'
                         g.cont.attenuation.data = [g.cont.attenuation.data;

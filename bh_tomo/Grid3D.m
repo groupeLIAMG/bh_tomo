@@ -94,16 +94,16 @@ classdef Grid3D < Grid
             else
                 obj.nthreads = 1;
             end
-            
+
         end
-        
+
         % Destructor - Destroy the C++ class instance
         function delete(obj)
             if ~isempty(obj.mexObj)
                 grid3d_mex('delete', obj.mexObj);
             end
         end
-        
+
         % raytrace
         function varargout = raytrace(obj, varargin)
             if isempty(obj.mexObj)
@@ -128,10 +128,10 @@ classdef Grid3D < Grid
                         abs(grid3d_mex('get_nx', obj.mexObj)-(length(obj.grx)-1))>10*eps || ...
                         abs(grid3d_mex('get_ny', obj.mexObj)-(length(obj.gry)-1))>10*eps || ...
                         abs(grid3d_mex('get_nz', obj.mexObj)-(length(obj.grz)-1))>10*eps
-                    
+
                     % delete old instance
                     grid3d_mex('delete', obj.mexObj);
-                    
+
                     % create new instance with right dimensions
                     s.xmin = obj.grx(1);
                     s.ymin = obj.gry(1);
@@ -147,7 +147,7 @@ classdef Grid3D < Grid
             end
             [varargout{1:nargout}] = grid3d_mex('raytrace', obj.mexObj, varargin{:});
         end
-        
+
         function L = getForwardStraightRays(obj,varargin)
             ind = true(size(obj.Tx,1),1);
             grx = obj.grx;
@@ -217,9 +217,9 @@ classdef Grid3D < Grid
         end
         function [Dx,Dy,Dz] = derivative(obj,order)
             % compute derivative operators for grid _cells_
-            
+
             % x is "fastest" dimension, z is "slowest"
-            
+
             nx=length(obj.grx)-1;
             ny=length(obj.gry)-1;
             nz=length(obj.grz)-1;
@@ -227,7 +227,7 @@ classdef Grid3D < Grid
                 idx = 1/obj.dx;
                 idy = 1/obj.dy;
                 idz = 1/obj.dz;
-                
+
                 i = kron(1:nx*ny*nz,ones(1,2));
                 jj = [[1 1:nx-1];[2 3:nx nx]];
                 jj = reshape(jj,1,numel(jj));
@@ -239,7 +239,7 @@ classdef Grid3D < Grid
                 v = kron(ones(1,ny*nz),v);
                 Dx = sparse(i,j,v);
 
-                
+
                 nxy=nx*ny;
                 i = zeros(1,nz*nxy*2);
                 j = zeros(1,nz*nxy*2);
@@ -261,7 +261,7 @@ classdef Grid3D < Grid
                     v((1:2*nxy)+(n-1)*2*nxy) = v(1:2*nxy);
                 end
                 Dy = sparse(i,j,v);
-                
+
                 i = zeros(1,nz*nxy*2);
                 j = zeros(1,nz*nxy*2);
                 v = zeros(1,nz*nxy*2);
@@ -285,7 +285,7 @@ classdef Grid3D < Grid
                 idx2 = 1/(obj.dx*obj.dx);
                 idy2 = 1/(obj.dy*obj.dy);
                 idz2 = 1/(obj.dz*obj.dz);
-                
+
                 i = kron(1:nx*ny*nz,ones(1,3));
                 jj = [[1 1:nx-2 nx-2];[2 2:nx-1 nx-1];[3 3:nx nx]];
                 jj = reshape(jj,1,numel(jj));
@@ -296,7 +296,7 @@ classdef Grid3D < Grid
                 v = kron(ones(1,nx*ny*nz),idx2*[1 -2 1]);
                 Dx = sparse(i,j,v);
 
-                
+
                 nxy=nx*ny;
                 i = zeros(1,nz*nxy*3);
                 j = zeros(1,nz*nxy*3);
@@ -319,7 +319,7 @@ classdef Grid3D < Grid
                 end
                 Dy = sparse(i,j,v);
 
-                
+
                 i = zeros(1,nz*nxy*3);
                 j = zeros(1,nz*nxy*3);
                 v = zeros(1,nz*nxy*3);
@@ -344,28 +344,28 @@ classdef Grid3D < Grid
             Nx = 2*length(obj.grx);
             Ny = 2*length(obj.gry);
             Nz = 2*length(obj.grz);
-            
+
             Nx2 = Nx/2;
             Ny2 = Ny/2;
             Nz2 = Nz/2;
-            
+
             x = obj.dx*(0:Nx2-1);
             x = [x fliplr(-x)]';
             y = obj.dy*(0:Ny2-1);
             y = [y fliplr(-y)]';
             z = obj.dz*(0:Nz2-1);
             z = [z fliplr(-z)]';
-            
+
             x = kron(ones(Ny*Nz,1), x);
             y = kron(kron(ones(Nz,1), y),ones(Nx,1));
             z = kron(z, ones(Nx*Ny,1));
-            
+
             d = cm(1).compute([x y z],[0 0 0]);
             for n=2:numel(cm)
                 d = d + cm(n).compute([x y z],[0 0 0]);
             end
             K = reshape(d,Nx,Ny,Nz);
-            
+
             mk=0;
             tmp = K(:,:,1);
             if min(tmp(:))>small
@@ -382,23 +382,23 @@ classdef Grid3D < Grid
                 Nx=5*Nx;
                 mk=1;
             end
-            
+
             if mk==1;
                 Nx2 = Nx/2;
                 Ny2 = Ny/2;
                 Nz2 = Nz/2;
-                
+
                 x = obj.dx*(0:Nx2-1);
                 x = [x fliplr(-x)]';
                 y = obj.dy*(0:Ny2-1);
                 y = [y fliplr(-y)]';
                 z = obj.dz*(0:Nz2-1);
                 z = [z fliplr(-z)]';
-                
+
                 x = kron(ones(Ny*Nz,1), x);
                 y = kron(kron(ones(Nz,1), y),ones(Nx,1));
                 z = kron(z, ones(Nx*Ny,1));
-                
+
                 d = cm(1).compute([x y z],[0 0 0]);
                 for n=2:numel(cm)
                     d = d + cm(n).compute([x y z],[0 0 0]);
@@ -440,7 +440,7 @@ classdef Grid3D < Grid
         function obj = loadobj(s)
             if isstruct(s)
                 obj = Grid3D(s.grx, s.gry, s.grz, s.nthreads);
-                
+
                 obj.cont = s.cont;
                 obj.Tx = s.Tx;
                 obj.Rx = s.Rx;

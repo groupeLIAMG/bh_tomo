@@ -115,7 +115,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%
 %%% Create InputFig %%%
 %%%%%%%%%%%%%%%%%%%%%%%
-FigWidth=175;
+FigWidth=200;
 FigHeight=100;
 FigPos(3:4)=[FigWidth FigHeight];  %#ok
 FigColor=get(0,'DefaultUicontrolBackgroundColor');

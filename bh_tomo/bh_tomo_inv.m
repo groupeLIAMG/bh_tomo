@@ -648,10 +648,10 @@ end
 % h.tomo.date = date_tomo;
 
 % BG: above changed to use date of selected mogs only
-[mog mdate] = strtok(str_mogs{selected_mogs(1)},',');
+[~, mdate] = strtok(str_mogs{selected_mogs(1)},',');
 h.tomo.date = mdate(2:end);
 for n=2:length(selected_mogs)
-    [mog mdate] = strtok(str_mogs{selected_mogs(n)},',');
+    [~, mdate] = strtok(str_mogs{selected_mogs(n)},',');
     d = mdate(2:end);
     if ( datenum(d) < datenum(h.tomo.date) )
         h.tomo.date = d;

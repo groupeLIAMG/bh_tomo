@@ -40,6 +40,7 @@ else
     end
 end
 
+[Dx,Dy,Dz] = grid.derivative(param.order);
 for noIter=1:param.numItStraight + param.numItCurved
     
     if ~isempty(t_handle)
@@ -61,7 +62,6 @@ for noIter=1:param.numItStraight + param.numItCurved
         s_o = l_moy * ones(size(L,2),1);
     end
 
-    [Dx,Dy,Dz] = grid.derivative(2);
     A = [L; Dx*param.alphax; Dy*param.alphay; Dz*param.alphaz];
     b = [dt;zeros(size(Dx,1),1);zeros(size(Dy,1),1);zeros(size(Dz,1),1)];
     if ~isempty(cont) && param.useCont==1

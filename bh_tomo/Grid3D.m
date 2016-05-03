@@ -215,18 +215,31 @@ classdef Grid3D < Grid
                 indc(i)=min(ind11(ind22(ind33)));
             end
         end
-        function [Dx,Dy,Dz] = derivative(obj,order)
+        function [Dx,Dy,Dz] = derivative(obj,order,varargin)
             % compute derivative operators for grid _cells_
 
             % x is "fastest" dimension, z is "slowest"
 
+            normalize=false;
+            if nargin>=3
+                % normalize to true cell size
+                normalize=varargin{1};
+            end
+            dx=1;
+            dy=1;
+            dz=1;
+            if normalize
+                dx=obj.dx;
+                dy=obj.dy;
+                dz=obj.dz;
+            end
             nx=length(obj.grx)-1;
             ny=length(obj.gry)-1;
             nz=length(obj.grz)-1;
             if order==1
-                idx = 1/obj.dx;
-                idy = 1/obj.dy;
-                idz = 1/obj.dz;
+                idx = 1/dx;
+                idy = 1/dy;
+                idz = 1/dz;
 
                 i = kron(1:nx*ny*nz,ones(1,2));
                 jj = [[1 1:nx-1];[2 3:nx nx]];
@@ -282,9 +295,9 @@ classdef Grid3D < Grid
                 Dz = sparse(i,j,v);
             else
                 % order = 2
-                idx2 = 1/(obj.dx*obj.dx);
-                idy2 = 1/(obj.dy*obj.dy);
-                idz2 = 1/(obj.dz*obj.dz);
+                idx2 = 1/(dx*dx);
+                idy2 = 1/(dy*dy);
+                idz2 = 1/(dz*dz);
 
                 i = kron(1:nx*ny*nz,ones(1,3));
                 jj = [[1 1:nx-2 nx-2];[2 2:nx-1 nx-1];[3 3:nx nx]];

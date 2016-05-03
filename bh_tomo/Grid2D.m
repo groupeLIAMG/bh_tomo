@@ -162,14 +162,25 @@ classdef Grid2D < Grid
                 indc(i)=min(ind11(ind22));
             end
         end
-        function [Dx,Dy,Dz] = derivative(obj,order)
+        function [Dx,Dy,Dz] = derivative(obj,order,varargin)
             % compute derivative operators for grid _cells_
+            normalize=false;
+            if nargin>=3
+                % normalize to true cell size
+                normalize=varargin{1};
+            end
+            dx=1;
+            dz=1;
+            if normalize
+                dx=obj.dx;
+                dz=obj.dz;
+            end
             nx=length(obj.grx)-1;
             nz=length(obj.grz)-1;
             Dy = [];
             if order==1
-                idx = 1/obj.dx;
-                idz = 1/obj.dz;
+                idx = 1/dx;
+                idz = 1/dz;
                 
                 i = zeros(1,nz*nx*2);
                 j = zeros(1,nz*nx*2);
@@ -202,8 +213,8 @@ classdef Grid2D < Grid
                 Dz = sparse(i,j,v);
             else
                 % order==2
-                idx2 = 1/(obj.dx*obj.dx);
-                idz2 = 1/(obj.dz*obj.dz);
+                idx2 = 1/(dx*dx);
+                idz2 = 1/(dz*dz);
                 
                 i = zeros(1,nz*nx*3);
                 j = zeros(1,nz*nx*3);
@@ -234,6 +245,8 @@ classdef Grid2D < Grid
                 v=kron(ones(1,nx*nz),idz2*[1 -2 1]);
                 Dz = sparse(i,j,v);
             end
+%             figure; imagesc(Dx); axis tight; axis equal; colorbar
+%             figure; imagesc(Dz); axis tight; axis equal; colorbar
         end
         function G = preFFTMA(obj,cm)
             small = 1e-6;

@@ -1,4 +1,4 @@
-classdef Covariance < matlab.mixin.Heterogeneous & handle
+classdef Covariance < matlab.mixin.Heterogeneous & matlab.mixin.Copyable
     %COVARIANCE Base class for covariance models
     
     % Code in part from covardm from Denis Marcotte

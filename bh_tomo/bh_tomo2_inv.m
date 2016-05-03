@@ -19,6 +19,14 @@ model = [];
 saved = true;
 previousTypeData = 1;
 previousTypeInv = 1;
+tomo = [];
+param = [];
+gridViewer = [];
+
+cminAmp = 1;
+cmaxAmp = 3;
+cminTT = 0.06;
+cmaxTT = 0.12;
 
 fs = 11;
 if nargin>=3
@@ -65,9 +73,23 @@ uimenu(hmenu,'Label','Close',...
     'Separator','on',...
     'Accelerator','W',...
     'Callback',@closeWindow);
-hinvMenu = uimenu(f,'Label','Inversion');
+%hinvMenu = uimenu(f,'Label','Inversion');
 hresultsMenu = uimenu(f,'Label','Results');
-hdataMenu = uimenu(f,'Label','Data');
+uimenu(hresultsMenu,'Label','Export ...',...
+    'Accelerator','E',...
+    'Callback',@exportTomo);
+uimenu(hresultsMenu,'Label','Tomogram',...
+    'Accelerator','T',...
+    'Callback',@showTomo);
+uimenu(hresultsMenu,'Label','Simulations',...
+    'Accelerator','G',...
+    'Callback',@showSim);
+uimenu(hresultsMenu,'Label','Rays',...
+    'Accelerator','R',...
+    'Callback',@showRays);
+uimenu(hresultsMenu,'Label','Residuals',...
+    'Callback',@showResiduals);
+%hdataMenu = uimenu(f,'Label','Data');
 
 %
 % Main Panels
@@ -110,7 +132,7 @@ hpanelName = uicontrol('Style','text',...
     'Units','normalized',...
     'Position',[0.03 3.5*vSize+5*vSpace 0.47 vSize],...
     'Parent',pdata);
-hTypeData = uicontrol('Style','popupmenu',...
+htypeData = uicontrol('Style','popupmenu',...
     'String',{'Traveltime','Amplitude - Peak-to-Peak','Amplitude - Centroid Frequency'},...
     'FontSize',fs,...
     'Units','normalized',...
@@ -311,21 +333,21 @@ huseRays = uicontrol('Style','checkbox',...
     'Units','normalized',...
     'Position',[0.675 2*vSpace+vSize 0.3 vSize],...
     'Parent',pprevious);
-hviewPrevious = uicontrol('Style','pushbutton',...
+uicontrol('Style','pushbutton',...
     'String','View',...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.025 vSpace 0.3 vSize],...
     'Callback',@viewPrevious,...
     'Parent',pprevious);
-hdeletePrevious = uicontrol('Style','pushbutton',...
+uicontrol('Style','pushbutton',...
     'String','Delete',...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.35 vSpace 0.3 vSize],...
     'Callback',@deletePrevious,...
     'Parent',pprevious);
-hloadPrevious = uicontrol('Style','pushbutton',...
+uicontrol('Style','pushbutton',...
     'String','Load',...
     'FontSize',fs,...
     'Units','normalized',...
@@ -341,7 +363,7 @@ vSizeTot = nLines*22 + (nLines+1)*5;
 vSize = 22/vSizeTot;
 vSpace = 5/vSizeTot;
 
-hdoInv = uicontrol('Style','pushbutton',...
+uicontrol('Style','pushbutton',...
     'String','GO',...
     'FontSize',fs+1,...
     'FontWeight','bold',...
@@ -354,7 +376,7 @@ pgeostat = uipanel(pinv,'Title','Geostatistical Inversion',...
     'Position',[0.025 2*vSpace+1*vSize 0.95 14*vSize+14*vSpace],...
     'FontSize',fs,...
     'Visible','on');
-plsqr = uipanel(pinv,'Title','LSQR',...
+plsqr = uipanel(pinv,'Title','LSQR Solver',...
     'Units','normalized',...
     'Position',[0.025 2*vSpace+1*vSize 0.95 14*vSize+14*vSpace],...
     'FontSize',fs,...
@@ -371,7 +393,7 @@ uicontrol('Style','text',...
     'Position',[0.1 18*vSpace+16.75*vSize 0.3 vSize],...
     'Parent',pinv);
 htypeInv = uicontrol('Style','popupmenu',...
-    'String',{'Geostatistic','LSQR'},...
+    'String',{'Geostatistic','LSQR Solver'},...
     'Units','normalized',...
     'Position',[0.45 18*vSpace+16.75*vSize 0.4 vSize],...
     'Callback',@changeTypeInv,...
@@ -446,11 +468,12 @@ htilted = uicontrol('Style','checkbox',...
     'Position',[0.5 5*vSpace+14*vSize 0.45 vSize],...
     'Callback',@doTilted,...
     'Parent',pgeostat);
-hdoSimu = uicontrol('Style','checkbox',...
+hdoSim = uicontrol('Style','checkbox',...
     'String','Simulations',...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.025 6*vSpace+15*vSize 0.25 vSize],...
+    'Callback',@doSim,...
     'Parent',pgeostat);
 uicontrol('Style','text',...
     'String','Number of Simulations ',...
@@ -459,11 +482,12 @@ uicontrol('Style','text',...
     'Units','normalized',...
     'Position',[0.475 6*vSpace+15*vSize 0.35 vSize],...
     'Parent',pgeostat);
-hnSimu = uicontrol('Style','edit',...
-    'String','100',...
+hnSim = uicontrol('Style','edit',...
+    'String','128',...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.825 6*vSpace+15*vSize 0.15 vSize],...
+    'Callback',@checkNsim,...
     'Parent',pgeostat);
 
 nLines=2;
@@ -482,7 +506,7 @@ hmodelNugget = uicontrol('Style','edit',...
     'String','0',...
     'FontSize',fs,...
     'Units','normalized',...
-    'Callback',@updateCov,...
+    'Callback',@updateCovPar,...
     'Position',[0.28 2*vSpace+vSize 0.15 vSize],...
     'Parent',pnugget);
 uicontrol('Style','text',...
@@ -496,7 +520,7 @@ httNugget = uicontrol('Style','edit',...
     'String','0',...
     'FontSize',fs,...
     'Units','normalized',...
-    'Callback',@updateCov,...
+    'Callback',@updateCovPar,...
     'Position',[0.78 2*vSpace+vSize 0.15 vSize],...
     'Parent',pnugget);
 hxiText = uicontrol('Style','text',...
@@ -511,7 +535,7 @@ hxiNugget = uicontrol('Style','edit',...
     'String','0',...
     'FontSize',fs,...
     'Units','normalized',...
-    'Callback',@updateCov,...
+    'Callback',@updateCovPar,...
     'Visible','off',...
     'Position',[0.28 vSpace 0.15 vSize],...
     'Parent',pnugget);
@@ -527,7 +551,7 @@ htiltNugget = uicontrol('Style','edit',...
     'String','0',...
     'FontSize',fs,...
     'Units','normalized',...
-    'Callback',@updateCov,...
+    'Callback',@updateCovPar,...
     'Visible','off',...
     'Position',[0.78 vSpace 0.15 vSize],...
     'Parent',pnugget);
@@ -622,10 +646,10 @@ vSize = 22/vSizeTot;
 vSpace = 5/vSizeTot;
 
 hcolorbar = uicontrol('Style','checkbox',...
-    'String','Colorbar',...
+    'String','Set Color Limits',...
     'FontSize',fs,...
     'Units','normalized',...
-    'Position',[0.02 vSpace 0.1 vSize],...
+    'Position',[0.02 vSpace 0.12 vSize],...
     'Callback',@doColorbar,...
     'Parent',pfig);
 uicontrol('Style','text',...
@@ -633,26 +657,28 @@ uicontrol('Style','text',...
     'HorizontalAlignment','right',...
     'FontSize',fs,...
     'Units','normalized',...
-    'Position',[0.14 vSpace 0.05 vSize],...
+    'Position',[0.15 vSpace 0.04 vSize],...
     'Parent',pfig)
 hcmin = uicontrol('Style','edit',...
     'String','0.06',...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.2 vSpace 0.07 vSize],...
+    'Callback',@setClim,...
     'Parent',pfig);
 uicontrol('Style','text',...
     'String','Max: ',...
     'HorizontalAlignment','right',...
     'FontSize',fs,...
     'Units','normalized',...
-    'Position',[0.28 vSpace 0.05 vSize],...
+    'Position',[0.28 vSpace 0.04 vSize],...
     'Parent',pfig)
 hcmax = uicontrol('Style','edit',...
     'String','0.12',...
     'FontSize',fs,...
     'Units','normalized',...
-    'Position',[0.34 vSpace 0.07 vSize],...
+    'Position',[0.33 vSpace 0.07 vSize],...
+    'Callback',@setClim,...
     'Parent',pfig);
 
 m = {'cmr','parula','jet','hsv','hot','cool','autumn','spring','winter',...
@@ -662,7 +688,15 @@ hcmap = uicontrol('Style','popupmenu',...
     'String',m,...
     'FontSize',fs,...
     'Units','normalized',...
-    'Position',[0.42 vSpace 0.15 vSize],...
+    'Position',[0.41 vSpace 0.12 vSize],...
+    'Callback',@doMap,...
+    'Parent',pfig);
+hsliderText = uicontrol('Style','text',...
+    'String','Y Plane',...
+    'FontSize',fs,...
+    'Units','normalized',...
+    'Position',[0.54 vSpace 0.07 vSize],...
+    'Visible','off',...
     'Parent',pfig);
 
 nLines=14;
@@ -671,35 +705,42 @@ vSize = 22/vSizeTot;
 vSpace = 5/vSizeTot;
 
 uicontrol('Style','text',...
-    'String','Tolerance ',...
+    'String','Solver Tolerance ',...
+    'HorizontalAlignment','right',...
+    'FontSize',fs,...
+    'Units','normalized',...
+    'Position',[0.02 13*vSpace+12*vSize 0.75 vSize],...
+    'Parent',plsqr);
+uicontrol('Style','text',...
+    'String','Max Number of Solver Iterations ',...
     'HorizontalAlignment','right',...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.02 12*vSpace+11*vSize 0.75 vSize],...
     'Parent',plsqr);
 uicontrol('Style','text',...
-    'String','Alpha ',...
+    'String','Constraints Weight ',...
     'HorizontalAlignment','right',...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.02 11*vSpace+10*vSize 0.75 vSize],...
     'Parent',plsqr);
 uicontrol('Style','text',...
-    'String','gradmin ',...
+    'String','Smoothing Weight x',...
     'HorizontalAlignment','right',...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.02 10*vSpace+9*vSize 0.75 vSize],...
     'Parent',plsqr);
 uicontrol('Style','text',...
-    'String','correlmin ',...
+    'String','Smoothing Weight y',...
     'HorizontalAlignment','right',...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.02 9*vSpace+8*vSize 0.75 vSize],...
     'Parent',plsqr);
 uicontrol('Style','text',...
-    'String','Number of solver iterations ',...
+    'String','Smoothing Weight z',...
     'HorizontalAlignment','right',...
     'FontSize',fs,...
     'Units','normalized',...
@@ -717,28 +758,34 @@ htolLSQR = uicontrol('Style','edit',...
     'String','1e-6',...
     'FontSize',fs,...
     'Units','normalized',...
+    'Position',[0.8 13*vSpace+12*vSize 0.15 vSize],...
+    'Parent',plsqr);
+hnitLSQR = uicontrol('Style','edit',...
+    'String','100',...
+    'FontSize',fs,...
+    'Units','normalized',...
     'Position',[0.8 12*vSpace+11*vSize 0.15 vSize],...
     'Parent',plsqr);
-halphaLSQR = uicontrol('Style','edit',...
-    'String','10',...
+hwContLSQR = uicontrol('Style','edit',...
+    'String','1',...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.8 11*vSpace+10*vSize 0.15 vSize],...
     'Parent',plsqr);
-hgradminLSQR = uicontrol('Style','edit',...
-    'String','1e-12',...
+halphaxLSQR = uicontrol('Style','edit',...
+    'String','10',...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.8 10*vSpace+9*vSize 0.15 vSize],...
     'Parent',plsqr);
-hcorelminLSQR = uicontrol('Style','edit',...
-    'String','1',...
+halphayLSQR = uicontrol('Style','edit',...
+    'String','10',...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.8 9*vSpace+8*vSize 0.15 vSize],...
     'Parent',plsqr);
-hnitLSQR = uicontrol('Style','edit',...
-    'String','100',...
+halphazLSQR = uicontrol('Style','edit',...
+    'String','10',...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.8 8*vSpace+7*vSize 0.15 vSize],...
@@ -774,7 +821,7 @@ f.Visible = 'on';
         vBorder = 10*vFac;
         
         axBorder = 60;%haxes1.Position(2);
-        
+        rBorder = 2*hBorder;
         hSize = 420;
         
         vSizeCumul = vBorder;
@@ -793,7 +840,6 @@ f.Visible = 'on';
         vSize2 = 5*vSize+6*vSpace;
         pdata.Position = [hBorder vSizeCumul hSize vSize2];
         
-        rBorder = 2*hBorder;
         vSize2 = height-2*axBorder-4*vSize;
         hSize2 = width-(hBorder+hSize+axBorder+rBorder);
         
@@ -827,9 +873,78 @@ f.Visible = 'on';
         if isempty(model)
             return
         end
-        m=matfile([rep,file],'Writable',true);
-        m.models(modelNo) = model;
+        
+        if isempty(tomo)
+            % save current model even if empty tomo,
+            %    in case previous inversion were removed
+            load([rep,file],'models')
+            models(modelNo).inv_res = model.inv_res; %#ok<STRNU>
+            save([rep,file],'models','-append')
+            saved = true;
+            return
+        end
+            
+        switch htypeData.Value
+            case 1
+                dType = '-vel';
+            otherwise
+                dType = '-att';
+        end
+        switch htypeInv.Value
+            case 1
+                if param.cm.use_tilt==1
+                    cov = '-tilted_aniso';
+                elseif param.cm.use_xi==1
+                    cov = '-ellipt_aniso';
+                else
+                    cov = '-geostat';
+                end
+            case 2
+                cov = '-LSQR';
+        end
+        nameDefault = ['tomo(',tomo.date,')',dType,cov];  
+        prompt = {'Inversion name:                                                               '};
+        title = 'Save inversion results';
+        nblines = 1;
+        answer = myinputdlg(prompt,title,nblines,{nameDefault},'on');
+        if ~isempty(answer)
+            name=answer{1};
+        end
+        
+        if isempty(model.inv_res)
+            no_inv_res = 1;
+        else
+            flag=0;
+            no_inv_res = 1+length(model.inv_res);
+            for n=1:length(model.inv_res)
+                if strcmp(model.inv_res(n).name, name)
+                    no_inv_res = n;
+                    flag = 1;
+                    break;
+                end
+            end
+            if flag==1
+                answer=questdlg(['Overwrite ',name,'?']);
+                if ~strcmp(answer,'Yes')
+                    return
+                end
+            end
+        end
+        model.inv_res(no_inv_res).name = name;
+        model.inv_res(no_inv_res).tomo = tomo;
+        model.inv_res(no_inv_res).param = param;
+        
+        load([rep,file],'models')
+        models(modelNo) = model; %#ok<NASGU>
+        save([rep,file],'models','-append')
         saved = true;
+        
+        names = cell(numel(model.inv_res),1);
+        for n=1:numel(model.inv_res)
+            names{n} = model.inv_res(n).name;
+        end
+        hpreviousInv.String = names;
+        
     end
     function openFile(varargin)
         [modelNo,file2,rep2] = chooseModel(rep,file);
@@ -839,7 +954,7 @@ f.Visible = 'on';
         rep=rep2;
         file=file2;
         try
-            load([rep,file],'models','names_mog')
+            load([rep,file],'models','mogs')
         catch ME
             errordlg(ME.message)
             return
@@ -853,22 +968,29 @@ f.Visible = 'on';
         %
         % Reset UI
         %
-        cla(haxes1)
-        cla(haxes2)
-        cla(haxes3)
-        
+        cla(haxes1);cla(haxes2);cla(haxes3)
+        cbh = findobj( 0, 'tag', 'Colorbar' );
+        hsliderText.Visible = 'off';
+        for i = 1: length(cbh)
+            colorbar(cbh(i),'off')
+        end
+
         mname = cell(numel(model.mogs),1);
         for n=1:numel(model.mogs)
-            mname{n} = names_mog{model.mogs(n)}; %#ok<USENS>
+            mname{n} = [mogs(model.mogs(n)).name,' - ',mogs(model.mogs(n)).date];
         end
         hlistMog.String = mname;
         hlistMog.Max = numel(model.mogs);
         hpanelName.String = model.name;
         
-        nr = cell(1+numel(model.inv_res),1);
-        nr{1} = '-';
-        for n=1:numel(model.inv_res)
-            nr{n+1} = [char( model.inv_res(n).name ), ', ',char( model.inv_res(n).tomo.date)];
+        if ~isempty(model.inv_res)
+            nr = cell(numel(model.inv_res),1);
+            for n=1:numel(model.inv_res)
+                nr{n} = model.inv_res(n).name;
+            end
+        else
+            nr = cell(1);
+            nr{1} = '-';
         end
         hpreviousInv.String = nr;
         hpreviousInv.Value = 1;
@@ -891,10 +1013,25 @@ f.Visible = 'on';
         hzmin.String = num2str(model.grid.grz(1));
         hzmax.String = num2str(model.grid.grz(end));
         hdz.String = num2str(model.grid.dz());
-        hncells.String = num2str(model.grid.getNumberOfCells());
+        hncells.String = [num2str(model.grid.getNumberOfCells()),' Cells'];
         
-        hTypeData.Value = 1;
-        
+        htypeData.Value = 1;
+        gridViewer = GridViewer(model.grid);
+        if strcmp(model.grid.type, '3D')
+            hsliderText.Visible = 'on';
+            gridViewer.createSliders('Parent',pfig,...
+                'Units','normalized','Visible','off');
+            nLines=1;
+            vSizeTot = nLines*22 + 2*5;
+            vSize = 22/vSizeTot;
+            vSpace = 5/vSizeTot;
+            gridViewer.slider1.Position = [0.64 vSpace 0.15 vSize];
+            gridViewer.slider1.Visible = 'on';
+            gridViewer.slider2.Position = [0.80 vSpace 0.15 vSize];
+            if hdoSim.Value==1
+                gridViewer.slider2.Visible = 'on';
+            end
+        end
         if ~isempty(model.tt_covar.covar)
             hvar.String = 'Slowness';
             cm = model.tt_covar;
@@ -1079,9 +1216,7 @@ f.Visible = 'on';
             htilt.Visible = 'on';
             htiltText.Visible = 'on';
             htiltNugget.Visible = 'on';
-                        
             cmTiltUI(hstructList.Value).setVisible('on');
-
         else
             htilt.Visible = 'off';
             htiltText.Visible = 'off';
@@ -1112,42 +1247,96 @@ f.Visible = 'on';
             cm.covar(sNo).range = cmUI(sNo).range;
             cm.covar(sNo).angle = cmUI(sNo).angle;
             cm.covar(sNo).sill = cmUI(sNo).sill;
-        elseif src == cmXiUI(sNo)
-            cm.covar_xi(sNo).range = cmXiUI(sNo).range;
-            cm.covar_xi(sNo).angle = cmXiUI(sNo).angle;
-            cm.covar_xi(sNo).sill = cmXiUI(sNo).sill;
-        elseif src == cmTiltUI(sNo)
-            cm.covar_tilt(sNo).range = cmTiltUI(sNo).range;
-            cm.covar_tilt(sNo).angle = cmTiltUI(sNo).angle;
-            cm.covar_tilt(sNo).sill = cmTiltUI(sNo).sill;
+        elseif ~isempty(cmXiUI)
+            if src == cmXiUI(sNo)
+                cm.covar_xi(sNo).range = cmXiUI(sNo).range;
+                cm.covar_xi(sNo).angle = cmXiUI(sNo).angle;
+                cm.covar_xi(sNo).sill = cmXiUI(sNo).sill;
+            end
+        elseif ~isempty(cmTiltUI)
+            if src == cmTiltUI(sNo)
+                cm.covar_tilt(sNo).range = cmTiltUI(sNo).range;
+                cm.covar_tilt(sNo).angle = cmTiltUI(sNo).angle;
+                cm.covar_tilt(sNo).sill = cmTiltUI(sNo).sill;
+            end
+        elseif src==httNugget
+            cm.nugget_d = str2double(httNugget.String);
+        elseif src==hmodelNugget
+            cm.nugget_m = str2double(hmodelNugget.String);
+        elseif src==hxiNugget
+            cm.nugget_xi = str2double(hxiNugget.String);
+        elseif src==htiltNugget
+            cm.nugget_tilt = str2double(htiltNugget.String);
         end
     end
 
     function changeTypeData(varargin)
-        if hTypeData.Value ~= previousTypeData
+        if isempty(model)
+            warndlg('Data not Loaded')
+            htypeData.Value = previousTypeData;
+            return
+        end
+        if htypeData.Value ~= previousTypeData
             % type was really changed
-            % TODO
-            
-            previousTypeData = hTypeData.Value;
+            if previousTypeData == 1
+                
+                if isempty(model.amp_covar.covar)
+                    warndlg({'Covariance model parameters not defined for Attenuation',...
+                        'Use Covariance Model Estmation Module',...
+                        'Switching to back to Traveltime'})
+                    htypeData.Value = previousTypeData;
+                    return
+                end
+                
+                model.tt_covar = cm;
+                cm = model.amp_covar;
+                hvar.String = 'Attenuation';
+                hcmin.String = num2str(cminAmp);
+                hcmax.String = num2str(cmaxAmp);
+            elseif htypeData.Value == 1
+                
+                if isempty(model.amp_covar.covar)
+                    warndlg({'Covariance model parameters not defined for Slowness',...
+                        'Use Covariance Model Estmation Module',...
+                        'Switching to back to Amplitude'})
+                    htypeData.Value = previousTypeData;
+                    return
+                end
+                
+                model.amp_covar = cm;
+                cm = model.tt_covar;
+                hvar.String = 'Slowness';
+                hcmin.String = num2str(cminTT);
+                hcmax.String = num2str(cmaxTT);
+            end
+            previousTypeData = htypeData.Value;
+            fillCovarUI()
         end
     end
 
     function changeTypeInv(varargin)
+        if isempty(model)
+            warndlg('Data not Loaded')
+            htypeInv.Value = previousTypeInv;
+            return
+        end
         if htypeInv.Value ~= previousTypeInv
             % type was really changed
             if htypeInv.Value==1
-                if (hTypeData.Value==1 && isempty(model.tt_covar.covar)) || ...
-                        (hTypeData.Value~=1 && isempty(model.amp_covar.covar))
+                if (htypeData.Value==1 && isempty(model.tt_covar.covar)) || ...
+                        (htypeData.Value~=1 && isempty(model.amp_covar.covar))
                     warndlg({'Covariance model parameters not defined',...
                         'Use Covariance Model Estmation Module',...
                         'Switching to LSQR'})
                     htypeInv.Value = 2;
                     return
                 end
-                if hTypeData.Value==1
+                if htypeData.Value==1
                     cm = model.tt_covar;
+                    hvar.String = 'Slowness';
                 else
                     cm = model.amp_covar;
+                    hvar.String = 'Attenuation';
                 end
                 pgeostat.Visible = 'on';
                 plsqr.Visible = 'off';
@@ -1161,26 +1350,257 @@ f.Visible = 'on';
     end
 
     function viewPrevious(varargin)
-        
+        if isempty(model)
+            return
+        end
+        if isempty(model.inv_res)
+            return
+        end
+        no = hpreviousInv.Value;
+        if model.inv_res(no).param.tomoAtt==0
+            t = 1./model.inv_res(no).tomo.s;
+        else
+            t = model.inv_res(no).tomo.s;
+        end
+        nf=figure;
+        ax=axes('Parent',nf);
+        if strcmp(model.grid.type,'3D')==1
+            gv = GridViewer(model.grid);
+            gv.createSliders('Parent',nf);
+            gv.slider2.Visible = 'off';
+            gv.plotTomo(t,model.inv_res(no).name,'Distance [m]','Elevation [m]',ax)
+        else
+            gridViewer.plotTomo(t,model.inv_res(no).name,'Distance [m]','Elevation [m]',ax)
+        end
+        colorbar('peer',ax)
+        colormap(nf,hcmap.String{hcmap.Value})
     end
     function deletePrevious(varargin)
+        if isempty(model)
+            return
+        end
+        if isempty(model.inv_res)
+            return
+        end
+        no = hpreviousInv.Value;
+        nos=1:numel(model.inv_res);
+        ind = nos~=no;
+        model.inv_res = model.inv_res(ind);
         
+        if isempty(model.inv_res)
+            hpreviousInv.String = {'-'};
+        else
+            names = cell(numel(model.inv_res),1);
+            for n=1:numel(model.inv_res)
+                names{n} = model.inv_res(n).name;
+            end
+            hpreviousInv.String = names;
+        end
+        tomo = [];
+        saved = false;
     end
     function loadPrevious(varargin)
-        
+        if isempty(model)
+            return
+        end
+        if isempty(model.inv_res)
+            return
+        end
+        no = hpreviousInv.Value;
+        tomo = model.inv_res(no).tomo;
+        param = model.inv_res(no).param;
     end
     function doColorbar(varargin)
-        
+        cl = [str2double(hcmin.String) str2double(hcmax.String)];
+        haxes1.CLim = cl;
+        haxes2.CLim = cl;
+        haxes3.CLim = cl;        
+    end
+    function doMap(varargin)
+        colormap(f, hcmap.String{hcmap.Value})
     end
     function doInv(varargin)
+        if isempty(model)
+            return
+        end
+        if huseRays.Value==1 && htypeInv.Value==1 && htilted.Value==1
+            warndlg('Inversion using rays for tilted anisotropic media not yet available')
+            return
+        end
+        cla(haxes1);cla(haxes2);cla(haxes3)
+        cbh = findobj( 0, 'tag', 'Colorbar' );
+        for i = 1: length(cbh)
+            colorbar(cbh(i),'off')
+        end
+
+        param = [];
+        param.selectedMogs = hlistMog.Value;
+        cmap = hcmap.String{hcmap.Value};
+        clim = [];
+        if htypeData.Value==1
+            param.tomoAtt = 0;
+            [data,idata] = Model.getModelData(model,[rep,file],'tt',param.selectedMogs);
+            data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data ...
+                model.grid.TxCosDir(idata,:) model.grid.RxCosDir(idata,:)];
+            if hcolorbar.Value==1
+                clim = [cminTT cmaxTT];
+            end
+        else
+            param.tomoAtt = 1;
+            switch htypeData.Value
+                case 2
+                    [data,idata] = Model.getModelData(model,[rep,file],'amp',param.selectedMogs);
+                case 3
+                    [data,idata] = Model.getModelData(model,[rep,file],'fce',param.selectedMogs);
+                case 4
+                    [data,idata] = Model.getModelData(model,[rep,file],'hyb',param.selectedMogs);
+            end
+            data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
+            if hcolorbar.Value==1
+                clim = [cminAmp cmaxAmp];
+            end
+        end
+        if isempty(data)
+            warndlg('Empty data')
+            return
+        end
         
+        param.numItStraight = str2double(hnStraight.String);
+        param.numItCurved = str2double(hnCurved.String);
+        param.saveInvData = 1;
+        param.useCont = huseCont.Value;
+        L = [];
+        rays = {};
+        noL = hpreviousInv.Value;
+        if huseRays.Value == 1
+            % check if grids are compatible
+            gx = 0.5*(model.grid.grx(1:end-1)+model.grid.grx(2:end));
+            gz = 0.5*(model.grid.grz(1:end-1)+model.grid.grz(2:end));
+            if ~isempty(model.grid.gry)
+                gy = 0.5*(model.grid.gry(1:end-1)+model.grid.gry(2:end));
+            else
+                gy = [];
+            end
+            if any(abs(model.inv_res(noL).tomo.x-gx)>100*eps) || ...
+                    any(abs(model.inv_res(noL).tomo.y-gy)>100*eps) || ...
+                    any(abs(model.inv_res(noL).tomo.z-gz)>100*eps)
+                errordlg('Rays of previous inversion not compatible with current grid')
+                return
+            end
+            
+            ind = [];
+            for n=1:size(data,1)
+                ii = find( model.inv_res(noL).tomo.no_trace==data(n,9) );
+                if isempty(ii)
+                    warndlg(['Ray no ',num2str(data(n,9)),' not in Matrix of Rays'])
+                    return
+                else
+                    ind = [ind ii]; %#ok<AGROW>
+                end
+            end
+            L = model.inv_res(noL).tomo.L(ind,:);
+            rays = rays{ind};
+            
+            if model.inv_res(noL).covar.use_xi==1 && cm.use_xi==0
+                % we need to transform matrix L
+                % we are in 2D
+                np = size(L,2)/2;
+                Lx = L(:,1:np);
+                Lz = L(:,(np+1):end);
+                L = sqrt(Lx.^2 + Lz.^2);
+            end
+        end
+        
+        width = f.Position(3);
+        height = f.Position(4);        
+        vFac = 1;
+        if ispc
+            vFac = 0.81*vFac;
+        end
+        vSize = 22*vFac;
+        axBorder = 60;%haxes1.Position(2);
+        hBorder = 15;
+        rBorder = 2*hBorder;
+        hSize = 420;
+        vSize2 = height-2*axBorder-4*vSize;
+        hSize2 = width-(hBorder+hSize+axBorder+rBorder);
+
+        if htypeInv.Value==1
+            % Geostat
+            
+            param.doSim = hdoSim.Value;
+            param.nSim = str2double(hnSim.String);
+            if htilted.Value==1
+                % we need three axes
+                haxes2.Visible = 'on';
+                haxes3.Visible = 'on';
+                hSize3 = (hSize2-2*rBorder)/3;
+                haxes1.Position = [hBorder+hSize+axBorder axBorder hSize3 vSize2];
+                haxes2.Position = [hBorder+hSize+axBorder+hSize3+rBorder axBorder hSize3 vSize2];
+                haxes3.Position = [hBorder+hSize+axBorder+2*hSize3+2*rBorder axBorder hSize3 vSize2];
+                gh = {clim; cmap; haxes1; haxes2; haxes3};
+            elseif hdoSim.Value==1 || helliptical.Value==1
+                % we need two axes
+                haxes2.Visible = 'on';
+                haxes3.Visible = 'off';
+                hSize3 = (hSize2-rBorder)/2;
+                haxes1.Position = [hBorder+hSize+axBorder axBorder hSize3 vSize2];
+                haxes2.Position = [hBorder+hSize+axBorder+hSize3+rBorder axBorder hSize3 vSize2];
+                gh = {clim; cmap; haxes1; haxes2; ''};
+            else
+                haxes1.Position = [hBorder+hSize+axBorder axBorder hSize2 vSize2];
+                haxes2.Visible = 'off';
+                haxes3.Visible = 'off';
+                gh = {clim; cmap; haxes1; ''; ''};
+            end
+            param.cm = copy(cm);
+            if cm.use_tilt==1
+                % TODO
+            elseif cm.use_xi==1
+                % TODO
+            else
+                tomo = invGeostat(param,data,idata,model.grid,cm,L,hmessage,gh,gridViewer);
+            end
+        else
+            % LSQR
+            param.tol = str2double(htolLSQR.String);
+            param.wCont = str2double(hwContLSQR.String);
+            param.alphax = str2double(halphaxLSQR.String);
+            param.alphay = str2double(halphayLSQR.String);
+            param.alphaz = str2double(halphazLSQR.String);
+            param.nbreiter = str2double(hnitLSQR.String);
+            param.dv_max = str2double(hdeltamaxLSQR.String);
+
+            haxes1.Position = [hBorder+hSize+axBorder axBorder hSize2 vSize2];
+            haxes2.Visible = 'off';
+            haxes3.Visible = 'off';
+            gh = {clim; cmap; haxes1; ''; ''};
+            
+            tomo = invLSQR(param,data,idata,model.grid,L,hmessage,gh,gridViewer);
+        end
+        
+        if isempty(tomo.rays)
+            tomo.rays = rays;
+        end
+        [~, mdate] = strtok(hlistMog.String{param.selectedMogs(1)},' - ');
+        tomo.date = mdate(4:end);
+        for n=2:length(param.selectedMogs)
+            [~, mdate] = strtok(hlistMog.String{param.selectedMogs(n)},' - ');
+            d = mdate(4:end);
+            if datenum(d) < datenum(tomo.date)
+                tomo.date = d;
+            end
+        end
+        saved = false;
     end
+
     function doElliptical(varargin)
         if helliptical.Value==1 && isempty(cm.covar_xi)
             warndlg({'Covariance model parameters not defined for elliptically anisotropic media'...
                 'Use Covariance Model Estmation Module'})
             helliptical.Value = 0;
         end
+        cm.use_xi = helliptical.Value;
         fillEllipticalUI()
     end
     function doTilted(varargin)
@@ -1189,7 +1609,110 @@ f.Visible = 'on';
                 'Use Covariance Model Estmation Module'})
             htilted.Value = 0;
         end
+        cm.use_tilt = htilted.Value;
         fillTiltUI()
     end
-
+    function setClim(src,varargin)
+        if htypeData.Value==1
+            if src==hcmin
+                if str2double(src.String)>cmaxTT
+                    warndlg({'Value should be smaller than max value',...
+                        'Resetting value'})
+                    src.String = num2str(cminTT);
+                    return
+                else
+                    cminTT = str2double(src.String);
+                end
+            else
+                if str2double(src.String)<cminTT
+                    warndlg({'Value should be greater than min value',...
+                        'Resetting value'})
+                    src.String = num2str(cmaxTT);
+                    return
+                else
+                    cmaxTT = str2double(src.String);
+                end
+            end
+        else
+            if src==hcmin
+                if str2double(src.String)>cmaxAmp
+                    warndlg({'Value should be smaller than max value',...
+                        'Resetting value'})
+                    src.String = num2str(cminAmp);
+                    return
+                else
+                    cminAmp = str2double(src.String);
+                end
+            else
+                if str2double(src.String)<cminAmp
+                    warndlg({'Value should be greater than min value',...
+                        'Resetting value'})
+                    src.String = num2str(cmaxAmp);
+                    return
+                else
+                    cmaxAmp = str2double(src.String);
+                end
+            end
+        end
+        if hcolorbar.Value==1
+            doColorbar()
+        end
+    end
+    function checkNsim(varargin)
+        ns = str2double(hnSim.String);
+        if 2^nextpow2(ns) ~= ns
+            warndlg({'Number of simulations must be a power of 2',...
+                ['Raising the number to ',num2str(2^nextpow2(ns))]})
+            hnSim.String = num2str(2^nextpow2(ns));
+        end
+    end
+    function doSim(varargin)
+        if ~isempty(gridViewer.slider2)
+            if hdoSim.Value==1
+                gridViewer.slider2.Visible = 'on';
+            else
+                gridViewer.slider2.Visible = 'off';
+            end
+        end
+    end
+    function exportTomo(varargin)
+        % TODO
+    end
+    function showTomo(varargin)
+        if isempty(tomo)
+            return
+        end
+        if param.tomoAtt==0
+            t = 1./tomo.s;
+        else
+            t = tomo.s;
+        end
+        nf=figure;
+        ax=axes('Parent',nf);
+        if strcmp(model.grid.type,'3D')==1
+            gv = GridViewer(model.grid);
+            gv.createSliders('Parent',nf);
+            gv.slider2.Visible = 'off';
+            gv.plotTomo(t,'','Distance [m]','Elevation [m]',ax)
+        else
+            gridViewer.plotTomo(t,'','Distance [m]','Elevation [m]',ax)
+        end
+        colorbar('peer',ax)
+        colormap(nf,hcmap.String{hcmap.Value})
+    end
+    function showSim(varargin)
+        if isempty(tomo)
+            return
+        end
+        if ~isfield(tomo,'simu')
+            return
+        end
+        % TODO add plotSimu to GridViewer
+    end
+    function showRays(varargin)
+        
+    end
+    function showResiduals(varargin)
+        
+    end
 end

@@ -87,7 +87,11 @@ uimenu(hresultsMenu,'Label','Simulations',...
 uimenu(hresultsMenu,'Label','Rays',...
     'Accelerator','R',...
     'Callback',@showRays);
+uimenu(hresultsMenu,'Label','Ray Density',...
+    'Accelerator','D',...
+    'Callback',@showRayDensity);
 uimenu(hresultsMenu,'Label','Residuals',...
+    'Accelerator','L',...
     'Callback',@showResiduals);
 %hdataMenu = uimenu(f,'Label','Data');
 
@@ -1725,9 +1729,160 @@ f.Visible = 'on';
         % TODO add plotSimu to GridViewer
     end
     function showRays(varargin)
+        if isempty(tomo)
+            return
+        end
+        nf=figure;
+        ax=axes('Parent',nf);
         
+        rmin = min(tomo.invData(end).res);
+        rmax = max(tomo.invData(end).res);
+        c = [0 0 1;0.8 0.8 0.8;1 0 0];
+        c = interp1((-1:1)',c,(-1:0.02:1)');
+        
+        m = (size(c,1)-1)/(rmax-rmin);
+        b = 1-rmin*m;
+        p = m*tomo.invData(end).res(1)+b;
+        
+        if strcmp(model.grid.type,'3D')
+            couleur = interp1(c,p);
+            plot3(ax,tomo.rays{1}(:,1),tomo.rays{1}(:,2),tomo.rays{1}(:,3),...
+                'Color',couleur)
+            hold(ax,'on')
+            for n=2:length(tomo.rays)
+                p = m*tomo.invData(end).res(n)+b;
+                couleur = interp1(c,p);
+                plot3(ax,tomo.rays{n}(:,1),tomo.rays{n}(:,2),tomo.rays{n}(:,3),...
+                    'Color',couleur)
+            end
+            hold(ax,'off')
+            xlabel(ax,'X','FontSize',12)
+            ylabel(ax,'Y','FontSize',12)
+            zlabel('Elevation [m]','FontSize',12)
+        else
+            couleur = interp1(c,p);
+            plot(ax,tomo.rays{1}(:,1),tomo.rays{1}(:,end),'Color',couleur)
+            hold(ax,'on')
+            for n=2:length(tomo.rays)
+                p = m*tomo.invData(end).res(n)+b;
+                couleur = interp1(c,p);
+                plot(ax,tomo.rays{n}(:,1),tomo.rays{n}(:,end),'Color',couleur)
+            end
+            hold(ax,'off')
+            xlabel('Distance [m]','FontSize',12)
+            ylabel('Elevation [m]','FontSize',12)
+        end
+        set(ax,'DataAspectRatio',[1 1 1])
+        colormap(c)%jet)
+        hb=colorbar('peer',ax);
+        caxis(ax,[rmin rmax])
+        set(get(hb,'Title'),'String','Residuals','FontSize',12)
+    end
+    function showRayDensity(varargin)
+        if isempty(tomo)
+            return
+        end
+        nf=figure;
+        ax=axes('Parent',nf);
+
+        rd = sum(tomo.L);
+        if strcmp(model.grid.type,'3D')==1
+            gv = GridViewer(model.grid);
+            gv.createSliders('Parent',nf);
+            gv.slider2.Visible = 'off';
+            gv.plotTomo(rd,'','Distance [m]','Elevation [m]',ax)
+        else
+            gridViewer.plotTomo(rd,'','Distance [m]','Elevation [m]',ax)
+        end
+        hb=colorbar('peer',ax);
+        colormap(nf,hcmap.String{hcmap.Value})
+        set(get(hb,'Title'),'String','Ray Density','FontSize',12)
     end
     function showResiduals(varargin)
+        if isempty(tomo)
+            return
+        end
+        if param.tomoAtt == 0
+            [data,idata] = Model.getModelData(model,[rep,file],'tt',param.selectedMogs);
+            [depth,~] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'tt');
+            data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
+        else
+            switch htypeData.Value
+                case 2
+                    [data,idata] = Model.getModelData(model,[rep,file],'amp',param.selectedMogs);
+                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'tt');
+                case 3
+                    [data,idata] = Model.getModelData(model,[rep,file],'fce',param.selectedMogs);
+                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'fce');
+                case 4
+                    [data,idata] = Model.getModelData(model,[rep,file],'hyb',param.selectedMogs);
+                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'hyb');
+            end
+            data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
+        end
+        hyp = sqrt( sum((data(:,1:3)-data(:,4:6)).^2, 2) );
+        dz = data(:,6)-data(:,3);
+        theta = 180/pi*asin(dz./hyp);
+
+        nIt = length(tomo.invData);
+        rms = zeros(nIt,1);
+        for n=1:nIt
+            rms(n) = rmsv(tomo.invData(n).res);
+        end
         
+        
+        figure
+        subplot(2,2,1)
+        plot(1:nIt, rms,'o')
+        ylabel('||res||')
+        xlabel('Iteration')
+        
+        res = tomo.invData(nIt).res;
+        subplot(2,2,2)
+        plot(theta, res,'o')
+        xlabel('Angle w/r to horizontal [deg]')
+        ylabel('Residuals')
+        
+        vres = var(res);
+        h1=subplot(2,2,3);
+        hist(res,30)
+        xlabel('Residuals')
+        ylabel('Count')
+        title(['\sigma^2 = ', num2str(vres)])
+        
+        dTx = sort(unique(depth(:,1)));
+        dRx = sort(unique(depth(:,2)));
+        imdata = nan(length(dTx),length(dRx));
+        for i=1:length(dTx)
+            for j=1:length(dRx)
+                ind = dTx(i)==depth(:,1) & dRx(j)==depth(:,2);
+                if sum(ind)==1
+                    imdata(i,j) = res(ind);
+                end
+            end
+        end
+        
+        p = [0 0 1;1 1 1;1 0 0];
+        p = interp1((-1:1)',p,(-1:0.02:1)');
+        
+        z=imdata;
+        z(isnan(imdata))=0;
+        z(~isnan(imdata))=1;
+        
+        h2=subplot(2,2,4);
+        imagesc(dRx,dTx,imdata);
+        set(gca,'color',[0.8 0.8 0.8]);
+        alpha(z);
+        axis image;
+        
+        ca = caxis;
+        caxis([-max(abs(ca)) max(abs(ca))])
+        
+        xlabel('Rx depth')
+        ylabel('Tx depth')
+        colorbar
+        
+        colormap(h2,p)
+        set(get(h1,'Children'),'FaceColor',[0 0 1])
     end
 end

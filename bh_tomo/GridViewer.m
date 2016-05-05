@@ -5,12 +5,15 @@ classdef GridViewer < handle
     properties
         slider1
         slider2
+        simuSlider
     end
     properties (Access = private, Hidden = true)
         x
         y
         z
         data
+        simu
+        varSimu
         grid
         himsc1
         himsc2
@@ -44,7 +47,6 @@ classdef GridViewer < handle
                 'Callback',@obj.update3D,...
                 varargin{:});
         end
-        
         function plotTomo(obj,tomo,ti,xl,yl,axes,varargin)
             if strcmp(obj.grid.type,'3D')
                 obj.plotTomo3D(tomo,ti,xl,yl,axes,varargin{:})
@@ -56,9 +58,9 @@ classdef GridViewer < handle
             imagesc(obj.x,obj.z,reshape(tomo,length(obj.z),length(obj.x)),'Parent',axes)
             set(axes,'DataAspectRatio',[1 1 1],'YDir','normal')
             title(axes,ti,'FontSize',14)
-            xlabel(axes,xl)
+            xlabel(axes,xl,'FontSize',12)
             if ~isempty(yl)
-                ylabel(axes,yl)
+                ylabel(axes,yl,'FontSize',12)
             end
         end
         function plotTomo3D(obj,tomo,ti,xl,yl,axes,varargin)
@@ -80,19 +82,21 @@ classdef GridViewer < handle
                 obj.htext1 = text(obj.x(1),obj.z(end)+obj.grid.dz,...
                     ['Y = ',num2str(obj.y(iy))],...
                     'FontSize',14,...
-                    'HorizontalAlignment','center');
+                    'HorizontalAlignment','center',...
+                    'Parent',axes);
             else
                 obj.himsc2 = imagesc(obj.x,obj.z,sl,'Parent',axes);
-                obj.htext1 = text(obj.x(1),obj.z(end)+obj.grid.dz,...
+                obj.htext2 = text(obj.x(1),obj.z(end)+obj.grid.dz,...
                     ['Y = ',num2str(obj.y(iy))],...
                     'FontSize',14,...
-                    'HorizontalAlignment','center');
+                    'HorizontalAlignment','center',...
+                    'Parent',axes);
             end
             set(axes,'DataAspectRatio',[1 1 1],'YDir','normal')
             title(axes,ti,'FontSize',14)
-            xlabel(axes,xl)
+            xlabel(axes,xl,'FontSize',12)
             if ~isempty(yl)
-                ylabel(axes,yl)
+                zlabel(axes,yl,'FontSize',12)
             end
         end
         function update3D(obj,src,varargin)
@@ -112,6 +116,88 @@ classdef GridViewer < handle
                 obj.himsc2.CData = sl;
                 obj.htext2.String = ['Y = ',num2str(obj.y(iy))];
             end
+        end
+        function plotSimu(obj,simu,nf)
+            nsimu = size(simu,2);
+            v = var(simu,0,2);
+            
+            obj.simuSlider = uicontrol('Style','slider',...
+                'Min',1,...
+                'Max',nsimu,...
+                'SliderStep',[1/nsimu 1/nsimu],...
+                'Value',round(nsimu/2),...
+                'Callback',@obj.updateSimu,...
+                'Parent',nf);
+
+            if strcmp(obj.grid.type,'3D')
+                obj.varSimu = reshape(v,length(obj.x),length(obj.y),length(obj.z));
+                obj.simu = reshape(simu,length(obj.x),length(obj.y),length(obj.z),nsimu);
+                obj.plotSimu3D(nf)
+                obj.slider1.Callback = @obj.updateSimu;
+            else
+                v = reshape(v,length(obj.z),length(obj.x));
+                obj.simu = reshape(simu,length(obj.z),length(obj.x),nsimu);
+                obj.plotSimu2D(nf,v)
+            end
+        end
+        function plotSimu2D(obj,nf,v)
+            ax = subplot(1,2,1,'Parent',nf);
+            
+            is = round(obj.simuSlider.Value);
+            s = squeeze(obj.simu(:,:,is));
+            obj.himsc1 = imagesc(obj.x,obj.z,s,'Parent',ax);
+            set(ax,'DataAspectRatio',[1 1 1],'YDir','normal')
+            title(ax,['Simulation no ',num2str(is)],'FontSize',14);
+            colorbar('peer',ax)
+            
+            ax = subplot(1,2,2,'Parent',nf);
+            
+            imagesc(obj.x,obj.z,v,'Parent',ax);
+            set(ax,'DataAspectRatio',[1 1 1],'YDir','normal')
+            title(ax,'Variance of Simulations','FontSize',14);
+            colorbar('peer',ax)
+        end
+        function plotSimu3D(obj,nf)
+            ax = subplot(1,2,1,'Parent',nf);
+            
+            is = round(obj.simuSlider.Value);
+            iy = round(obj.slider1.Value);
+            s = squeeze(obj.simu(:,iy,:,is))';
+            obj.himsc1 = imagesc(obj.x,obj.z,s,'Parent',ax);
+            obj.htext1 = text(obj.x(1),obj.z(end)+obj.grid.dz,...
+                ['Y = ',num2str(obj.y(iy))],...
+                'FontSize',14,...
+                'HorizontalAlignment','center');
+            set(ax,'DataAspectRatio',[1 1 1],'YDir','normal')
+            title(ax,['Simulation no ',num2str(is)],'FontSize',14);
+            colorbar('peer',ax)
+            
+            ax = subplot(1,2,2,'Parent',nf);
+            v = squeeze(obj.varSimu(:,iy,:))';
+            obj.himsc2 = imagesc(obj.x,obj.z,v,'Parent',ax);
+            obj.htext2 = text(obj.x(1),obj.z(end)+obj.grid.dz,...
+                ['Y = ',num2str(obj.y(iy))],...
+                'FontSize',14,...
+                'HorizontalAlignment','center');
+            set(ax,'DataAspectRatio',[1 1 1],'YDir','normal')
+            title(ax,'Variance of Simulations','FontSize',14);
+            colorbar('peer',ax)
+        end
+        function updateSimu(obj,varargin)
+            is = round(obj.simuSlider.Value);
+            if strcmp(obj.grid.type,'3D')
+                iy = round(obj.slider1.Value);
+                s = squeeze(obj.simu(:,iy,:,is))';
+                obj.himsc1.CData = s;
+                obj.htext1.String = ['Y = ',num2str(obj.y(iy))];
+                v = squeeze(obj.varSimu(:,iy,:))';
+                obj.himsc2.CData = v;
+                obj.htext2.String = ['Y = ',num2str(obj.y(iy))];
+            else
+                s = squeeze(obj.simu(:,:,is));
+                obj.himsc1.CData = s;
+            end
+            title(obj.himsc1.Parent,['Simulation no ',num2str(is)],'FontSize',14);
         end
     end
     

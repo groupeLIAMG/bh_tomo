@@ -1109,12 +1109,18 @@ f.Visible = 'on';
         hstructList.Value = 1;
         nStruct = numel(cm.covar);
         sname = cell(nStruct,1);
+        
+        if strcmp(model.grid.type,'3D')
+            cmUIpos = [0.23 0.5*vSpace 0.23 7*vSize+8*vSpace];
+        else
+            cmUIpos = [0.23 3.5*vSpace+3*vSize 0.23 4*vSize+5*vSpace];
+        end
         for n=1:nStruct
             sname{n} = ['Structure no ',num2str(n)];
-            cmUI(n) = CovarianceUI(cm.covar(n).range, cm.covar.angle(n), cm.covar.sill(n),...
+            cmUI(n) = CovarianceUI(cm.covar(n).range, cm.covar(n).angle, cm.covar(n).sill,...
                 false,...
                 'Units','normalized',...
-                'Position',[0.23 3.5*vSpace+3*vSize 0.23 4*vSize+5*vSpace],...
+                'Position',cmUIpos,...
                 'Parent',pparams);
             cmUI(n).setVisible('off');
             
@@ -1737,10 +1743,20 @@ f.Visible = 'on';
         if ~isfield(tomo,'simu')
             return
         end
-        % TODO add plotSimu to GridViewer
+        nf=figure;
+        gv = GridViewer(model.grid);
+        if strcmp(model.grid.type,'3D')==1
+            gv.createSliders('Parent',nf);
+            gv.slider2.Visible = 'off';
+        end
+        gv.plotSimu(tomo.simu,nf);
+        gv.simuSlider.Position(2) = 3*gv.simuSlider.Position(2);
     end
     function showRays(varargin)
         if isempty(tomo)
+            return
+        end
+        if isempty(tomo.rays)
             return
         end
         nf=figure;
@@ -1796,7 +1812,7 @@ f.Visible = 'on';
         nf=figure;
         ax=axes('Parent',nf);
 
-        rd = sum(tomo.L);
+        rd = full(sum(tomo.L));
         if strcmp(model.grid.type,'3D')==1
             gv = GridViewer(model.grid);
             gv.createSliders('Parent',nf);

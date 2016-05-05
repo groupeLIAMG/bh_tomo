@@ -430,6 +430,49 @@ classdef Grid3D < Grid
                 (Ny+2)/2+1:(Ny+2)/2+length(obj.gry)-1,...
                 (Nz+2)/2+1:(Nz+2)/2+length(obj.grz)-1);
         end
+        function toXdmf(obj,field,fieldname,filename)
+            % for some reason we have to permute x & z (which h5create and
+            % h5write do already)
+            
+            nx=length(obj.grx)-1;
+            ny=length(obj.gry)-1;
+            nz=length(obj.grz)-1;
+            ox=obj.grx(1)+obj.dx/2;
+            oy=obj.gry(1)+obj.dy/2;
+            oz=obj.grz(1)+obj.dz/2;
+            
+            fid = fopen(filename,'wt');
+            fprintf(fid,'<?xml version="1.0" ?>\n');
+            fprintf(fid,'<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>\n');
+            fprintf(fid,'<Xdmf xmlns:xi="http://www.w3.org/2003/XInclude" Version="2.2">\n');
+%            fprintf(fid,' <Information Name="SampleLocation" Value="4"/>\n');
+            fprintf(fid,' <Domain>\n');
+            fprintf(fid,'   <Grid Name="Structured Grid" GridType="Uniform">\n');
+            fprintf(fid,'     <Topology TopologyType="3DCORECTMesh" NumberOfElements="%d %d %d "/>\n',nz+1,ny+1,nx+1);
+            fprintf(fid,'     <Geometry GeometryType="ORIGIN_DXDYDZ">\n');
+            fprintf(fid,'       <DataItem Dimensions="3 " NumberType="Float" Precision="4" Format="XML">\n');
+            fprintf(fid,'          %f %f %f\n',oz,oy,ox);
+            fprintf(fid,'       </DataItem>\n');
+            fprintf(fid,'       <DataItem Dimensions="3 " NumberType="Float" Precision="4" Format="XML">\n');
+            fprintf(fid,'        %f %f %f\n',obj.dz,obj.dy,obj.dx);
+            fprintf(fid,'       </DataItem>\n');
+            fprintf(fid,'     </Geometry>\n');
+            fprintf(fid,'     <Attribute Name="%s" AttributeType="Scalar" Center="Cell">\n',fieldname);
+            fprintf(fid,'       <DataItem Dimensions="%d %d %d" NumberType="Float" Precision="4" Format="HDF">%s.h5:/%s</DataItem>\n',nz,ny,nx,filename,fieldname);
+            fprintf(fid,'     </Attribute>\n');
+            fprintf(fid,'   </Grid>\n');
+            fprintf(fid,' </Domain>\n');
+            fprintf(fid,'</Xdmf>\n');
+            fclose(fid);
+            
+            if exist([filename,'.h5'],'file')
+                delete([filename,'.h5'])
+            end
+            field=reshape(single(field),nx,ny,nz);
+            h5create([filename,'.h5'],['/',fieldname],size(field),'Datatype','single');
+            h5write([filename,'.h5'],['/',fieldname],field);
+            
+        end
         % for saving in mat-files
         function s = saveobj(obj)
             s.nthreads = obj.nthreads;

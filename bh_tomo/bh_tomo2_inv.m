@@ -1695,7 +1695,18 @@ f.Visible = 'on';
         end
     end
     function exportTomo(varargin)
-        % TODO
+        
+        [file, rep] = uiputfile('*.xmf','Export Results');
+        if isequal(file,0)
+            return
+        end
+        
+        if param.tomoAtt==0
+            model.grid.toXdmf(1./tomo.s,'Velocity',[rep,file])
+        else
+            model.grid.toXdmf(tomo.s,'Attenuation',[rep,file])
+        end
+        
     end
     function showTomo(varargin)
         if isempty(tomo)

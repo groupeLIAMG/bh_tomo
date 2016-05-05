@@ -308,7 +308,50 @@ classdef Grid2D < Grid
             Z=real(ifft2(GU));
             ms = Z((Nz+2)/2+1:(Nz+2)/2+length(obj.grz)-1,(Nx+2)/2+1:(Nx+2)/2+length(obj.grx)-1);
         end
-        
+        function toXdmf(obj,field,fieldname,filename)
+            % for some reason we have to permute x & z (which h5create and
+            % h5write do already)
+            
+            nx=length(obj.grx)-1;
+            nz=length(obj.grz)-1;
+            ox=obj.grx(1)+obj.dx/2;
+            oz=obj.grz(1)+obj.dz/2;
+            
+            fid = fopen(filename,'wt');
+            fprintf(fid,'<?xml version="1.0" ?>\n');
+            fprintf(fid,'<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>\n');
+            fprintf(fid,'<Xdmf xmlns:xi="http://www.w3.org/2003/XInclude" Version="2.2">\n');
+%            fprintf(fid,' <Information Name="SampleLocation" Value="4"/>\n');
+            fprintf(fid,' <Domain>\n');
+            fprintf(fid,'   <Grid Name="Structured Grid" GridType="Uniform">\n');
+            fprintf(fid,'     <Topology TopologyType="2DCORECTMesh" NumberOfElements="%d %d"/>\n',nz+1,nx+1);
+            fprintf(fid,'     <Geometry GeometryType="ORIGIN_DXDY">\n');
+            fprintf(fid,'       <DataItem Dimensions="2 " NumberType="Float" Precision="4" Format="XML">\n');
+            fprintf(fid,'          %f %f\n',oz,ox);
+            fprintf(fid,'       </DataItem>\n');
+            fprintf(fid,'       <DataItem Dimensions="2 " NumberType="Float" Precision="4" Format="XML">\n');
+            fprintf(fid,'        %f %f\n',obj.dz,obj.dx);
+            fprintf(fid,'       </DataItem>\n');
+            fprintf(fid,'     </Geometry>\n');
+            fprintf(fid,'     <Attribute Name="%s" AttributeType="Scalar" Center="Cell">\n',fieldname);
+            fprintf(fid,'       <DataItem Dimensions="%d %d" NumberType="Float" Precision="4" Format="HDF">%s.h5:/%s</DataItem>\n',nz,nx,filename,fieldname);
+            fprintf(fid,'     </Attribute>\n');
+            fprintf(fid,'   </Grid>\n');
+            fprintf(fid,' </Domain>\n');
+            fprintf(fid,'</Xdmf>\n');
+            fclose(fid);
+            
+            if exist([filename,'.h5'],'file')
+                delete([filename,'.h5'])
+            end
+            field=reshape(single(field),nz,nx)'; % z is fast dim, we have
+            % to transpose to get x,z rather than z,x (which is needed by
+            % h5create & h5write)
+            h5create([filename,'.h5'],['/',fieldname],size(field),'Datatype','single');
+            h5write([filename,'.h5'],['/',fieldname],field);
+            
+        end
+
         % for saving in mat-files
         function s = saveobj(obj)
             s.nthreads = obj.nthreads;

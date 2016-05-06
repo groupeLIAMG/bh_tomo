@@ -493,12 +493,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             for ( size_t nv=0; nv<vTx.size(); ++nv ) {
                 for ( size_t ni=0; ni<iTx[nv].size(); ++ni ) {
                     size_t npts = r_data[nv][ni].size();
-                    Rays[ iTx[nv][ni] ] = mxCreateDoubleMatrix(npts, 3, mxREAL);
+                    Rays[ iTx[nv][ni] ] = mxCreateDoubleMatrix(npts, 2, mxREAL);
                     double *rays_p = (double*) mxGetData(Rays[ iTx[nv][ni] ]);
                     for ( size_t np=0; np<npts; ++np ) {
                         rays_p[np] = r_data[nv][ni][np].x;
-                        rays_p[np+npts] = 0.0;
-                        rays_p[np+2*npts] = r_data[nv][ni][np].z;
+                        rays_p[np+npts] = r_data[nv][ni][np].z;
                     }
                     mxSetCell( plhs[1], iTx[nv][ni], Rays[ iTx[nv][ni] ] );
                 }

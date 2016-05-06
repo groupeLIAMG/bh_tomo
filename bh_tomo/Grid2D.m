@@ -149,6 +149,38 @@ classdef Grid2D < Grid
             c(:,1)=xmin+c(:,1)-dx;
             c(:,2)=zmin+c(:,2)-dz;
         end
+        function c = checkCenter(obj,x,y,z)
+            if ~isempty(y)
+                c=0;
+                return
+            end
+            dx = obj.grx(2)-obj.grx(1);
+            xmin = obj.grx(1)+dx/2;
+            xmax = obj.grx(end)-dx/3;  % divide by 3 to avoid truncation error
+            xx=xmin:dx:xmax;
+            if numel(x)~=numel(xx)
+                c=0;
+                return
+            end
+            if any(abs(x-reshape(xx,size(x)))>1000*eps)
+                c=0;
+                return
+            end
+            
+            dz = obj.grz(2)-obj.grz(1);
+            zmin = obj.grz(1)+dz/2;
+            zmax = obj.grz(end)-dz/3;
+            zz=zmin:dz:zmax;
+            if numel(z)~=numel(zz)
+                c=0;
+                return
+            end
+            if any(abs(z-reshape(zz,size(z)))>1000*eps)
+                c=0;
+                return
+            end
+            c=1;
+        end
         function indc = getContIndices(obj,cont,varargin)
             if nargin==3
                 x = varargin{1};

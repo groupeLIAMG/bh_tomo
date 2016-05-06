@@ -201,6 +201,48 @@ classdef Grid3D < Grid
             c(:,2)=ymin+c(:,2)-dy;
             c(:,3)=zmin+c(:,3)-dz;
         end
+        function c = checkCenter(obj,x,y,z)
+            dx = obj.grx(2)-obj.grx(1);
+            xmin = obj.grx(1)+dx/2;
+            xmax = obj.grx(end)-dx/3;  % divide by 3 to avoid truncation error
+            xx=xmin:dx:xmax;
+            if numel(x)~=numel(xx)
+                c=0;
+                return
+            end
+            if any(abs(x-reshape(xx,size(x)))>1000*eps)
+                c=0;
+                return
+            end
+            
+            dy = obj.gry(2)-obj.gry(1);
+            ymin = obj.gry(1)+dy/2;
+            ymax = obj.gry(end)-dy/3;  % divide by 3 to avoid truncation error
+            yy=ymin:dy:ymax;
+            if numel(y)~=numel(yy)
+                c=0;
+                return
+            end
+            if any(abs(y-reshape(yy,size(y)))>1000*eps)
+                c=0;
+                return
+            end
+            
+            dz = obj.grz(2)-obj.grz(1);
+            zmin = obj.grz(1)+dz/2;
+            zmax = obj.grz(end)-dz/3;
+            zz=zmin:dz:zmax;
+            if numel(z)~=numel(zz)
+                c=0;
+                return
+            end
+            if any(abs(z-reshape(zz,size(z)))>1000*eps)
+                c=0;
+                return
+            end
+            c=1;
+        end
+
         function indc = getContIndices(obj,cont,varargin)
             if nargin==3
                 x = varargin{1};

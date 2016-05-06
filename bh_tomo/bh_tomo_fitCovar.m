@@ -2441,7 +2441,7 @@ L = [];
 ind = [];
 for n=1:length(h.data(:,3))
     ii = find( h.panel.inv_res(no_Ldc-1).tomo.no_trace(:)==h.data(n,3) );
-    if isempty(ii)   
+    if isempty(ii)
          choice = questdlg([h.str.s186{1}, num2str(h.data(n,3)), h.str.s186{2}], ...
         'Warning', ...
         'Continue','About','About');

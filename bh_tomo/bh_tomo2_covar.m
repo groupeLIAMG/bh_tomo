@@ -1643,7 +1643,31 @@ f.Visible = 'on';
         if hrays.Value>1
             % curved rays
             
-            % TODO
+            % check if grid compatible
+            if model.grid.checkCenter(model.inv_res(hrays.Value-1).tomo.x,...
+                    model.inv_res(hrays.Value-1).tomo.y,...
+                    model.inv_res(hrays.Value-1).tomo.z)==0
+                errordlg({'Grid Not Compatible With Ray Matrix','Using Straight Rays'})
+                    hrays.Value=1;
+                    loadRays()
+                    return
+            end
+            ndata=0;
+            ind = zeros(size(data,1),1);
+            for n=1:size(data,1)
+                ii = find(model.inv_res(hrays.Value-1).tomo.no_trace == data(n,3));
+                if isempty(ii)
+                    errordlg({['Ray No ',num2str(data(n,3)),' Missing From Ray Matrix'],'Using Straight Rays'})
+                    hrays.Value=1;
+                    loadRays()
+                    return
+                else
+                    ndata = ndata+1;
+                    ind(ndata) = ii;
+                end
+            end
+            ind = ind(1:ndata);
+            L = model.inv_res(hrays.Value-1).tomo.L(ind,:);
         else
             % straight rays
             dx = str2double(hdx.String);

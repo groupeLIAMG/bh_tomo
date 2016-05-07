@@ -842,21 +842,21 @@ f.Visible = 'on';
         rBorder = 2*hBorder;
         hSize = 420;
         
-        vSizeCumul = vBorder;
-        vSize2 = 19*vSize+20*vSpace;
-        pinv.Position = [hBorder vSizeCumul hSize vSize2];
-        vSizeCumul = vSizeCumul + vBorder + vSize2;
+        vSize2 = 5*vSize+6*vSpace;
+        vPos = height-1.5*vBorder-vSize2;
+        pdata.Position = [hBorder vPos hSize vSize2];
+
+        vSize2 = 3*vSize+4*vSpace;
+        vPos = vPos-vBorder-vSize2;
+        pgrid.Position = [hBorder vPos hSize vSize2];
         
         vSize2 = 2.75*vSize+3*vSpace;
-        pprevious.Position = [hBorder vSizeCumul hSize vSize2];
-        vSizeCumul = vSizeCumul + vBorder + vSize2;
+        vPos = vPos-vBorder-vSize2;
+        pprevious.Position = [hBorder vPos hSize vSize2];
         
-        vSize2 = 3*vSize+4*vSpace;
-        pgrid.Position = [hBorder vSizeCumul hSize vSize2];
-        vSizeCumul = vSizeCumul + vBorder + vSize2;
-        
-        vSize2 = 5*vSize+6*vSpace;
-        pdata.Position = [hBorder vSizeCumul hSize vSize2];
+        vSize2 = 19*vSize+20*vSpace;
+        vPos = vPos-vBorder-vSize2;
+        pinv.Position = [hBorder vPos hSize vSize2];
         
         vSize2 = height-2*axBorder-4*vSize;
         hSize2 = width-(hBorder+hSize+axBorder+rBorder);

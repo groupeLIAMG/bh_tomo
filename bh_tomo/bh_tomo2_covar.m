@@ -697,21 +697,21 @@ f.Visible = 'on';
         haxes1.Position = [axBorder axBorder width-hSize-2*axBorder-hBorder vSizeAx];
         haxes2.Position = [axBorder 2*axBorder+vSizeAx width-hSize-2*axBorder-hBorder vSizeAx];
 
-        vSizeCumul = vBorder;
+        vSize2 = 6*vSize+7*vSpace;
+        vPos = height-1.5*vBorder-vSize2;
+        pdata.Position = [width-hSize-hBorder vPos hSize vSize2];
+        
         vSize2 = 3*vSize+4*vSpace;
-        pfit.Position = [width-hSize-hBorder vSizeCumul hSize vSize2];
-        vSizeCumul = vSizeCumul + vBorder + vSize2;
+        vPos = vPos-vBorder-vSize2;
+        pgrid.Position = [width-hSize-hBorder vPos hSize vSize2];
         
         vSize2 = 14*vSize+15*vSpace;
-        pcovModel.Position = [width-hSize-hBorder vSizeCumul hSize vSize2];
-        vSizeCumul = vSizeCumul + vBorder + vSize2;
+        vPos = vPos-vBorder-vSize2;
+        pcovModel.Position = [width-hSize-hBorder vPos hSize vSize2];
         
         vSize2 = 3*vSize+4*vSpace;
-        pgrid.Position = [width-hSize-hBorder vSizeCumul hSize vSize2];
-        vSizeCumul = vSizeCumul + vBorder + vSize2;
-        
-        vSize2 = 6*vSize+7*vSpace;
-        pdata.Position = [width-hSize-hBorder vSizeCumul hSize vSize2];
+        vPos = vPos-vBorder-vSize2;
+        pfit.Position = [width-hSize-hBorder vPos hSize vSize2];
         
         f.Visible = 'on';
     end

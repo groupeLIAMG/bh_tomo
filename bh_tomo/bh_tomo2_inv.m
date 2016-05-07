@@ -685,7 +685,7 @@ hcmax = uicontrol('Style','edit',...
     'Callback',@setClim,...
     'Parent',pfig);
 
-m = {'cmr','parula','jet','hsv','hot','cool','autumn','spring','winter',...
+m = {'cmr','polarmap','parula','jet','hsv','hot','cool','autumn','spring','winter',...
     'summer','gray','bone','copper','pink','prism','flag','colorcube','lines'};
 
 hcmap = uicontrol('Style','popupmenu',...
@@ -1762,8 +1762,8 @@ f.Visible = 'on';
         nf=figure;
         ax=axes('Parent',nf);
         
-        rmin = min(tomo.invData(end).res);
-        rmax = max(tomo.invData(end).res);
+        rmin = 1.001*min(tomo.invData(end).res);
+        rmax = 1.001*max(tomo.invData(end).res);
         c = [0 0 1;0.8 0.8 0.8;1 0 0];
         c = interp1((-1:1)',c,(-1:0.02:1)');
         
@@ -1792,6 +1792,12 @@ f.Visible = 'on';
             hold(ax,'on')
             for n=2:length(tomo.rays)
                 p = m*tomo.invData(end).res(n)+b;
+                if p>size(c,1)
+                    p=size(c,1);
+                elseif p<1
+                    p=1;
+                end
+                    
                 couleur = interp1(c,p);
                 plot(ax,tomo.rays{n}(:,1),tomo.rays{n}(:,end),'Color',couleur)
             end
@@ -1800,6 +1806,7 @@ f.Visible = 'on';
             ylabel('Elevation [m]','FontSize',12)
         end
         set(ax,'DataAspectRatio',[1 1 1])
+        axis(ax,'tight')
         colormap(c)%jet)
         hb=colorbar('peer',ax);
         caxis(ax,[rmin rmax])

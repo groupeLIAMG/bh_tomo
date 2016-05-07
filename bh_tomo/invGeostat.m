@@ -175,8 +175,8 @@ for noIter=1:param.numItStraight + param.numItCurved
         end
         
         tomo.s = m+l_moy;
-        tomo.simu = mSim;
-        tomo.sgr = ms;
+        tomo.simu = mSim+l_moy;
+        tomo.sgr = ms+l_moy;
         tomo.lmoy=l_moy;
         tomo.diff1_min=diff1_min;
         
@@ -191,9 +191,9 @@ for noIter=1:param.numItStraight + param.numItCurved
             eval(['colormap(',g_handles{2},')'])
             
             if param.tomoAtt==0
-                gv.plotTomo(1./(tomo.sgr+l_moy),'Simulation','Distance [m]',[],g_handles{4},2)
+                gv.plotTomo(1./(tomo.sgr),'Simulation','Distance [m]',[],g_handles{4},2)
             else
-                gv.plotTomo(tomo.sgr+l_moy,'Simulation','Distance [m]',[],g_handles{4},2)
+                gv.plotTomo(tomo.sgr,'Simulation','Distance [m]',[],g_handles{4},2)
             end
             if ~isempty(g_handles{1}), caxis(g_handles{4},g_handles{1}), end
             colorbar('peer', g_handles{4})

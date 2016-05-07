@@ -979,7 +979,7 @@ f.Visible = 'on';
         end
         model = models(modelNo);
         if isempty(model.grid)
-            errordlg('Grid not created, covariance cannot be computed')
+            errordlg('Grid not created, inversion cannot be computed')
             return
         end
         
@@ -1435,10 +1435,16 @@ f.Visible = 'on';
         param = model.inv_res(no).param;
     end
     function doColorbar(varargin)
-        cl = [str2double(hcmin.String) str2double(hcmax.String)];
-        haxes1.CLim = cl;
-        haxes2.CLim = cl;
-        haxes3.CLim = cl;        
+        if hcolorbar.Value==1
+            cl = [str2double(hcmin.String) str2double(hcmax.String)];
+            haxes1.CLim = cl;
+            haxes2.CLim = cl;
+            haxes3.CLim = cl;
+        else
+            haxes1.CLimMode = 'auto';
+            haxes2.CLimMode = 'auto';
+            haxes3.CLimMode = 'auto';
+        end
     end
     function doMap(varargin)
         colormap(f, hcmap.String{hcmap.Value})
@@ -1749,7 +1755,11 @@ f.Visible = 'on';
             gv.createSliders('Parent',nf);
             gv.slider2.Visible = 'off';
         end
-        gv.plotSimu(tomo.simu,nf);
+        if param.tomoAtt==1
+            gv.plotSimu(tomo.simu,nf);
+        else
+            gv.plotSimu(1./tomo.simu,nf);
+        end
         gv.simuSlider.Position(2) = 3*gv.simuSlider.Position(2);
     end
     function showRays(varargin)

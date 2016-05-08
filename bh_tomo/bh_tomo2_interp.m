@@ -409,8 +409,43 @@ f.Visible = 'on';
         plotFig()
     end
     function saveFigure(varargin)
-        % TODO
+        [filename,pathname,filterindex] = uiputfile({'Portable Document Format *.pdf';...
+            'Encapsulated Postscript *.eps';...
+            'Portable Network Graphics file *.png';...
+            'TIFF image *.tif';...
+            'TIFF no compression image *.tif';...
+            'Scalable Vector Graphics file *.svg';...
+            'Bitmap file *.bmp'});
+        if isequal(filename,0) || isequal(pathname,0)
+            return
+        end
+        f.PaperPositionMode = 'auto';
+        ptomo.Visible = 'off';
+        pprop.Visible = 'off';
+        ppetro.Visible = 'off';
+        pfig.Visible = 'off';
         
+        switch filterindex
+            case 1
+                print(f,[pathname,filename],'-dpdf','-noui')
+            case 2
+                print(f,[pathname,filename],'-depsc2','-noui')
+            case 3
+                print(f,[pathname,filename],'-dpng','-noui')
+            case 4
+                print(f,[pathname,filename],'-dtiff','-noui')
+            case 5
+                print(f,[pathname,filename],'-dtiffnocompression','-noui')
+            case 6
+                print(f,[pathname,filename],'-dsvg','-noui')
+            case 7
+                print(f,[pathname,filename],'-dbmp16m','-noui')
+        end
+        ptomo.Visible = 'on';
+        pprop.Visible = 'on';
+        ppetro.Visible = 'on';
+        pfig.Visible = 'on';
+
     end
     function plotFig(varargin)
         cla(haxes1)

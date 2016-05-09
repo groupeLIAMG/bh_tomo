@@ -317,13 +317,13 @@ f.Visible = 'on';
         if saved == false
             choice = questdlg('Database not saved, quit anyway?',...
                 'bh_tomo_db',...
-                'Don''t save','Cancel','Save','Save');
+                'Don''t save','Cancel','Save Figure','Save Figure');
             switch choice
                 case 'Don''t save'
                 case 'Cancel'
                     return
                 case 'Save'
-                    saveFile()
+                    saveFigure()
             end
         end
         quitUI()

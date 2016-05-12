@@ -13,7 +13,10 @@ g.nsnz = 5;
 x=g.dx*(2:g.nx-1);
 z=g.dz*(2:g.nz-1);
 Rx = [kron(x(:),ones(numel(z),1)) kron(ones(numel(x),1),z(:))];
-Tx = kron([0.5*g.dx*g.nx 0.5*g.dz*g.nz],ones(size(Rx,1),1));
+Tx = kron([0.5*g.dx*g.nx 0.0 0.5*g.dz*g.nz],ones(size(Rx,1),1));
+
+Rx = [Rx(:,1) zeros(size(Rx,1),1) Rx(:,2)];
+
 
 slowness = ones(g.nx*g.nz,1);
 xi = 2*slowness;
@@ -30,6 +33,8 @@ nz = grid2d_mex('get_nz',g2);
 strcmp(grid2d_mex('get_type',g2), t)
 
 t1 = grid2d_mex('raytrace',g2, slowness, Tx, Rx);
+[tt1,r1,L1] = grid2d_mex('raytrace',g2, slowness, Tx(1:10,:), Rx(1:10,:));
+
 grid2d_mex('delete',g2)
 
 

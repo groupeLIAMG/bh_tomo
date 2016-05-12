@@ -1,5 +1,5 @@
 function bh_tomo2_inv( varargin )
-%BH_TOMO2_INV Pertorm tomographic inversion
+%BH_TOMO2_INV Perform tomographic inversion
 
 rep='';
 file='';

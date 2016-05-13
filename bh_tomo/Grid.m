@@ -53,6 +53,13 @@ classdef Grid < matlab.mixin.Copyable
                 nc = nc*(length(obj.gry)-1);
             end
         end
+        function s = getNcell(obj)
+            if ~isempty(obj.gry)
+                s = [numel(obj.grx)-1 numel(obj.gry)-1 numel(obj.grz)-1];
+            else
+                s = [numel(obj.grz)-1 numel(obj.grx)-1];
+            end
+        end
         function d = dx(obj)
             d=obj.grx(2)-obj.grx(1);
         end

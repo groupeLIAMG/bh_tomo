@@ -113,11 +113,6 @@ for noIter=1:param.numItStraight + param.numItCurved
             m = (Gamma*Cdm)';
         end
         
-%         figure; plot(m)
-%         [S_sim,ss] = cokri_simu(L, dt, covar, length(L(:,1)), gridx, gridz, ...
-%             1, 1, c0);
-%         figure; plot(ss)
-        
         if param.tomoAtt==1
             % negative attenuation set to zero
             m(m<-l_moy) = -l_moy;

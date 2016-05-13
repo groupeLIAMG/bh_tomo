@@ -67,7 +67,7 @@ uimenu(hmenu,'Label','Close',...
     'Separator','on',...
     'Accelerator','W',...
     'Callback',@closeWindow);
-hresultsMenu = uimenu(f,'Label','Results');
+% hresultsMenu = uimenu(f,'Label','Results');
 % uimenu(hresultsMenu,'Label','Export ...',...
 %     'Accelerator','E',...
 %     'Callback',@exportTomo);
@@ -116,7 +116,7 @@ vSpace = 5/vSizeTot;
 
 % Data
 
-hpanelName = uicontrol('Style','text',...
+hmodelName = uicontrol('Style','text',...
     'String','Model: ',...
     'ForegroundColor','red',...
     'FontSize',fs+1,...
@@ -159,7 +159,7 @@ hlistRepeat = uicontrol('Style','listbox',...
 
 % Inversion params
 
-nLines=14;
+nLines=15;
 vSizeTot = nLines*22 + (nLines+1)*5;
 vSize = 22/vSizeTot;
 vSpace = 5/vSizeTot;
@@ -189,44 +189,62 @@ pweight = uipanel(pinv,'Title','Weight - Reservoir Cells',...
     'Position',[0.025 10*vSpace+8.7*vSize 0.95 1.5*vSize+2*vSpace],...
     'FontSize',fs,...
     'Visible','on');
+pref = uipanel(pinv,'Title','Reference Tomogram',...
+    'Units','normalized',...
+    'Position',[0.025 12*vSpace+10.75*vSize 0.95 1.5*vSize+2*vSpace],...
+    'FontSize',fs,...
+    'Visible','on');
 
 
 uicontrol('Style','text',...
     'String','Algorithm',...
+    'FontSize',fs,...
     'Units','normalized',...
     'HorizontalAlignment','right',...
-    'Position',[0.1 14*vSpace+12.75*vSize 0.3 vSize],...
+    'Position',[0.1 15*vSpace+13.75*vSize 0.3 vSize],...
     'Parent',pinv);
 htypeInv = uicontrol('Style','popupmenu',...
     'String',{'Simultaneous Inversion','Difference Inversion'},...
+    'FontSize',fs,...
     'Units','normalized',...
-    'Position',[0.45 14*vSpace+12.75*vSize 0.4 vSize],...
-    'Callback',@changeTypeInv,...
-    'Parent',pinv);
-uicontrol('Style','text',...
-    'String','Reference Tomogram',...
-    'Units','normalized',...
-    'HorizontalAlignment','right',...
-    'Position',[0.1 13*vSpace+11.75*vSize 0.3 vSize],...
-    'Parent',pinv);
-hrefTomo = uicontrol('Style','popupmenu',...
-    'String',{'-'},...
-    'Units','normalized',...
-    'Position',[0.45 13*vSpace+11.75*vSize 0.4 vSize],...
+    'Position',[0.45 15*vSpace+13.75*vSize 0.4 vSize],...
     'Callback',@changeTypeInv,...
     'Parent',pinv);
 uicontrol('Style','text',...
     'String','Number of Iterations',...
+    'FontSize',fs,...
     'Units','normalized',...
     'HorizontalAlignment','right',...
-    'Position',[0.1 12*vSpace+10.75*vSize 0.3 vSize],...
+    'Position',[0.1 14*vSpace+12.75*vSize 0.3 vSize],...
     'Parent',pinv);
 hnumIt = uicontrol('Style','edit',...
     'String',5,...
+    'FontSize',fs,...
     'Units','normalized',...
-    'Position',[0.45 12*vSpace+10.75*vSize 0.2 vSize],...
+    'Position',[0.45 14*vSpace+12.75*vSize 0.2 vSize],...
     'Callback',@changeTypeInv,...
     'Parent',pinv);
+
+nLines=1;
+vSizeTot = nLines*22 + (nLines+1)*5;
+vSize = 22/vSizeTot;
+vSpace = 5/vSizeTot;
+
+hrefTomo = uicontrol('Style','popupmenu',...
+    'String',{'-'},...
+    'FontSize',fs,...
+    'Units','normalized',...
+    'Position',[0.05 vSpace 0.5 vSize],...
+    'Callback',@changeTypeInv,...
+    'Parent',pref);
+uicontrol('Style','pushbutton',...
+    'String','View',...
+    'FontSize',fs,...
+    'Units','normalized',...
+    'HorizontalAlignment','right',...
+    'Position',[0.65 vSpace 0.2 vSize],...
+    'Callback',@showRef,...
+    'Parent',pref);
 
 
 
@@ -430,7 +448,7 @@ uicontrol('Style','text',...
     'Units','normalized',...
     'Position',[0.3 vSpace 0.3 vSize],...
     'Parent',pweight);
-hresValue = uicontrol('Style','edit',...
+hresWeight = uicontrol('Style','edit',...
     'String','0.0001',...
     'FontSize',fs,...
     'Units','normalized',...
@@ -522,7 +540,7 @@ f.Visible = 'on';
         vPos = height-2*vBorder-vSize2;
         pdata.Position = [hBorder vPos hSize vSize2];
 
-        vSize2 = 15*vSize+16*vSpace;
+        vSize2 = 16*vSize+17*vSpace;
         vPos = vPos-2*vBorder-vSize2;
         pinv.Position = [hBorder vPos hSize vSize2];
         
@@ -603,6 +621,7 @@ f.Visible = 'on';
         hlistBaseline.Max = numel(model.mogs);
         hlistRepeat.String = mname;
         hlistRepeat.Max = numel(model.mogs);
+        hmodelName.String = model.name;
         
         inv_name = cell(1,length(model.inv_res));
         for n=1:length(model.inv_res)
@@ -632,6 +651,7 @@ f.Visible = 'on';
         if isempty(model)
             return
         end
+        hmessage.String = 'Starting ...';
         cla(haxes1);cla(haxes2);
         cbh = findobj( 0, 'tag', 'Colorbar' );
         for i = 1: length(cbh)
@@ -639,8 +659,107 @@ f.Visible = 'on';
         end
 
         param = [];
+        param.db_file = [rep,file];
+        param.saveInvData = 1;
+        if ~isempty(model.grid.cont.ind_reservoir) && hreservoir.Value == 1
+            param.ind_reservoir = model.grid.cont.ind_reservoir;
+        else
+            param.ind_reservoir = false(model.grid.getNCell());
+        end
+        param.weight_reservoir = str2double(hresWeight.String);
+        param.max_it = str2double(hnumIt.String);
+        param.ref_inv_no = hrefTomo.Value;
+
+        cmap = hcmap.String{hcmap.Value};
+        clim = [];
+        if htypeData.Value == 1
+            param.typeData = 'tt';
+            param.tomoAtt = 0;
+            
+            if model.inv_res(param.ref_inv_no).param.tomoAtt == 1
+                errordlg('Cannot use attenuation model as reference for traveltime inversion')
+                hmessage.String = '';
+                return
+            end
+            if hcolorbar.Value==1
+                clim = [cminTT cmaxTT];
+            end
+        elseif htypeData.Value == 2
+            param.typeData = 'amp';
+            param.tomoAtt = 1;
+            
+            if model.inv_res(param.ref_inv_no).param.tomoAtt == 0
+                errordlg('Cannot use velocity model as reference for amplitude inversion')
+                hmessage.String = '';
+                return
+            end
+            if hcolorbar.Value==1
+                clim = [cminAmp cmaxAmp];
+            end
+        else
+            param.typeData = 'fce';
+            param.tomoAtt = 1;
+            
+            if model.inv_res(param.ref_inv_no).param.tomoAtt == 0
+                errordlg('Cannot use velocity model as reference for amplitude inversion')
+                hmessage.String = '';
+                return
+            end
+            if hcolorbar.Value==1
+                clim = [cminAmp cmaxAmp];
+            end
+        end
         
-        
+        gh = {clim; cmap; haxes1; haxes2};
+
+        if htypeInv.Value == 1
+            % Simultaneous
+            param.alpha = str2double(halphaS.String);
+            param.beta = str2double(hbetaS.String);
+            param.lambda = str2double(hlambdaS.String);
+            param.mu = str2double(hmuS.String);
+            param.eta = str2double(hetaS.String);
+            param.damping = str2double(hdampS.String);
+            
+            param.mog_no0 = hlistBaseline.Value;
+            param.mog_no1 = hlistRepeat.Value;
+            param.L_tomo_no = hraysS.Value;
+            
+            if param.tomoAtt == 1 && ~isfield(model.inv_res(param.L_tomo_no).tomo,'no_trace0')
+                errordlg('Selected rays not obtained with simultaneous inversion')
+                hmessage.String = '';
+                return
+            end
+            
+            tomo = invSimultaneous(model,param,hmessage,gh,gridViewer);
+        else
+            % Difference
+            param.beta = str2double(hbetaD.String);
+            param.lambda = str2double(hlambdaD.String);
+            param.mu = str2double(hmuD.String);
+            param.eta = str2double(hetaD.String);
+            param.damping = str2double(hdampD.String);
+
+            param.mog_no = hlistRepeat.Value;
+            param.L_tomo_no = hraysD.Value;
+            
+            % Show Reference model
+            if param.tomoAtt == 1
+                gridViewer.plotTomo(model.inv_res(param.ref_inv_no).tomo.s,...
+                    'Baseline Survey: Attenuation','Distance [m]','Elevation [m]',haxes1)
+            else
+                gridViewer.plotTomo(1./model.inv_res(param.ref_inv_no).tomo.s,...
+                    'Baseline Survey: Velocity','Distance [m]','Elevation [m]',haxes1)
+            end
+            if ~isempty(clim), caxis(haxes1,clim), end
+            colorbar('peer', haxes1)
+            colormap(haxes1,cmap)
+            drawnow
+            
+            tomo = invDifference(model,param,hmessage,gh,gridViewer);
+        end
+        saved = false;
+        hmessage.String = '';
         
     end
     function changeTypeData(varargin)
@@ -743,6 +862,27 @@ f.Visible = 'on';
     end
     function doMap(varargin)
         colormap(f, hcmap.String{hcmap.Value})
+    end
+    function showRef(varargin)
+        if isempty(model)
+            warndlg('Data not Loaded')
+            return
+        end
+        if isempty(model.inv_res)
+            warndlg('No Inversion Results Found For This Model')
+            return
+        end
+        nf=figure;
+        ax=axes('Parent',nf);
+        if param.tomoAtt == 1
+            gridViewer.plotTomo(model.inv_res(param.ref_inv_no).tomo.s,...
+                'Reference Model: Attenuation','Distance [m]','Elevation [m]',ax)
+        else
+            gridViewer.plotTomo(1./model.inv_res(param.ref_inv_no).tomo.s,...
+                'Reference Model: Velocity','Distance [m]','Elevation [m]',ax)
+        end
+        colorbar('peer', ax)
+        colormap(ax,hcmap.String{hcmap.Value})
     end
 end
 

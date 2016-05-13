@@ -395,7 +395,7 @@ if get(handles.popupmenu_type_data,'Value')==1
         return
     end
     
-elseif get(handles.popupmenu_type_data,'Value')==1
+elseif get(handles.popupmenu_type_data,'Value')==2
     p.type_data = 'amp';
     p.tomo_amp = 1;
 
@@ -487,7 +487,7 @@ else
     p.mog_no1 = get(handles.listbox_repeat,'Value');
     p.L_tomo_no = get(handles.popupmenu_si_rays,'Value');
     
-    if ~isfield(h.panel.inv_res(p.L_tomo_no).tomo,'no_trace0')
+    if p.tomo_amp == 1 && ~isfield(h.panel.inv_res(p.L_tomo_no).tomo,'no_trace0')
         errordlg('Selected rays not obtained with simultaneous inversion')
         set(handles.text_message_inv, 'String', '')
         return

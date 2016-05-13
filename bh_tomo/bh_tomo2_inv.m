@@ -129,7 +129,7 @@ vSpace = 5/vSizeTot;
 
 % Data
 
-hpanelName = uicontrol('Style','text',...
+hmodelName = uicontrol('Style','text',...
     'String','Model: ',...
     'ForegroundColor','red',...
     'FontSize',fs+1,...
@@ -999,7 +999,7 @@ f.Visible = 'on';
         end
         hlistMog.String = mname;
         hlistMog.Max = numel(model.mogs);
-        hpanelName.String = model.name;
+        hmodelName.String = model.name;
         
         if ~isempty(model.inv_res)
             nr = cell(numel(model.inv_res),1);
@@ -1397,7 +1397,7 @@ f.Visible = 'on';
             gridViewer.plotTomo(t,model.inv_res(no).name,'Distance [m]','Elevation [m]',ax)
         end
         colorbar('peer',ax)
-        colormap(nf,hcmap.String{hcmap.Value})
+        colormap(ax,hcmap.String{hcmap.Value})
     end
     function deletePrevious(varargin)
         if isempty(model)

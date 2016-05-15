@@ -209,7 +209,7 @@ classdef Grid2D < Grid
             end
             nx=length(obj.grx)-1;
             nz=length(obj.grz)-1;
-            Dy = [];
+            Dy = 0;
             if order==1
                 idx = 1/dx;
                 idz = 1/dz;

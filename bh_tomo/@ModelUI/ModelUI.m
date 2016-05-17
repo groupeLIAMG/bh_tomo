@@ -214,6 +214,9 @@ classdef ModelUI < handle
             no = obj.handles.listModels.Value;
             if no>0 && no<=numel(obj.models)
                 no_mog = chooseMOG(obj.mogUI);
+                if no_mog==0
+                    return
+                end
                 for n=1:numel(obj.models(no).mogs)
                     if obj.mogUI.mogs(no_mog).ID == obj.mogUI.mogs(obj.models(no).mogs(n)).ID 
                         warndlg('MOG already added to model')
@@ -230,7 +233,7 @@ classdef ModelUI < handle
         function removeMOG(obj,varargin)
             no = obj.handles.listModels.Value;
             if no>0 && no<=numel(obj.models)
-                no_mog = obj.handles.listMogs.Value;
+                no_mog = obj.handles.listMOGs.Value;
                 ind=1:length(obj.models(no).mogs);
                 ind = ind~=no_mog;
                 obj.models(no).mogs = obj.models(no).mogs(ind);

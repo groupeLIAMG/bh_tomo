@@ -196,6 +196,9 @@ classdef BoreholeUI < handle
 
         end
         function resizeUI(obj,varargin)
+            if isempty(obj.handles.hp)
+                return
+            end
             obj.handles.hp.Visible = 'off';
             oldUnits = obj.handles.hp.Units;
             obj.handles.hp.Units = 'points';

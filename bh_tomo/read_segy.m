@@ -62,3 +62,5 @@ else
     s.th = read_segy_tr_headers(segyfile, traces, fields, dict, word_length);
 end
 s.data = read_segy_data(segyfile, traces);
+
+end

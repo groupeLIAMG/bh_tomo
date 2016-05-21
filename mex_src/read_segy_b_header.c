@@ -115,8 +115,8 @@ void mexFunction( int nlhs, mxArray *plhs[],
     offset = 3200L;
     for ( nf=0; nf<27; ++nf ) {
         
-//        if ( word_length[nf] == 240 ||  // unassinged bytes 3261-3500
-//                word_length[nf] == 94 ) {  // unassinged bytes 3507-3600
+//        if ( word_length[nf] == 240 ||  // unassigned bytes 3261-3500
+//                word_length[nf] == 94 ) {  // unassigned bytes 3507-3600
 //            offset += word_length[nf];
 //            continue;
 //        }
@@ -172,7 +172,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     
     // get SEG Y Format revision number
     
-    if ( fseek(fid, 3500, SEEK_SET) == -1 ) {
+    if ( fseek(fid, 3500L, SEEK_SET) == -1 ) {
         fclose(fid);
         mexErrMsgTxt("Problem with the size of the SEG-Y file.");
     }
@@ -189,7 +189,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     
     // get Fixed length trace flag
     
-    if ( fseek(fid, 3502, SEEK_SET) == -1 ) {
+    if ( fseek(fid, 3502L, SEEK_SET) == -1 ) {
         fclose(fid);
         mexErrMsgTxt("Problem with the size of the SEG-Y file.");
     }
@@ -206,7 +206,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     
     // get Number of 3200-byte, Extended Textual File Header records
     
-    if ( fseek(fid, 3502, SEEK_SET) == -1 ) {
+    if ( fseek(fid, 3504L, SEEK_SET) == -1 ) {
         fclose(fid);
         mexErrMsgTxt("Problem with the size of the SEG-Y file.");
     }

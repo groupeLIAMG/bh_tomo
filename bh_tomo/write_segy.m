@@ -1,6 +1,27 @@
 function write_segy(segyfile, s, varargin)
-%WRITE_SEGY - save the content
-%   Detailed explanation goes here
+%WRITE_SEGY - save data to SEG-Y format
+%  write_segy(segyfile, s, dict, word_length)
+%
+% Input:
+%    segyfile (mandatory) : name of SEG-Y file
+%    s (mandatory) : a struct variable holding
+%                - the binary header data (s.bh)
+%                - the trace header data (s.th)
+%                - the trace data (s.data)
+%    dict (optional)  : custom dictionary for trace header (cell array
+%                       of strings)
+%    word_length (optional)  : word length in bytes for trace header
+%                              (vector of double)
+%                              (mandatory if dict given)
+%	               - sum(word_length) must be less than 241
+%                - numel(word_length) must equal numel(dict)
+%                - 4-byte IBM float words are handled by setting word_length=5
+%
+% ---
+%
+% Bernard Giroux
+% INRS-ETE
+% 2016-05-24
 
 
 s.bh.format = int16(5);  % data sample format code set to 5 (4-byte IEEE floating point)

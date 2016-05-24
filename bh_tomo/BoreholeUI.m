@@ -6,7 +6,7 @@ classdef BoreholeUI < handle
     end
     properties (Dependent)
         Position
-        FontSize   % should be within [10 11 12]
+        FontSize
     end
     properties (Access=private)
         handles

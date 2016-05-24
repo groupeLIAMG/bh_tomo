@@ -20,6 +20,18 @@ int IsBigEndian() { // grabed at http://unixpapa.com/incnote/byteorder.html
     return !(*((char *)(&one)));
 }
 
+void Swap2Bytes(int16_t *x) {
+    *x=(((*x>>8)&0xff) | ((*x&0xff)<<8));
+}
+
+void Swap4Bytes(int32_t *x) {
+    *x=(((*x>>24)&0xff) | ((*x&0xff)<<24) | ((*x>>8)&0xff00) | ((*x&0xff00)<<8));
+}
+
+void SwapFloat(float *x) {
+    int32_t *y = (int32_t *)x;
+    *y=(((*y>>24)&0xff) | ((*y&0xff)<<24) | ((*y>>8)&0xff00) | ((*y&0xff00)<<8));
+}
 
 void float2ibm(const int32_t from[], int32_t to[], size_t n, int endian)
 /**********************************************************************
@@ -208,9 +220,15 @@ void mexFunction( int nlhs, mxArray *plhs[],
 
     // arg 3: traces
     //
-    float *traces = (float *)mxGetData( prhs[2] );
+    float *tr = (float *)mxGetData( prhs[2] );
     size_t nsamples = mxGetM(prhs[2]);
     size_t ntraces = mxGetN(prhs[2]);
+    float *traces = mxMalloc(ntraces*nsamples*sizeof(float));
+    memcpy(traces, tr, ntraces*nsamples*sizeof(float));
+    if ( bt == false ) {
+        for ( size_t ns=0; ns<ntraces*nsamples; ++ns )
+            SwapFloat(&traces[ns]);
+    }
 
     // arg 4 & 5
     // override standard SEG trace header structure
@@ -284,10 +302,10 @@ void mexFunction( int nlhs, mxArray *plhs[],
 
     int header_length=0;
     for ( size_t nf=0; nf<NFIELDS; ++nf ) {
-        if (word_length[nf] != 5 )
-            header_length += word_length[nf];
-        else
+        if (word_length[nf] == 5 )
             header_length += 4;
+        else
+            header_length += word_length[nf];
     }
     if ( header_length>240 ) {
         mexErrMsgTxt("Trace header should be <= 240 bytes.");
@@ -333,29 +351,45 @@ void mexFunction( int nlhs, mxArray *plhs[],
         }
     }
 
-    int32_t *itmp = (int32_t *)mxMalloc(sizeof(int32_t));;
+    mexPrintf("write %zd\n", ntraces);
+    
+    int16_t i16[1];
+    int32_t i32[1];
     double e, m;
     for ( size_t n=0; n<ntraces; ++n ) {
-
+        //mexPrintf("%zd - %ld  --  ", n, ftell(fid));
         // write header
         for ( size_t nf=0; nf<NFIELDS; ++nf ) {
             
             switch ( word_length[ nf ] ) {
                 case 2:
-                    if ( fwrite(&(i16v[nf][n]),2,1,fid)!=1) {
+                    {
+                    i16[0] = i16v[nf][n];
+                    if ( bt == false ) {
+                        Swap2Bytes( i16 );
+                    }
+                    if ( fwrite(i16,2,1,fid)!=1) {
                         fclose(fid);
                         mexErrMsgTxt("Problem writing to SEG-Y file 1.");
                     }
                     break;
+                    }
                 case 4:
-                    if ( fwrite(&(i32v[nf][n]),4,1,fid)!=1) {
+                    {
+                    i32[0] = i32v[nf][n];
+                    //if ( nf==0 ) mexPrintf("%d\n", i32v[nf][n]);
+                    if ( bt == false ) {
+                        Swap4Bytes( i32 );
+                    }
+                    if ( fwrite(i32,4,1,fid)!=1) {
                         fclose(fid);
                         mexErrMsgTxt("Problem writing to SEG-Y file 2.");
                     }
                     break;
+                    }
                 case 5:
-                    float2ibm((int32_t *)&(fv[nf][n]), itmp, 1, bt);
-                    if ( fwrite(itmp,4,1,fid)!=1) {
+                    float2ibm((int32_t *)&(fv[nf][n]), i32, 1, bt);
+                    if ( fwrite(i32,4,1,fid)!=1) {
                         fclose(fid);
                         mexErrMsgTxt("Problem writing to SEG-Y file 3.");
                     }
@@ -363,10 +397,12 @@ void mexFunction( int nlhs, mxArray *plhs[],
                 case 6:
                     e = floor(log10(dv[nf][n]))-8;
                     m = dv[nf][n] / pow( 10.0, e);
-                    int32_t im[1];
-                    int16_t ie[1];
-                    im[0] = m;
-                    ie[0] = e;
+                    int32_t im[] = { (int32_t)m };
+                    int16_t ie[] = { (int16_t)e };
+                    if ( bt == false ) {
+                        Swap4Bytes( im );
+                        Swap2Bytes( ie );
+                    }
                     if ( fwrite(im,4,1,fid)!=1) {
                         fclose(fid);
                         mexErrMsgTxt("Problem writing to SEG-Y file 4.");
@@ -381,7 +417,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
             }
         }
         // fill remaining of header with 1-byte 0
-        for (size_t n=header_length; n<240; ++n) {
+        for (size_t nn=header_length; nn<240; ++nn) {
             if ( fwrite(zero,1,1,fid)!=1) {
                 fclose(fid);
                 mexErrMsgTxt("Problem writing to SEG-Y file 6.");
@@ -403,10 +439,10 @@ void mexFunction( int nlhs, mxArray *plhs[],
         mxFree(fnames[n]);
     }
     mxFree(fnames);
-    mxFree(itmp);
     mxFree(i16v);
     mxFree(i32v);
     mxFree(fv);
     mxFree(dv);
+    mxFree(traces);
     return;
 }

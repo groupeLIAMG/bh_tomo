@@ -20,11 +20,11 @@ int IsBigEndian() { // grabed at http://unixpapa.com/incnote/byteorder.html
     return !(*((char *)(&one)));
 }
 
-inline void Swap2Bytes(int16_t *x) {
+void Swap2Bytes(int16_t *x) {
     *x=(((*x>>8)&0xff) | ((*x&0xff)<<8));
 }
 
-inline void Swap4Bytes(int32_t *x) {
+void Swap4Bytes(int32_t *x) {
     *x=(((*x>>24)&0xff) | ((*x&0xff)<<24) | ((*x>>8)&0xff00) | ((*x&0xff00)<<8));
 }
 
@@ -210,11 +210,13 @@ void mexFunction( int nlhs, mxArray *plhs[],
     FILE *fid;
     char *filename;
     
-    if(nrhs<1)
+    if (nrhs<1)
         mexErrMsgTxt("At least one input variables required.");
-    else if(nrhs>5)
+    else if (nrhs>5)
         mexErrMsgTxt("No more than five input.");
-    else if(nlhs > 1)
+    else if (nrhs==4)
+        mexErrMsgTxt("Word length must be given with dictionnary.");
+    else if (nlhs > 1)
         mexErrMsgTxt("Too many output arguments.");
     
     int16_t *stmp = (int16_t *)mxMalloc(sizeof(int16_t));
@@ -327,7 +329,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
         for (n=0; n<ntraces; ++n)
             traces_no[n] = n;
     }
-    
+
     // arg 4 & 5
     // override standard SEG trace header structure
     if ( nrhs==5 ) {
@@ -400,7 +402,39 @@ void mexFunction( int nlhs, mxArray *plhs[],
     //
     
     if ( nrhs>=3 ) {
-        if (mxIsDouble(prhs[2])) {
+        if ( mxIsCell(prhs[2]) ) {
+            nfields = mxGetNumberOfElements(prhs[2]);
+            fields_no = (int16_t*)mxMalloc(nfields*sizeof(int16_t));
+            const mxArray *cell_element_ptr;
+            char tmpstr[100];
+            for ( n = 0; n<nfields; ++n ) {
+            
+                cell_element_ptr = mxGetCell(prhs[2], n);
+                if (cell_element_ptr == NULL) {
+                    mexErrMsgTxt("\tEmpty Cell\n");
+                }
+                if (mxIsChar(cell_element_ptr)) {
+                    mxGetString(cell_element_ptr, tmpstr, 99);
+                    int found = 0;
+                    for (int16_t nn=0; nn<NFIELDS; ++nn) {
+                        if ( strcmp( tmpstr, fnames[nn] ) == 0 ) {
+                            found = 1;
+                            fields_no[ n ] = nn;
+                            break;
+                        }
+                    }
+                    if ( found == 0 ) {
+                        char message[80];
+                        sprintf(message, "Header field \"%s\" not defined in dictionnary", tmpstr);
+                        mexErrMsgTxt(message);
+                    }
+                    
+                } else {
+                    mexErrMsgTxt("\tCell data must be strings\n");
+                }
+            }
+        }
+        else if (mxIsDouble(prhs[2])) {
             number_of_dims = mxGetNumberOfDimensions(prhs[2]);
             if ( number_of_dims != 2 ){
                 mexErrMsgTxt("fields must be a rank 2 matrix.");
@@ -443,7 +477,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
                 p = strtok(NULL, " ,");
             }
         } else {
-            mexErrMsgTxt("Arg 3 must be of type string or double.");
+            mexErrMsgTxt("Arg 3 must be of type cell, string or double.");
         }
     } else {
         nfields = NFIELDS;

@@ -58,7 +58,7 @@ switch filterindex
         name = file(1:end-4);
         newMog = Mog(name);
         newMog.data = MogData();
-        newMog.data.readSEGY([rep,name]);
+        newMog.data.readSEGY([rep,file]);
 end
 newMog.initialize();
 

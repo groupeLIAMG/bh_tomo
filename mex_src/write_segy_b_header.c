@@ -4,6 +4,19 @@
 
 #include "mex.h"
 
+/* returns true if on big endian, else false */
+int IsBigEndian() { // grabed at http://unixpapa.com/incnote/byteorder.html
+    long one = 1;
+    return !(*((char *)(&one)));
+}
+
+void Swap2Bytes(int16_t *x) {
+    *x=(((*x>>8)&0xff) | ((*x&0xff)<<8));
+}
+
+void Swap4Bytes(int32_t *x) {
+    *x=(((*x>>24)&0xff) | ((*x&0xff)<<24) | ((*x>>8)&0xff00) | ((*x&0xff00)<<8));
+}
 
 
 /*  the gateway routine.  */
@@ -79,6 +92,8 @@ void mexFunction( int nlhs, mxArray *plhs[],
     if(!mxIsStruct(prhs[1]))
 		mexErrMsgTxt("header must be a structure.");
     
+    int bt = IsBigEndian();
+    
     //  open file
     fid = fopen(filename, "a+");
     if ( fid==NULL ) {
@@ -91,19 +106,33 @@ void mexFunction( int nlhs, mxArray *plhs[],
         fclose(fid);
         mexErrMsgTxt("Problem writing to SEG-Y file.");
     }
+    
+    int16_t i16[1];
+    int32_t i32[1];
+    
     for ( size_t nf=0; nf<27; ++nf ) {
         
         switch ( word_length[ nf ] ) {
             case 2:
                 if ( signed_word[nf] ) {
                     int16_t *val = (int16_t *)( mxGetData( mxGetField(prhs[1], 0, fnames[nf]) ) );
-                    if ( fwrite(val,2,1,fid)!=1) {
+                    i16[0] = *val;
+                    if ( bt == false ) {
+                        Swap2Bytes( i16 );
+                    }
+                    
+                    if ( fwrite(i16,2,1,fid)!=1) {
                         fclose(fid);
                         mexErrMsgTxt("Problem writing to SEG-Y file.");
                     }
                 } else {
                     uint16_t *val = (uint16_t *)( mxGetData( mxGetField(prhs[1], 0, fnames[nf]) ) );
-                    if ( fwrite(val,2,1,fid)!=1) {
+                    i16[0] = *val;
+                    if ( bt == false ) {
+                        Swap2Bytes( i16 );
+                    }
+
+                    if ( fwrite(i16,2,1,fid)!=1) {
                         fclose(fid);
                         mexErrMsgTxt("Problem writing to SEG-Y file.");
                     }
@@ -112,13 +141,23 @@ void mexFunction( int nlhs, mxArray *plhs[],
             case 4:
                 if ( signed_word[nf] ) {
                     int32_t *val = (int32_t *)( mxGetData( mxGetField(prhs[1], 0, fnames[nf]) ) );
-                    if ( fwrite(val,4,1,fid)!=1) {
+                    i32[0] = *val;
+                    if ( bt == false ) {
+                        Swap4Bytes( i32 );
+                    }
+                    
+                    if ( fwrite(i32,4,1,fid)!=1) {
                         fclose(fid);
                         mexErrMsgTxt("Problem writing to SEG-Y file.");
                     }
                 } else {
                     uint32_t *val = (uint32_t *)( mxGetData( mxGetField(prhs[1], 0, fnames[nf]) ) );
-                    if ( fwrite(val,4,1,fid)!=1) {
+                    i32[0] = *val;
+                    if ( bt == false ) {
+                        Swap4Bytes( i32 );
+                    }
+
+                    if ( fwrite(i32,4,1,fid)!=1) {
                         fclose(fid);
                         mexErrMsgTxt("Problem writing to SEG-Y file.");
                     }
@@ -141,21 +180,33 @@ void mexFunction( int nlhs, mxArray *plhs[],
     // set SEG Y Format revision number
     
     uint16_t *uval = (uint16_t *)( mxGetData( mxGetField(prhs[1], 0, "rev") ) );
-    if ( fwrite(uval,2,1,fid)!=1) {
+    i16[0] = *uval;
+    if ( bt == false ) {
+        Swap2Bytes( i16 );
+    }
+    if ( fwrite(i16,2,1,fid)!=1) {
         fclose(fid);
         mexErrMsgTxt("Problem writing to SEG-Y file.");
     }
     
     // set Fixed length trace flag
     int16_t *val = (int16_t *)( mxGetData( mxGetField(prhs[1], 0, "fixl") ) );
-    if ( fwrite(val,2,1,fid)!=1) {
+    i16[0] = *val;
+    if ( bt == false ) {
+        Swap2Bytes( i16 );
+    }
+    if ( fwrite(i16,2,1,fid)!=1) {
         fclose(fid);
         mexErrMsgTxt("Problem writing to SEG-Y file.");
     }
     
     // set Number of 3200-byte, Extended Textual File Header records
     val = (int16_t *)( mxGetData( mxGetField(prhs[1], 0, "extfh") ) );
-    if ( fwrite(val,2,1,fid)!=1) {
+    i16[0] = *val;
+    if ( bt == false ) {
+        Swap2Bytes( i16 );
+    }
+    if ( fwrite(i16,2,1,fid)!=1) {
         fclose(fid);
         mexErrMsgTxt("Problem writing to SEG-Y file.");
     }

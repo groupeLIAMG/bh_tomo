@@ -76,15 +76,15 @@ int IsBigEndian() { // grabed at http://unixpapa.com/incnote/byteorder.html
 Authors: Jens Hartmann,   Institut fur Geophysik, Hamburg, Jun 1993
 	 John Stockwell, CWP, Colorado School of Mines, Jan 1994
 ***************************************************************************/
-inline void Swap2Bytes(int16_t *x) {
+void Swap2Bytes(int16_t *x) {
     *x=(((*x>>8)&0xff) | ((*x&0xff)<<8));
 }
 
-inline void Swap4Bytes(int32_t *x) {
+void Swap4Bytes(int32_t *x) {
     *x=(((*x>>24)&0xff) | ((*x&0xff)<<24) | ((*x>>8)&0xff00) | ((*x&0xff00)<<8));
 }
 
-inline void SwapFloat(float *x) {
+void SwapFloat(float *x) {
     int32_t *y = (int32_t *)x;
     *y=(((*y>>24)&0xff) | ((*y&0xff)<<24) | ((*y>>8)&0xff00) | ((*y&0xff00)<<8));
 }

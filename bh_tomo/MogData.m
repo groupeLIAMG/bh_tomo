@@ -226,7 +226,13 @@ classdef MogData < handle
 
         end
         function readSEGY(obj, basename)
-            s = read_segy(basename, [], 'scalco,sx,sy,gx,gy,selev,gelev');
+            
+            [fields, trueCoord] = MogData.getSEGYfields();
+            if isempty(fields)
+                error('User aborted')
+            end
+                        
+            s = read_segy(basename, [], fields);
 
             obj.ntrace = size( s.data, 2 );
             obj.nptsptrc = double(s.bh.hns);
@@ -247,31 +253,122 @@ classdef MogData < handle
             obj.Rx_y = zeros(1,obj.ntrace);
             obj.Rx_z = zeros(1,obj.ntrace);
             obj.antennas = 'SEG Y';
-            obj.comment='true positions';
             obj.tunits = 'ms';
-
             obj.timestp = obj.timec*(1:obj.nptsptrc);
 
-            ind = s.th.scalco>0;
-            if any(ind)
-                obj.Tx_x(ind) = double(s.th.scalco(ind)) .* double(s.th.sx(ind));
-                obj.Tx_y(ind) = double(s.th.scalco(ind)) .* double(s.th.sy(ind));
-                obj.Tx_z(ind) = double(s.th.scalco(ind)) .* double(s.th.selev(ind));
-                obj.Rx_x(ind) = double(s.th.scalco(ind)) .* double(s.th.gx(ind));
-                obj.Rx_y(ind) = double(s.th.scalco(ind)) .* double(s.th.gy(ind));
-                obj.Rx_z(ind) = double(s.th.scalco(ind)) .* double(s.th.gelev(ind));
+            % Source Z
+            field = fields{3};
+            if strcmp(field,'gelev')==1 || strcmp(field,'selev')==1 || ...
+                    strcmp(field,'sdepth')==1 || strcmp(field,'gdel')==1 || ...
+                    strcmp(field,'sdel')==1 || strcmp(field,'swdep')==1 || ...
+                    strcmp(field,'gwdep')==1
+                % we must scale 
+                ind = s.th.scalel>0;
+                if any(ind)
+                    eval(['obj.Tx_z(ind) = double(s.th.scalel(ind)) .* double(s.th.',field,'(ind));']);
+                end
+                ind = ~ind;
+                if any(ind)
+                    eval(['obj.Tx_z(ind) = double(s.th.',field,'(ind)) ./ abs( double(s.th.scalel(ind)) );']);
+                end
+            else
+                eval(['obj.Tx_z = double(s.th.',field,');']);
             end
-
-            ind = ~ind;
-            if any(ind)
-                obj.Tx_x(ind) = double(s.th.sx(ind)) ./ abs( double(s.th.scalco(ind)) );
-                obj.Tx_y(ind) = double(s.th.sy(ind)) ./ abs( double(s.th.scalco(ind)) );
-                obj.Tx_z(ind) = double(s.th.selev(ind)) ./ abs( double(s.th.scalco(ind)) );
-                obj.Rx_x(ind) = double(s.th.gx(ind)) ./ abs( double(s.th.scalco(ind)) );
-                obj.Rx_y(ind) = double(s.th.gy(ind)) ./ abs( double(s.th.scalco(ind)) );
-                obj.Rx_z(ind) = double(s.th.gelev(ind)) ./ abs( double(s.th.scalco(ind)) );
+            
+            % Receiver Z
+            field = fields{6};
+            if strcmp(field,'gelev')==1 || strcmp(field,'selev')==1 || ...
+                    strcmp(field,'sdepth')==1 || strcmp(field,'gdel')==1 || ...
+                    strcmp(field,'sdel')==1 || strcmp(field,'swdep')==1 || ...
+                    strcmp(field,'gwdep')==1
+                % we must scale 
+                ind = s.th.scalel>0;
+                if any(ind)
+                    eval(['obj.Rx_z(ind) = double(s.th.scalel(ind)) .* double(s.th.',field,'(ind));']);
+                end
+                ind = ~ind;
+                if any(ind)
+                    eval(['obj.Rx_z(ind) = double(s.th.',field,'(ind)) ./ abs( double(s.th.scalel(ind)) );']);
+                end
+            else
+                eval(['obj.Rx_z = double(s.th.',field,');']);
             end
-
+            
+            if trueCoord==true
+                obj.comment='true positions';
+                
+                % Source X
+                field = fields{1};
+                if strcmp(field,'sx')==1 || strcmp(field,'sy')==1 || ...
+                        strcmp(field,'gx')==1 || strcmp(field,'gx')==1 || ...
+                        strcmp(field,'xcdp')==1 || strcmp(field,'ycdp')==1
+                    % we must scale
+                    ind = s.th.scalco>0;
+                    if any(ind)
+                        eval(['obj.Tx_x(ind) = double(s.th.scalco(ind)) .* double(s.th.',field,'(ind));']);
+                    end
+                    ind = ~ind;
+                    if any(ind)
+                        eval(['obj.Tx_x(ind) = double(s.th.',field,'(ind)) ./ abs( double(s.th.scalco(ind)) );']);
+                    end
+                else
+                    eval(['obj.Tx_x = double(s.th.',field,');']);
+                end
+                
+                % Source Y
+                field = fields{2};
+                if strcmp(field,'sx')==1 || strcmp(field,'sy')==1 || ...
+                        strcmp(field,'gx')==1 || strcmp(field,'gx')==1 || ...
+                        strcmp(field,'xcdp')==1 || strcmp(field,'ycdp')==1
+                    % we must scale
+                    ind = s.th.scalco>0;
+                    if any(ind)
+                        eval(['obj.Tx_y(ind) = double(s.th.scalco(ind)) .* double(s.th.',field,'(ind));']);
+                    end
+                    ind = ~ind;
+                    if any(ind)
+                        eval(['obj.Tx_y(ind) = double(s.th.',field,'(ind)) ./ abs( double(s.th.scalco(ind)) );']);
+                    end
+                else
+                    eval(['obj.Tx_y = double(s.th.',field,');']);
+                end
+                
+                % Receiver X
+                field = fields{4};
+                if strcmp(field,'sx')==1 || strcmp(field,'sy')==1 || ...
+                        strcmp(field,'gx')==1 || strcmp(field,'gx')==1 || ...
+                        strcmp(field,'xcdp')==1 || strcmp(field,'ycdp')==1
+                    % we must scale
+                    ind = s.th.scalco>0;
+                    if any(ind)
+                        eval(['obj.Rx_x(ind) = double(s.th.scalco(ind)) .* double(s.th.',field,'(ind));']);
+                    end
+                    ind = ~ind;
+                    if any(ind)
+                        eval(['obj.Rx_x(ind) = double(s.th.',field,'(ind)) ./ abs( double(s.th.scalco(ind)) );']);
+                    end
+                else
+                    eval(['obj.Rx_x = double(s.th.',field,');']);
+                end
+                
+                % Receiver Y
+                field = fields{5};
+                if strcmp(field,'sx')==1 || strcmp(field,'sy')==1 || ...
+                        strcmp(field,'gx')==1 || strcmp(field,'gx')==1 || ...
+                        strcmp(field,'xcdp')==1 || strcmp(field,'ycdp')==1
+                    % we must scale
+                    ind = s.th.scalco>0;
+                    if any(ind)
+                        eval(['obj.Rx_y(ind) = double(s.th.scalco(ind)) .* double(s.th.',field,'(ind));']);
+                    end
+                    ind = ~ind;
+                    if any(ind)
+                        eval(['obj.Rx_y(ind) = double(s.th.',field,'(ind)) ./ abs( double(s.th.scalco(ind)) );']);
+                    end
+                else
+                    eval(['obj.Rx_y = double(s.th.',field,');']);
+                end
+            end
         end
 
     end
@@ -476,6 +573,303 @@ classdef MogData < handle
                 obj.rdata = [obj.rdata fread(fid, header(3), 'int16','ieee-le')];
             end
             fclose(fid);
+        end
+    end
+
+    methods (Static)
+        function [fields, trueCoord] = getSEGYfields()
+           
+            fnamesSEG = {'tracl'  % 1
+            'tracr'
+            'fldr'
+            'tracf'
+            'ep'
+            'cdp'
+            'cdpt'
+            'trid'
+            'nvs'
+            'nhs'
+            'duse'  % 11
+            'offset'
+            'gelev'
+            'selev'
+            'sdepth'
+            'gdel'
+            'sdel'
+            'swdep'
+            'gwdep'
+            'scalel'
+            'scalco'  % 21
+            'sx'
+            'sy'
+            'gx'
+            'gy'
+            'counit'
+            'wevel'
+            'swevel'
+            'sut'
+            'gut'
+            'sstat' % 31
+            'gstat'
+            'tstat'
+            'laga'
+            'lagb'
+            'delrt'
+            'muts'
+            'mute'
+            'ns'
+            'dt'
+            'gain'  % 41
+            'igc'
+            'igi'
+            'corr'
+            'sfs'
+            'sfe'
+            'slen'
+            'styp'
+            'stas'
+            'stae'
+            'tatyp'  % 51
+            'afilf'
+            'afils'
+            'nofilf'
+            'nofils'
+            'lcf'
+            'hcf'
+            'lcs'
+            'hcs'
+            'year'
+            'day'  % 61
+            'hour'
+            'minute'
+            'sec'
+            'timbas'
+            'trwf'
+            'grnors'
+            'grnofr'
+            'grnlof'
+            'gaps'
+            'otrav'  % 71 %  names below arbitrarily given
+            'xcdp'   % 72 - X coord of ensemble (CDP) position of this trace
+            'ycdp'   % 73 - Y coord of ensemble (CDP) position of this trace
+            'ilineno'
+            'clineno'
+            'shotno'   % 76 - shotpoint number
+            'scalsn'
+            'tvmunit'   % 78 - trace value measurement units
+            'tdcst'
+            'tdunit'
+            'trid'   % 81 - device/trace identifier
+            'scalt'
+            'styp'   % 83 - source type/orientation
+            'sdir'
+            'smeas'
+            'smunit'};
+        
+        wordLengthSEG = [4 4 4 4 4 4 4 2 2 2 2 4 4 4 4 4 4 4 4 2 2 4 4 4 4 2 2 2 2 2 ...
+            2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 ...
+            2 4 4 4 4 4 2 2 6 2 2 2 2 6 6 2]';
+        
+        
+            % get header fields for coordinates
+            trueCoord = true;
+            fields = '';
+            
+            byte1 = cumsum(wordLengthSEG)-wordLengthSEG+1;
+            byte2 = cumsum(wordLengthSEG);
+            desc = cell(size(fnamesSEG));
+            for n=1:numel(desc)
+                desc{n} = [num2str(byte1(n),'%3d'),'-',num2str(byte2(n),'%3d'),': ',fnamesSEG{n}];
+            end
+
+            fs = 11;
+            if ispc
+                fs = 9;
+            end
+
+            nLines=11;
+            vSizeTot = nLines*22 + (nLines+1)*5;
+
+            hSize=350;
+            FigPos=[0 0 hSize vSizeTot];
+            vSize = 22/vSizeTot;
+            vSpace = 5/vSizeTot;
+            
+            d = dialog('Name','SEGY Trace Header Fields',...
+                'Visible','off',...
+                'Units','points');
+            set(d,'Position',mygetnicedialoglocation(FigPos,get(d,'Units')));
+            
+            lineNo = 10;
+            coordPopup = uicontrol('Style','popupmenu',...
+                'FontSize',fs,...
+                'String',{'Trace Header Data Contain Abolute Coordinates',...
+                'Z Fields Contain Depth Along Borehole'},...
+                'Units','normalized',...
+                'Position',[0.05 (lineNo-1)*vSize+lineNo*vSpace 0.9 vSize],...
+                'Callback',@setTrueCoord,...
+                'Parent',d);
+            lineNo = 8.5;
+            uicontrol('Style','text',...
+                'FontSize',fs,...
+                'String','Coordinates ',...
+                'Units','normalized',...
+                'HorizontalAlignment','right',...
+                'Position',[0.05 (lineNo-1)*vSize+lineNo*vSpace 0.3 vSize],...
+                'Parent',d);
+            uicontrol('Style','text',...
+                'FontSize',fs,...
+                'String','Bytes in Trace Header ',...
+                'Units','normalized',...
+                'HorizontalAlignment','left',...
+                'Position',[0.4 (lineNo-1)*vSize+lineNo*vSpace 0.55 vSize],...
+                'Parent',d);
+            lineNo = 7.5;
+            uicontrol('Style','text',...
+                'FontSize',fs,...
+                'String','Source X ',...
+                'Units','normalized',...
+                'HorizontalAlignment','right',...
+                'Position',[0.05 (lineNo-1)*vSize+lineNo*vSpace 0.3 vSize],...
+                'Parent',d);
+            sxPopup = uicontrol('Style','popupmenu',...
+                'FontSize',fs,...
+                'String',desc,...
+                'Value',22,...
+                'Units','normalized',...
+                'Position',[0.4 (lineNo-1)*vSize+lineNo*vSpace 0.55 vSize],...
+                'Callback',@setTrueCoord,...
+                'Parent',d);
+            lineNo = 6.5;
+            uicontrol('Style','text',...
+                'FontSize',fs,...
+                'String','Source Y ',...
+                'Units','normalized',...
+                'HorizontalAlignment','right',...
+                'Position',[0.05 (lineNo-1)*vSize+lineNo*vSpace 0.3 vSize],...
+                'Parent',d);
+            syPopup = uicontrol('Style','popupmenu',...
+                'FontSize',fs,...
+                'String',desc,...
+                'Value',23,...
+                'Units','normalized',...
+                'Position',[0.4 (lineNo-1)*vSize+lineNo*vSpace 0.55 vSize],...
+                'Callback',@setTrueCoord,...
+                'Parent',d);
+            lineNo = 5.5;
+            uicontrol('Style','text',...
+                'FontSize',fs,...
+                'String','Source Z ',...
+                'Units','normalized',...
+                'HorizontalAlignment','right',...
+                'Position',[0.05 (lineNo-1)*vSize+lineNo*vSpace 0.3 vSize],...
+                'Parent',d);
+            szPopup = uicontrol('Style','popupmenu',...
+                'FontSize',fs,...
+                'String',desc,...
+                'Value',14,...
+                'Units','normalized',...
+                'Position',[0.4 (lineNo-1)*vSize+lineNo*vSpace 0.55 vSize],...
+                'Callback',@setTrueCoord,...
+                'Parent',d);
+
+            lineNo = 4.5;
+            uicontrol('Style','text',...
+                'FontSize',fs,...
+                'String','Receiver X ',...
+                'Units','normalized',...
+                'HorizontalAlignment','right',...
+                'Position',[0.05 (lineNo-1)*vSize+lineNo*vSpace 0.3 vSize],...
+                'Parent',d);
+            gxPopup = uicontrol('Style','popupmenu',...
+                'FontSize',fs,...
+                'String',desc,...
+                'Value',24,...
+                'Units','normalized',...
+                'Position',[0.4 (lineNo-1)*vSize+lineNo*vSpace 0.55 vSize],...
+                'Callback',@setTrueCoord,...
+                'Parent',d);
+            lineNo = 3.5;
+            uicontrol('Style','text',...
+                'FontSize',fs,...
+                'String','Receiver Y ',...
+                'Units','normalized',...
+                'HorizontalAlignment','right',...
+                'Position',[0.05 (lineNo-1)*vSize+lineNo*vSpace 0.3 vSize],...
+                'Parent',d);
+            gyPopup = uicontrol('Style','popupmenu',...
+                'FontSize',fs,...
+                'String',desc,...
+                'Value',25,...
+                'Units','normalized',...
+                'Position',[0.4 (lineNo-1)*vSize+lineNo*vSpace 0.55 vSize],...
+                'Callback',@setTrueCoord,...
+                'Parent',d);
+            lineNo = 2.5;
+            uicontrol('Style','text',...
+                'FontSize',fs,...
+                'String','Receiver Z ',...
+                'Units','normalized',...
+                'HorizontalAlignment','right',...
+                'Position',[0.05 (lineNo-1)*vSize+lineNo*vSpace 0.3 vSize],...
+                'Parent',d);
+            gzPopup = uicontrol('Style','popupmenu',...
+                'FontSize',fs,...
+                'String',desc,...
+                'Value',13,...
+                'Units','normalized',...
+                'Position',[0.4 (lineNo-1)*vSize+lineNo*vSpace 0.55 vSize],...
+                'Callback',@setTrueCoord,...
+                'Parent',d);
+
+            lineNo = 1.25;
+            uicontrol('Style','pushbutton',...
+                'FontSize',fs,...
+                'String','Cancel',...
+                'Units','normalized',...
+                'Position',[0.1 (lineNo-1)*vSize+lineNo*vSpace 0.35 vSize],...
+                'Callback','delete(gcf)',...
+                'Parent',d);
+            uicontrol('Style','pushbutton',...
+                'FontSize',fs,...
+                'String','Done',...
+                'Units','normalized',...
+                'Position',[0.55 (lineNo-1)*vSize+lineNo*vSpace 0.35 vSize],...
+                'Callback',@done,...
+                'Parent',d);
+            
+            d.Visible = 'on';
+            uiwait(d)
+            
+            function setTrueCoord(varargin)
+                if coordPopup.Value == 2
+                    sxPopup.Enable = 'off';
+                    syPopup.Enable = 'off';
+                    gxPopup.Enable = 'off';
+                    gyPopup.Enable = 'off';
+                else
+                    sxPopup.Enable = 'on';
+                    syPopup.Enable = 'on';
+                    gxPopup.Enable = 'on';
+                    gyPopup.Enable = 'on';
+                end   
+            end
+            function done(varargin)
+                if coordPopup==2
+                    trueCoord = false;
+                else
+                    trueCoord = true;
+                end
+                fields = {fnamesSEG{sxPopup.Value},...
+                    fnamesSEG{syPopup.Value},...
+                    fnamesSEG{szPopup.Value},...
+                    fnamesSEG{gxPopup.Value},...
+                    fnamesSEG{gyPopup.Value},...
+                    fnamesSEG{gzPopup.Value},...
+                    'scalel','scalco'};
+                
+                delete(d)
+            end
         end
     end
 end

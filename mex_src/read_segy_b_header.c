@@ -9,11 +9,11 @@ int IsBigEndian() { // grabed at http://unixpapa.com/incnote/byteorder.html
     return !(*((char *)(&one)));
 }
 
-inline void Swap2Bytes(int16_t *x) {
+void Swap2Bytes(int16_t *x) {
     *x=(((*x>>8)&0xff) | ((*x&0xff)<<8));
 }
 
-inline void Swap4Bytes(int32_t *x) {
+void Swap4Bytes(int32_t *x) {
     *x=(((*x>>24)&0xff) | ((*x&0xff)<<24) | ((*x>>8)&0xff00) | ((*x&0xff00)<<8));
 }
 
@@ -91,7 +91,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     // arg 1: filename
     //
     if(!mxIsChar(prhs[0]))
-      mexErrMsgTxt("Arg 1 must be of type char.");
+        mexErrMsgTxt("Arg 1 must be of type char.");
     filename = mxArrayToString(prhs[0]);
     
     
@@ -114,7 +114,6 @@ void mexFunction( int nlhs, mxArray *plhs[],
     
     offset = 3200L;
     for ( nf=0; nf<27; ++nf ) {
-        
 //        if ( word_length[nf] == 240 ||  // unassigned bytes 3261-3500
 //                word_length[nf] == 94 ) {  // unassigned bytes 3507-3600
 //            offset += word_length[nf];
@@ -129,11 +128,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
         switch ( word_length[ nf ] ) {
             case 2:
                 fread(stmp, 2, 1, fid);
-                
                 if ( bt == false ) {
                     Swap2Bytes( stmp );
                 }
-                
                 if ( signed_word[nf] )
                     wvalue = mxCreateNumericArray(2, oneone, mxINT16_CLASS, mxREAL);
                 else
@@ -146,7 +143,6 @@ void mexFunction( int nlhs, mxArray *plhs[],
                 break;
             case 4:
                 fread(itmp, 4, 1, fid);
-                
                 if ( bt == false ) {
                     Swap4Bytes( itmp );
                 }

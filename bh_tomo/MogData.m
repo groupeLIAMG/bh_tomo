@@ -272,7 +272,7 @@ classdef MogData < handle
                     eval(['obj.Tx_z(ind) = double(s.th.',field,'(ind)) ./ abs( double(s.th.scalel(ind)) );']);
                 end
             else
-                eval(['obj.Tx_z = double(s.th.',field,');']);
+                eval(['obj.Tx_z = reshape(double(s.th.',field,'),1,obj.ntrace);']);
             end
             
             % Receiver Z
@@ -291,7 +291,7 @@ classdef MogData < handle
                     eval(['obj.Rx_z(ind) = double(s.th.',field,'(ind)) ./ abs( double(s.th.scalel(ind)) );']);
                 end
             else
-                eval(['obj.Rx_z = double(s.th.',field,');']);
+                eval(['obj.Rx_z = reshape(double(s.th.',field,'),1,obj.ntrace);']);
             end
             
             if trueCoord==true
@@ -300,7 +300,7 @@ classdef MogData < handle
                 % Source X
                 field = fields{1};
                 if strcmp(field,'sx')==1 || strcmp(field,'sy')==1 || ...
-                        strcmp(field,'gx')==1 || strcmp(field,'gx')==1 || ...
+                        strcmp(field,'gx')==1 || strcmp(field,'gy')==1 || ...
                         strcmp(field,'xcdp')==1 || strcmp(field,'ycdp')==1
                     % we must scale
                     ind = s.th.scalco>0;
@@ -312,13 +312,13 @@ classdef MogData < handle
                         eval(['obj.Tx_x(ind) = double(s.th.',field,'(ind)) ./ abs( double(s.th.scalco(ind)) );']);
                     end
                 else
-                    eval(['obj.Tx_x = double(s.th.',field,');']);
+                    eval(['obj.Tx_x = reshape(double(s.th.',field,'),1,obj.ntrace);']);
                 end
                 
                 % Source Y
                 field = fields{2};
                 if strcmp(field,'sx')==1 || strcmp(field,'sy')==1 || ...
-                        strcmp(field,'gx')==1 || strcmp(field,'gx')==1 || ...
+                        strcmp(field,'gx')==1 || strcmp(field,'gy')==1 || ...
                         strcmp(field,'xcdp')==1 || strcmp(field,'ycdp')==1
                     % we must scale
                     ind = s.th.scalco>0;
@@ -330,7 +330,7 @@ classdef MogData < handle
                         eval(['obj.Tx_y(ind) = double(s.th.',field,'(ind)) ./ abs( double(s.th.scalco(ind)) );']);
                     end
                 else
-                    eval(['obj.Tx_y = double(s.th.',field,');']);
+                    eval(['obj.Tx_y = reshape(double(s.th.',field,'),1,obj.ntrace);']);
                 end
                 
                 % Receiver X
@@ -348,7 +348,7 @@ classdef MogData < handle
                         eval(['obj.Rx_x(ind) = double(s.th.',field,'(ind)) ./ abs( double(s.th.scalco(ind)) );']);
                     end
                 else
-                    eval(['obj.Rx_x = double(s.th.',field,');']);
+                    eval(['obj.Rx_x = reshape(double(s.th.',field,'),1,obj.ntrace);']);
                 end
                 
                 % Receiver Y
@@ -366,7 +366,7 @@ classdef MogData < handle
                         eval(['obj.Rx_y(ind) = double(s.th.',field,'(ind)) ./ abs( double(s.th.scalco(ind)) );']);
                     end
                 else
-                    eval(['obj.Rx_y = double(s.th.',field,');']);
+                    eval(['obj.Rx_y = reshape(double(s.th.',field,'),1,obj.ntrace);']);
                 end
             end
         end
@@ -855,7 +855,7 @@ classdef MogData < handle
                 end   
             end
             function done(varargin)
-                if coordPopup==2
+                if coordPopup.Value==2
                     trueCoord = false;
                 else
                     trueCoord = true;

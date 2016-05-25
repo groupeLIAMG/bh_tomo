@@ -350,8 +350,6 @@ void mexFunction( int nlhs, mxArray *plhs[],
                 mexErrMsgTxt("This should never happen!");
         }
     }
-
-    mexPrintf("write %zd\n", ntraces);
     
     int16_t i16[1];
     int32_t i32[1];

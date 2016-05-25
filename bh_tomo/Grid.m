@@ -24,7 +24,7 @@ classdef Grid < matlab.mixin.Copyable
             if ~isnumeric(g)
                 error('Grid coordinates must be numeric')
             end
-            if any(abs(diff(g)-(g(2)-g(1)))>10*eps)
+            if any(abs(diff(g)-(g(2)-g(1)))>100*eps)
                 error('Grid step size should be constant')
             end
             obj.grx = g;
@@ -33,7 +33,7 @@ classdef Grid < matlab.mixin.Copyable
             if ~isnumeric(g)
                 error('Grid coordinates must be numeric')
             end
-            if any(abs(diff(g)-(g(2)-g(1)))>10*eps)
+            if any(abs(diff(g)-(g(2)-g(1)))>100*eps)
                 error('Grid step size should be constant')
             end
             obj.gry = g;
@@ -42,7 +42,7 @@ classdef Grid < matlab.mixin.Copyable
             if ~isnumeric(g)
                 error('Grid coordinates must be numeric')
             end
-            if any(abs(diff(g)-(g(2)-g(1)))>10*eps)
+            if any(abs(diff(g)-(g(2)-g(1)))>100*eps)
                 error('Grid step size should be constant')
             end
             obj.grz = g;

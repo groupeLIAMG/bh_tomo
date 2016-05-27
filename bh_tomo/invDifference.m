@@ -59,6 +59,9 @@ else
 end
 
 [Dx,Dy,Dz] = model.grid.derivative(2);
+if isempty(Dy)
+    Dy=0;
+end
 
 nc = model.grid.getNumberOfCells();
 

@@ -328,9 +328,9 @@ f.Visible = 'on';
         if hamplitude.Value==1 && hvapp.Value==1
             plotVelAmp()
         elseif hamplitude.Value==1
-            plotAppVel()
-        elseif hvapp.Value==1
             plotAmp()
+        elseif hvapp.Value==1
+            plotAppVel()
         else
             cla(haxes2,'reset')
         end
@@ -375,8 +375,8 @@ f.Visible = 'on';
             plot_scont(haxes2)
         end
         grid(haxes2, 'on')
-        xlabel(haxes2, 'Velocity [m/ns]')
-        ylabel(haxes2, 'Elevation [m]')
+        xlabel(haxes2, ['Velocity [',mog.data.cunits,'/',mog.data.tunits,']'])
+        ylabel(haxes2, ['Elevation [',mog.data.cunits,']'])
         title(haxes2, 'Apparent velocity')
         haxes2.YLim = haxes1.YLim;
     end

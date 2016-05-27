@@ -41,9 +41,8 @@ else
 end
 
 Tx_z = unique(mog.data.Tx_z(mog.in));
-dTx = min(abs(diff(Tx_z)));
-
-Tx_z = min(mog.data.Tx_z):dTx:max(mog.data.Tx_z);
+%dTx = min(abs(diff(Tx_z)));
+%Tx_z = min(mog.data.Tx_z):dTx:max(mog.data.Tx_z);
 
 if corrSpread
 	lrai = sqrt( (mog.data.Tx_x-mog.data.Rx_x).^2 + ...
@@ -92,7 +91,8 @@ else
     figure
 end
 
-surf(timestp,Tx_z-0.5*dTx,traces)
+%surf(timestp,Tx_z-0.5*dTx,traces)
+surf(timestp,Tx_z,traces)
 shading flat
 view(0,90)
 axis tight

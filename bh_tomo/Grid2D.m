@@ -187,11 +187,28 @@ classdef Grid2D < Grid
             else
                 x = obj.getCellCenter();
             end
-            indc = zeros(size(cont,1),1);
-            for i=1:size(cont,1)
-                ind11=findnear(cont(i,1),x(:,1));
-                ind22=findnear(cont(i,2),x(ind11,2));
-                indc(i)=min(ind11(ind22));
+            
+            if isstruct(cont) % check if we have anisotropy
+                ncx = size(cont.data,1);
+                ncz = size(cont.data_xi,1);
+                indc = zeros(ncx+ncz,1);
+                for i=1:size(cont.data,1)
+                    ind11=findnear(cont.data(i,1),x(:,1));
+                    ind22=findnear(cont.data(i,2),x(ind11,2));
+                    indc(i)=min(ind11(ind22));
+                end
+                for i=1:size(cont.data_xi,1)
+                    ind11=findnear(cont.data_xi(i,1),x(:,1));
+                    ind22=findnear(cont.data_xi(i,2),x(ind11,2));
+                    indc(ncx+i)=nc+min(ind11(ind22));
+                end
+            else
+                indc = zeros(size(cont,1),1);
+                for i=1:size(cont,1)
+                    ind11=findnear(cont(i,1),x(:,1));
+                    ind22=findnear(cont(i,2),x(ind11,2));
+                    indc(i)=min(ind11(ind22));
+                end
             end
         end
         function [Dx,Dy,Dz] = derivative(obj,order,varargin)

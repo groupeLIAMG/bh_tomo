@@ -299,10 +299,10 @@ classdef Grid2DUI < handle
             obj.grid.bord(3) = str2double( obj.handles.nzm.String );
             obj.grid.bord(4) = str2double( obj.handles.nzp.String );
             obj.grid.flip = obj.handles.flip.Value;
-            bhNo = obj.handles.bhList.Value;
-            obj.grid.x0(1) = obj.data.boreholes(bhNo).X;
-            obj.grid.x0(2) = obj.data.boreholes(bhNo).Y;
-            obj.grid.x0(3) = obj.data.boreholes(bhNo).Z;
+            obj.grid.borehole_x0 = obj.handles.bhList.Value;
+            obj.grid.x0(1) = obj.data.boreholes(obj.grid.borehole_x0).X;
+            obj.grid.x0(2) = obj.data.boreholes(obj.grid.borehole_x0).Y;
+            obj.grid.x0(3) = obj.data.boreholes(obj.grid.borehole_x0).Z;
             obj.handles.x0x.String = num2str(obj.grid.x0(1));
             obj.handles.x0y.String = num2str(obj.grid.x0(2));
             obj.handles.x0z.String = num2str(obj.grid.x0(3));

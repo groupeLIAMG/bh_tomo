@@ -972,7 +972,7 @@ f.Visible = 'on';
         
     end
     function [g,gt] = computeCov(varargin)
-        
+        hmbox = msgbox('Computing Covariance');
         Cm = cm.compute(xc,xc);
         
         if cm.use_xi==1
@@ -1033,6 +1033,7 @@ f.Visible = 'on';
         ylabel(haxes2,'Covariance','FontSize',fs+1)
         h=legend(haxes2,'Experimental (C_d^*)','Model (GC_mG^T +C_0)');
         h.FontSize = fs+2;
+        delete(hmbox)
     end
     function chooseStruct(varargin)
         

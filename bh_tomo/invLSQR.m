@@ -99,6 +99,10 @@ for noIter=1:param.numItStraight + param.numItCurved
     
     if param.tomoAtt==0 && noIter>=param.numItStraight && ...
             param.numItCurved > 0
+        if any(tomo.s<0)
+            warndlg('Negative Slownesses: Change Inversion Parameters')
+            tomo = [];
+        end
         % update Rays
         [~,tomo.rays,L] = grid.raytrace(tomo.s,data(:,1:3),data(:,4:6));
     end

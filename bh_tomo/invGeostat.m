@@ -43,20 +43,6 @@ end
 x = grid.getCellCenter();
 Cm = cm.compute(x,x);
 
-% [LL,gridx,gridz] = Lsr2d(data(:,[1 3]),data(:,[4 6]),grid.grx,...
-%     grid.grz);
-% 
-% xx=grille2d(min(gridz),gridz(2)-gridz(1),length(gridz),min(gridx),gridx(2)-gridx(1),length(gridx));
-% % 
-% global kss 
-% covar.model = [2 fliplr(cm.covar.range) cm.covar.angle];
-% covar.c = cm.covar.sill;
-% covar.nugget_l = cm.nugget_m;
-% covar.nugget_t = cm.nugget_d;
-% ind = 1:length(L(1,:));
-% calcul_kss_global(length(L(1,:)),xx,ind,covar,gridx,gridz,length(gridx),length(gridz),t_handle)
-
-
 if ~isempty(cont) && param.useCont==1
     indc = grid.getContIndices(cont,x);
     
@@ -198,6 +184,10 @@ for noIter=1:param.numItStraight + param.numItCurved
     
     if param.tomoAtt==0 && noIter>=param.numItStraight && ...
             param.numItCurved > 0
+        if any(tomo.s<0)
+            warndlg('Negative Slownesses: Change Inversion Parameters')
+            tomo = [];
+        end
         % update Rays
         [~,tomo.rays,L] = grid.raytrace(tomo.s,data(:,1:3),data(:,4:6));
     

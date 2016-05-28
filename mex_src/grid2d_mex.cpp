@@ -383,8 +383,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         vector<sxz<double>> vRx;
         vector<vector<double>> tt( vTx.size() );
         vector<vector<vector<sxz<double>>>> r_data( vTx.size() );
-        vector<vector<siv<double> > > L_data(nTx);
-        vector<vector<vector<siv<double> > > > l_data( vTx.size() );
+        vector<vector<siv2<double> > > L_data(nTx);
+        vector<vector<vector<siv2<double> > > > l_data( vTx.size() );
 
         
         if ( grid_instance->getNthreads() == 1 ) {
@@ -504,36 +504,76 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             }
         }
         if ( nlhs == 3 ) {
+            
             for ( size_t nv=0; nv<vTx.size(); ++nv ) {
                 for ( size_t ni=0; ni<iTx[nv].size(); ++ni ) {
                     L_data[ iTx[nv][ni] ] = l_data[nv][ni];
                 }
             }
+            if (dynamic_cast<gridiso*>(grid_instance)) {
 
-            mwSize nLmax = 0;
-            for ( size_t n=0; n<L_data.size(); ++n ) {
-                nLmax += L_data[n].size();
-            }
-            plhs[2] = mxCreateSparse(nTx, nSlowness, nLmax, mxREAL);
-            double *Lval = mxGetPr( plhs[2] );
-            mwIndex *irL  = mxGetIr( plhs[2] );
-            mwIndex *jcL  = mxGetJc( plhs[2] );
+                mwSize nLmax = 0;
+                for ( size_t n=0; n<L_data.size(); ++n ) {
+                    nLmax += L_data[n].size();
+                }
+                plhs[2] = mxCreateSparse(nTx, nSlowness, nLmax, mxREAL);
+                double *Lval = mxGetPr( plhs[2] );
+                mwIndex *irL  = mxGetIr( plhs[2] );
+                mwIndex *jcL  = mxGetJc( plhs[2] );
 
-            size_t k = 0;
-            for ( size_t j=0; j<nSlowness; ++j ) {
-                jcL[j] = k;
-                for ( size_t i=0; i<nTx; ++i ) {
-                    for ( size_t n=0; n<L_data[i].size(); ++n ) {
-                        if ( L_data[i][n].i == j ) {
-                            irL[k] = i;
-                            Lval[k] = L_data[i][n].v;
-                            k++;
+                size_t k = 0;
+                for ( size_t j=0; j<nSlowness; ++j ) {
+                    jcL[j] = k;
+                    for ( size_t i=0; i<nTx; ++i ) {
+                        for ( size_t n=0; n<L_data[i].size(); ++n ) {
+                            if ( L_data[i][n].i == j ) {
+                                irL[k] = i;
+                                Lval[k] = L_data[i][n].v;
+                                k++;
+                            }
                         }
                     }
                 }
-            }
-            jcL[nSlowness] = k;
+                jcL[nSlowness] = k;
 
+            } else if (dynamic_cast<gridaniso*>(grid_instance)) {
+                mwSize nLmax = 0;
+                for ( size_t n=0; n<L_data.size(); ++n ) {
+                    nLmax += L_data[n].size();
+                }
+                nLmax *= 2;
+                plhs[2] = mxCreateSparse(nTx, 2*nSlowness, nLmax, mxREAL);
+                double *Lval = mxGetPr( plhs[2] );
+                mwIndex *irL  = mxGetIr( plhs[2] );
+                mwIndex *jcL  = mxGetJc( plhs[2] );
+                
+                size_t k = 0;
+                for ( size_t j=0; j<nSlowness; ++j ) {
+                    jcL[j] = k;
+                    for ( size_t i=0; i<nTx; ++i ) {
+                        for ( size_t n=0; n<L_data[i].size(); ++n ) {
+                            if ( L_data[i][n].i == j ) {
+                                irL[k] = i;
+                                Lval[k] = L_data[i][n].v;
+                                k++;
+                            }
+                        }
+                    }
+                }
+                for ( size_t j=nSlowness; j<2*nSlowness; ++j ) {
+                    jcL[j] = k;
+                    for ( size_t i=0; i<nTx; ++i ) {
+                        for ( size_t n=0; n<L_data[i].size(); ++n ) {
+                            if ( (L_data[i][n].i+nSlowness) == j ) {
+                                irL[k] = i;
+                                Lval[k] = L_data[i][n].v2;
+                                k++;
+                            }
+                        }
+                    }
+                }
+                jcL[2*nSlowness] = k;
+            }
         }
         return;
     }

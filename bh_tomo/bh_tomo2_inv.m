@@ -1142,11 +1142,9 @@ f.Visible = 'on';
         helliptical.Value = cm.use_xi;
         htilted.Value = cm.use_tilt;
         
-        fillEllipticalUI()
-        fillTiltUI()
 
         if ~isempty(cm.covar_xi)
-            
+            nStruct = numel(cm.covar_xi);
             for n=1:nStruct
                 if strcmp(model.grid.type, '3D')
                     cmXiUI(n) = CovarianceUI(cm.covar_xi(n).range,...
@@ -1162,11 +1160,11 @@ f.Visible = 'on';
                         cm.covar_xi(n).sill,...
                         false,...
                         'Units','normalized',...
-                        'Position',[0.23 3.5*vSpace+3*vSize 0.23 4*vSize+5*vSpace],...
+                        'Position',[0.49 3.5*vSpace+3*vSize 0.23 4*vSize+5*vSpace],...
                         'Parent',pparams);
                 end
                 cmXiUI(n).createList('Units','normalized',...
-                    'Position',[0.23 8*vSpace+7*vSize 0.23 vSize],...
+                    'Position',[0.49 8*vSpace+7*vSize 0.23 vSize],...
                     'Parent',pparams);
                 cmXiUI(n).setType(cm.covar_xi(n).type);
                 cmXiUI(n).setVisible('off');
@@ -1176,27 +1174,27 @@ f.Visible = 'on';
             cmXiUI(1).setVisible('on');
         end
         if ~isempty(cm.covar_tilt)
-            
+            nStruct = numel(cm.covar_tilt);
             for n=1:nStruct
                 if strcmp(model.grid.type, '3D')
                     cmTiltUI(n) = CovarianceUI(cm.covar_tilt(n).range, ...
                         cm.covar_tilt.angle(n), cm.covar_tilt.sill(n),...
                         false,...
                         'Units','normalized',...
-                        'Position',[0.23 0.5*vSpace0 0.23 7*vSize+8*vSpace],...
+                        'Position',[0.74 0.5*vSpace0 0.23 7*vSize+8*vSpace],...
                         'Parent',pparams);
                 else
                     cmTiltUI(n) = CovarianceUI(cm.covar_tilt(n).range, ...
                         cm.covar_tilt.angle(n), cm.covar_tilt.sill(n),...
                         false,...
                         'Units','normalized',...
-                        'Position',[0.23 3.5*vSpace+3*vSize 0.23 4*vSize+5*vSpace],...
+                        'Position',[0.74 3.5*vSpace+3*vSize 0.23 4*vSize+5*vSpace],...
                         'Parent',pparams);
                 end
                 cmTiltUI(n).setVisible('off');
                 
                 cmTiltUI(n).createList('Units','normalized',...
-                    'Position',[0.23 8*vSpace+7*vSize 0.23 vSize],...
+                    'Position',[0.74 8*vSpace+7*vSize 0.23 vSize],...
                     'Parent',pparams);
                 cmTiltUI(n).setType(cm.covar_tilt(n).type);
                 addlistener(cmTiltUI(n),'covarianceEdited',@updateCovPar);
@@ -1204,6 +1202,9 @@ f.Visible = 'on';
             end
             cmTiltUI(1).setVisible('on');
         end
+        fillEllipticalUI()
+        fillTiltUI()
+
     end
     function fillEllipticalUI()
         if helliptical.Value == 1
@@ -1587,7 +1588,7 @@ f.Visible = 'on';
             if cm.use_tilt==1
                 % TODO
             elseif cm.use_xi==1
-                % TODO
+                tomo = invGeostatEllipt(param,data,idata,model.grid,cm,L,hmessage,gh,gridViewer);
             else
                 tomo = invGeostat(param,data,idata,model.grid,cm,L,hmessage,gh,gridViewer);
             end
@@ -1608,6 +1609,9 @@ f.Visible = 'on';
             gh = {clim; cmap; haxes1; ''; ''};
             
             tomo = invLSQR(param,data,idata,model.grid,L,hmessage,gh,gridViewer);
+        end
+        if isempty(tomo)
+            return
         end
         
         if isempty(tomo.rays)
@@ -1774,6 +1778,8 @@ f.Visible = 'on';
         
         rmin = 1.001*min(tomo.invData(end).res);
         rmax = 1.001*max(tomo.invData(end).res);
+        rmax = max(abs([rmin rmax]));
+        rmin = -rmax;
         c = [0 0 1;0.8 0.8 0.8;1 0 0];
         c = interp1((-1:1)',c,(-1:0.02:1)');
         
@@ -1829,7 +1835,14 @@ f.Visible = 'on';
         nf=figure;
         ax=axes('Parent',nf);
 
-        rd = full(sum(tomo.L));
+        if isfield(tomo,'xi')
+            nCells=size(tomo.L,2)/2;
+            Lx = tomo.L(:,1:nCells);
+            Lz = tomo.L(:,(1+nCells):end);
+            rd = full(sum(sqrt(Lx.^2+Lz.^2)));
+        else
+            rd = full(sum(tomo.L));
+        end
         if strcmp(model.grid.type,'3D')==1
             gv = GridViewer(model.grid);
             gv.createSliders('Parent',nf);

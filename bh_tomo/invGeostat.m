@@ -61,10 +61,10 @@ end
 for noIter=1:param.numItStraight + param.numItCurved
     
     if ~isempty(t_handle)
-        t_handle.String = ['Geostatistical Inversion - Beginning of iteration ',num2str(noIter)];
+        t_handle.String = ['Geostatistical Inversion - Solving System, Iteration ',num2str(noIter)];
         drawnow
     else
-        disp(['Geostatistical Inversion -  Beginning of iteration ',num2str(noIter)])
+        disp(['Geostatistical Inversion -  Solving System, Iteration ',num2str(noIter)])
     end
 
     if noIter == 1
@@ -189,6 +189,12 @@ for noIter=1:param.numItStraight + param.numItCurved
             tomo = [];
         end
         % update Rays
+        if ~isempty(t_handle)
+            t_handle.String = ['Geostatistical Inversion - Raytracing, Iteration ',num2str(noIter)];
+            drawnow
+        else
+            disp(['Geostatistical Inversion -  Raytracing, Iteration ',num2str(noIter)])
+        end
         [~,tomo.rays,L] = grid.raytrace(tomo.s,data(:,1:3),data(:,4:6));
     
     end

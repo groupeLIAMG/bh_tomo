@@ -38,8 +38,6 @@ Lx = L(:,1:nCells);
 Lz = L(:,(1+nCells):end);
 
 
-
-
 cont = [];
 if param.tomoAtt==0
     if ~isempty( grid.cont.slowness )
@@ -68,8 +66,6 @@ if length(data(1,:))>7 && cm.use_c0==1
 end
 
 
-nbreitJ = 3;
-
 rayLength = sqrt(Lx.^2 + Lz.^2);
 rayLength = sum(rayLength,2);
 s0 = mean(data(:,7)./rayLength);
@@ -78,18 +74,18 @@ s0 = s0 + zeros(size(Lx,2),1);
 xi0 = ones(size(Lz,2),1);
 e0 = [s0; xi0];
 
+nbreitJ = 3;
 normOrder = 2;
 error = cm.nugget_d;
-
 modeJ = 1;
 
 for noIter=1:param.numItStraight + param.numItCurved
     
     if ~isempty(t_handle)
-        t_handle.String = ['Geostatistical Inversion - Beginning of iteration ',num2str(noIter)];
+        t_handle.String = ['Geostatistical Inversion - Solving System, Iteration ',num2str(noIter)];
         drawnow
     else
-        disp(['Geostatistical Inversion -  Beginning of iteration ',num2str(noIter)])
+        disp(['Geostatistical Inversion -  Solving System, Iteration ',num2str(noIter)])
     end
     
     
@@ -105,9 +101,6 @@ for noIter=1:param.numItStraight + param.numItCurved
     
     if doSim==0
         for itJ=1:nbreitJ
-            if doSim==1 && itJ==nbreitJ
-                modeJ = 2;
-            end
         
             dt = data(:,7) - t0;
         
@@ -120,13 +113,11 @@ for noIter=1:param.numItStraight + param.numItCurved
             end
             Cdm = J*Cm;
             
-            % center w/respect to J
-            %        moy = mean(dt./sum(J,2));
-            %        mt = sum(J*moy,2);
-            %        dt = dt - mt;
-        
             if ~isempty( cont.data ) && param.useCont==1
-                scont = cont.data(:,3);
+                scont = [];
+                if ~isempty(cont.data)
+                    scont = [scont; cont.data(:,3)]; %#ok<AGROW>
+                end
                 if ~isempty(cont.data_xi)
                     scont = [scont; cont.data_xi(:,3)]; %#ok<AGROW>
                 end
@@ -141,8 +132,6 @@ for noIter=1:param.numItStraight + param.numItCurved
                 de = (Gamma*Cdm)';
             end
         
-            %        ds = ds+moy;
-            
             s = s0 + de(1:nCells);
             xi = xi0 + de((nCells+1):end);
             t = Lx.^2 + Lz.^2.*kron(ones(nt,1),xi'.^2);
@@ -162,7 +151,7 @@ for noIter=1:param.numItStraight + param.numItCurved
         
         tomo.s  = s0;
         tomo.xi = xi0;
-        sz = s0 .* xi0;
+        
         
     else
         
@@ -182,11 +171,6 @@ for noIter=1:param.numItStraight + param.numItCurved
             end
             Cdm = J*Cm;
 
-            % center w/respect to J
-            %        moy = mean(dt./sum(J,2));
-            %        mt = sum(J*moy,2);
-            %        dt = dt - mt;
-        
             if ~isempty( cont.data ) && param.useCont==1
                 scont = cont.data(:,3);
                 if ~isempty(cont.data_xi)
@@ -203,43 +187,12 @@ for noIter=1:param.numItStraight + param.numItCurved
                 de = (Lambda*dt);
             end
         
-        
-            %        ds = ds+moy;
-            
             s = s0 + de(1:nCells);
             xi = xi0 + de((nCells+1):end);
             t = Lx.^2 + Lz.^2.*kron(ones(nt,1),xi'.^2);
             t = kron(ones(nt,1),s') .* sqrt(t);
             t = sum(t,2);
             res = norm(data(:,7)-t, normOrder);
-        
-            if modeJ==2
-
-                e_sim = zeros(length(m),param.nSim);
-                Gs = grid.preFFTMA(cm.covar);
-                Gxi = grid.preFFTMA(cm.covar_xi);
-
-                for ns=1:param.nSim
-                    ms = grid.FFTMA(Gs);
-                    xis = grid.FFTMA(Gxi);
-                    ms = [ms(:); xis(:)];
-                    
-                    % data computed with simulated model
-                    ds = L*ms + randn(length(dt),1)*cm.nugget_d;
-                    % cokriging estimator of the simulated data
-                    if ~isempty(cont) && param.useCont==1
-                        mss = Lambda*[ms(indc);ds];
-                    else
-                        mss = Lambda*ds;
-                    end
-                    % conditional simulated model  (eq 34 of Giroux et al 2007)
-                    e_sim(:,ns) = m + (ms-mss);
-                    
-                end
-                
-                e_sim = [e_sim(1:nCells,:)+kron(ones(1,param.nbresimu),s0);
-                    e_sim((nCells+1):end,:)+kron(ones(1,param.nbresimu),xi0)];
-            end
             t0 = t;
             s0 = s;
             xi0 = xi;
@@ -247,6 +200,39 @@ for noIter=1:param.numItStraight + param.numItCurved
             resJ(itJ) = res;
             if res < error
                 break
+            end
+
+            if modeJ==2
+
+                e_sim = zeros(length(e0),param.nSim);
+                Gs = grid.preFFTMA(cm.covar);
+                Gxi = grid.preFFTMA(cm.covar_xi);
+
+                for ns=1:param.nSim
+                    ms = grid.FFTMA(Gs);
+                    xis = grid.FFTMA(Gxi);
+                    ms = ms(:);
+                    xis = xis(:);
+                    
+                    % data computed with simulated model
+                    t = Lx.^2 + Lz.^2.*kron(ones(nt,1),xis'.^2);
+                    t = kron(ones(nt,1),ms') .* sqrt(t);
+                    t = sum(t,2);
+
+                    ds = t + randn(length(dt),1)*cm.nugget_d;
+                    % cokriging estimator of the simulated data
+                    es = [ms; xis];
+                    if ~isempty(cont) && param.useCont==1
+                        ess = Lambda*[es(indc);ds];
+                    else
+                        ess = Lambda*ds;
+                    end
+                    % conditional simulated model  (eq 34 of Giroux et al 2007)
+                    e_sim(:,ns) = de + (es-ess);
+                end
+                
+                e_sim = [e_sim(1:nCells,:)+kron(ones(1,param.nSim),s0);
+                    e_sim((nCells+1):end,:)+kron(ones(1,param.nSim),xi0)];
             end
         end
        
@@ -266,7 +252,7 @@ for noIter=1:param.numItStraight + param.numItCurved
     
     if ~isempty(g_handles)
         
-        gv.plotTomo(1./sz,'s_z','Distance [m]','Elevation [m]',g_handles{3})
+        gv.plotTomo(1./(s0.*xi0),'V_z','Distance [m]','Elevation [m]',g_handles{3})
         if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
         colorbar('peer', g_handles{3})
         
@@ -284,6 +270,12 @@ for noIter=1:param.numItStraight + param.numItCurved
             tomo = [];
         end
         % update Rays
+        if ~isempty(t_handle)
+            t_handle.String = ['Geostatistical Inversion - Raytracing, Iteration ',num2str(noIter)];
+            drawnow
+        else
+            disp(['Geostatistical Inversion -  Raytracing, Iteration ',num2str(noIter)])
+        end
         [~,tomo.rays,L] = grid.raytrace(tomo.s,tomo.xi,data(:,1:3),data(:,4:6));
         Lx = L(:,1:nCells);
         Lz = L(:,(1+nCells):np);
@@ -308,7 +300,6 @@ end
 if ~isempty(t_handle)
     t_handle.String = '';
 end
-
 
 end
 

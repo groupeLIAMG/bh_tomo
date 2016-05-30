@@ -87,17 +87,17 @@ for noIter=1:p.max_it
 
     if p.tomoAtt==0
         if ~isempty(hmessage)
-            hmessage.String = ['Traveltime inversion - Beginning of iteration ',num2str(noIter)];
+            hmessage.String = ['Traveltime inversion - Solving System, Iteration ',num2str(noIter)];
             drawnow
         else
-            disp(['Traveltime inversion - Beginning of iteration ',num2str(noIter)]); drawnow
+            disp(['Traveltime inversion - Solving System, Iteration ',num2str(noIter)]); drawnow
         end
     else
         if ~isempty(hmessage)
-            hmessage.String = ['Amplitude inversion - Beginning of iteration ',num2str(noIter)];
+            hmessage.String = ['Amplitude inversion - Solving System, Iteration ',num2str(noIter)];
             drawnow
         else
-            disp(['Amplitude inversion - Beginning of iteration ',num2str(noIter)]); drawnow
+            disp(['Amplitude inversion - Solving System, Iteration ',num2str(noIter)]); drawnow
         end
     end
 
@@ -123,6 +123,12 @@ for noIter=1:p.max_it
             drawnow
         end
 
+        if ~isempty(hmessage)
+            hmessage.String = ['Traveltime inversion - Raytracing, Iteration ',num2str(noIter)];
+            drawnow
+        else
+            disp(['Traveltime inversion - Raytracing, Iteration ',num2str(noIter)]); drawnow
+        end
         if noIter==p.max_it
             [tt,tomo.rays,L] = grid.raytrace(s,Tx,Rx);
         else

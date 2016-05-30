@@ -44,10 +44,10 @@ end
 for noIter=1:param.numItStraight + param.numItCurved
     
     if ~isempty(t_handle)
-        t_handle.String = ['LSQR Inversion - Beginning of iteration ',num2str(noIter)];
+        t_handle.String = ['LSQR Inversion - Solving System, Iteration ',num2str(noIter)];
         drawnow
     else
-        disp(['LSQR Inversion -  Beginning of iteration ',num2str(noIter)])
+        disp(['LSQR Inversion - Solving System, Iteration ',num2str(noIter)])
     end
 
     if noIter == 1
@@ -74,7 +74,7 @@ for noIter=1:param.numItStraight + param.numItCurved
         A = [A; param.wCont*sparse(K)]; %#ok<AGROW>
         b = [b; param.wCont*cont(:,end-1)-l_moy]; %#ok<AGROW>
     end
-    [x,flag,relres,iter,resvec,lsvec] = lsqr(A,b,param.tol,param.nbreiter);
+    [x,~,~,~,resvec,lsvec] = lsqr(A,b,param.tol,param.nbreiter);
     
     if max(abs(s_o./(x+l_moy) - 1))>param.dv_max
         fac = min(abs( (s_o/(param.dv_max+1)-l_moy)./x ));
@@ -104,6 +104,12 @@ for noIter=1:param.numItStraight + param.numItCurved
             tomo = [];
         end
         % update Rays
+        if ~isempty(t_handle)
+            t_handle.String = ['LSQR Inversion - Raytracing, Iteration ',num2str(noIter)];
+            drawnow
+        else
+            disp(['LSQR Inversion - Raytracing, Iteration ',num2str(noIter)])
+        end
         [~,tomo.rays,L] = grid.raytrace(tomo.s,data(:,1:3),data(:,4:6));
     end
     if param.saveInvData == 1

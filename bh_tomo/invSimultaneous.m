@@ -10,8 +10,8 @@ tomo.rays = {};
 tomo.L = [];
 tomo.invData = [];
 
-[t0_obs,ind0] = Model.getModelData(model,p.db_file,p.type_data,p.mog_no0);
-[t1_obs,ind1] = Model.getModelData(model,p.db_file,p.type_data,p.mog_no1);
+[t0_obs,ind0] = Model.getModelData(model,p.db_file,p.typeData,p.mog_no0);
+[t1_obs,ind1] = Model.getModelData(model,p.db_file,p.typeData,p.mog_no1);
 Tx0=model.grid.Tx(ind0,:);
 Rx0=model.grid.Rx(ind0,:);
 Tx1=model.grid.Tx(ind1,:);
@@ -98,17 +98,17 @@ for noIter=1:p.max_it
 
     if p.tomoAtt==0
         if ~isempty(hmessage)
-            hmessage.String = ['Traveltime inversion - Beginning of iteration ',num2str(noIter)];
+            hmessage.String = ['Traveltime inversion - Solving System, Iteration ',num2str(noIter)];
             drawnow
         else
-            disp(['Traveltime inversion - Beginning of iteration ',num2str(noIter)]); drawnow
+            disp(['Traveltime inversion - Solving System, Iteration ',num2str(noIter)]); drawnow
         end
     else
         if ~isempty(hmessage)
-            hmessage.String = ['Amplitude inversion - Beginning of iteration ',num2str(noIter)];
+            hmessage.String = ['Amplitude inversion - Solving System, Iteration ',num2str(noIter)];
             drawnow
         else
-            disp(['Amplitude inversion - Beginning of iteration ',num2str(noIter)]); drawnow
+            disp(['Amplitude inversion - Solving System, Iteration ',num2str(noIter)]); drawnow
         end
     end
 
@@ -145,11 +145,18 @@ for noIter=1:p.max_it
             drawnow
         end
     
-        [tt0,~,L0] = grid.raytrace(s0,Tx0,Rx0);
-        if noIter==p.max_it
-            [tt1,tomo.rays,L1] = grid.raytrace(s1,Tx1,Rx1);
+        if ~isempty(hmessage)
+            hmessage.String = ['Traveltime inversion - Raytracing, Iteration ',num2str(noIter)];
+            drawnow
         else
-            [tt1,~,L1] = grid.raytrace(s1,Tx1,Rx1);
+            disp(['Traveltime inversion - Raytracing, Iteration ',num2str(noIter)]); drawnow
+        end
+        
+        [tt0,~,L0] = model.grid.raytrace(s0,Tx0,Rx0);
+        if noIter==p.max_it
+            [tt1,tomo.rays,L1] = model.grid.raytrace(s1,Tx1,Rx1);
+        else
+            [tt1,~,L1] = model.grid.raytrace(s1,Tx1,Rx1);
         end
         
     else
@@ -190,7 +197,6 @@ tomo.L0 = L0;
 tomo.L = L1;
 tomo.no_trace0 = mogs(p.mog_no0).no_traces;
 tomo.no_trace = mogs(p.mog_no1).no_traces;
-tomo.s = s;
 tomo.date = mogs(p.mog_no1).date;
 
 if p.saveInvData == 1

@@ -132,6 +132,7 @@ classdef MogUI < handle
         spectra(obj,varargin)
         zop(obj,varargin)
         mergeMogs(obj,varargin)
+        createDt(obj,varargin)
         
         function removeMog(obj,varargin)
             no = obj.handles.listMogs.Value;
@@ -341,7 +342,7 @@ classdef MogUI < handle
         function editDate(obj,varargin)
             no = obj.handles.listMogs.Value;
             if no>0 && no<=length(obj.mogs)
-                obj.mogs(no).data = obj.handles.editDate.String;
+                obj.mogs(no).date = obj.handles.editDate.String;
                 obj.notify('mogEdited')
             end
         end

@@ -240,11 +240,13 @@ classdef ModelUI < handle
                 ind=1:length(obj.models(no).mogs);
                 ind = ind~=no_mog;
                 obj.models(no).mogs = obj.models(no).mogs(ind);
+                obj.handles.listMOGs.Value = 1;
                 obj.updateListMog()
                 obj.notify('modelEdited')
             end
         end
         function listModels(obj,varargin)
+            obj.handles.listMOGs.Value = 1;
             obj.updateListMog();
         end
         

@@ -40,7 +40,7 @@ switch grid.type
     case '2D+'
         prop = {'Velocity','Attenuation','Reservoir','xi','Tilt Angle'};
     case '3D'
-        prop = {'Velocity','Attenuation'};  % no anisotropy in 3D
+        prop = {'Velocity','Attenuation'};  % no time-lapse or anisotropy in 3D
         enableY = true;
 end
 
@@ -97,6 +97,13 @@ himport = uicontrol('Style','pushbutton',...
     'Units','points',...
     'FontSize',fs,...
     'Callback',@import,...
+    'Parent',pprop);
+
+hexport = uicontrol('Style','pushbutton',...
+    'String','Export',...
+    'Units','points',...
+    'FontSize',fs,...
+    'Callback',@export,...
     'Parent',pprop);
 
 hreinit = uicontrol('Style','pushbutton',...
@@ -233,16 +240,17 @@ uiwait(f)
         hcancel.Position = [width-hBorder-hSize vBorder+vSize+vSpace hSize vSize];
         
         vSizeVar = 2*vSize+7*vSpace;
-        vSizeProp = 11*vSpace+vSizeVar+5*vSize;
+        vSizeProp = 11*vSpace+vSizeVar+6*vSize;
         pprop.Position = [width-hBorder-hSize height-vSizeProp-vBorderTop hSize vSizeProp];
         
-        pvariance.Position = [5 vSpace hSize2 vSizeVar];
-        hreinit.Position = [5 2*vSpace+vSizeVar hSize2 vSize];
-        himport.Position = [5 3*vSpace+vSizeVar+vSize hSize2 vSize];
-        hedit.Position = [5 4*vSpace+vSizeVar+2*vSize hSize2 vSize];
-        hvalue.Position = [5 5*vSpace+vSizeVar+3*vSize hSize2/2 vSize];
-        hvalueEdit.Position = [hSize/2 5*vSpace+vSizeVar+3*vSize hSize2/2 vSize];
-        hprop.Position = [5 6*vSpace+vSizeVar+4*vSize hSize2 vSize];
+        pvariance.Position  = [5 vSpace hSize2 vSizeVar];
+        hreinit.Position    = [5 2*vSpace+vSizeVar hSize2 vSize];
+        hexport.Position    = [5 3*vSpace+vSizeVar+vSize hSize2 vSize];
+        himport.Position    = [5 4*vSpace+vSizeVar+2*vSize hSize2 vSize];
+        hedit.Position      = [5 5*vSpace+vSizeVar+3*vSize hSize2 vSize];
+        hvalue.Position     = [5 6*vSpace+vSizeVar+4*vSize hSize2/2 vSize];
+        hvalueEdit.Position = [hSize/2 6*vSpace+vSizeVar+4*vSize hSize2/2 vSize];
+        hprop.Position      = [5 7*vSpace+vSizeVar+5*vSize hSize2 vSize];
         
         if enableY
             hy.Position = [width-hBorder-hSize height-vSizeProp-vBorderTop-vBorder-vSize hSize vSize];
@@ -363,7 +371,7 @@ uiwait(f)
                 else
                     ind = 1:length(dist);
                 end
-                icont = [coord(ind,3) coord(ind,1) icont(ind,4:5)];
+                icont = [coord(ind,1) coord(ind,3) icont(ind,4:5)];
                 
                 switch hprop.Value
                     case 1
@@ -375,8 +383,16 @@ uiwait(f)
                         c.attenuation.data = [c.attenuation.data; icont];
                         c.attenuation.data = unique(c.attenuation.data,'rows');
                     case 3
-                        c.ind_reservoir = [c.ind_reservoir; icont];
-                        c.ind_reservoir = unique(c.ind_reservoir,'rows');
+                        ix = zeros(size(icont,1),1);
+                        iz = zeros(size(icont,1),1);
+                        for n=1:size(icont,1)
+                            ix(n) = findnear(icont(n,1),xx);
+                            iz(n) = findnear(icont(n,2),zz);
+                        end
+                        ix = unique(ix);
+                        iz = unique(iz);
+                        nz=length(zz);
+                        c.ind_reservoir = (ix-1)*nz+iz;
                     case 4
                         c.slowness.data_xi = [c.slowness.data_xi; icont];
                         c.slowness.data_xi = unique(c.slowness.data_xi,'rows');
@@ -401,7 +417,7 @@ uiwait(f)
                 else
                     ind = 1:length(dist);
                 end
-                icont = [coord(ind,3) coord(ind,1) icont(ind,4:5)];
+                icont = [coord(ind,1) coord(ind,2) icont(ind,4:5)];
                 
                 switch hprop.Value
                     case 1
@@ -413,8 +429,16 @@ uiwait(f)
                         c.attenuation.data = [c.attenuation.data; icont];
                         c.attenuation.data = unique(c.attenuation.data,'rows');
                     case 3
-                        c.ind_reservoir = [c.ind_reservoir; icont];
-                        c.ind_reservoir = unique(c.ind_reservoir,'rows');
+                        ix = zeros(size(icont,1),1);
+                        iz = zeros(size(icont,1),1);
+                        for n=1:size(icont,1)
+                            ix(n) = findnear(icont(n,1),xx);
+                            iz(n) = findnear(icont(n,2),zz);
+                        end
+                        ix = unique(ix);
+                        iz = unique(iz);
+                        nz=length(zz);
+                        c.ind_reservoir = (ix-1)*nz+iz;
                     case 4
                         c.slowness.data_xi = [c.slowness.data_xi; icont];
                         c.slowness.data_xi = unique(c.slowness.data_xi,'rows');
@@ -434,8 +458,7 @@ uiwait(f)
                         c.attenuation.data = [c.attenuation.data; icont];
                         c.attenuation.data = unique(c.attenuation.data,'rows');
                     case 3
-                        c.ind_reservoir = [c.ind_reservoir; icont];
-                        c.ind_reservoir = unique(c.ind_reservoir,'rows');
+                        % TODO
                     case 4
                         c.slowness.data_xi = [c.slowness.data_xi; icont];
                         c.slowness.data_xi = unique(c.slowness.data_xi,'rows');
@@ -450,6 +473,58 @@ uiwait(f)
         
         contEdited = true;
     end
+    function export(varargin)
+        
+        switch grid.type
+            case '2D'
+                % TODO we must "reverse project" to get coordonates in 3D
+                warndlg('Not yet working in 2D')
+            case '2D+'
+                % TODO we must "reverse project" to get coordonates in 3D
+                warndlg('Not yet working in 2D')
+            case '3D'
+                
+                switch hprop.Value
+                    case 1
+                        str = 'File with Velocity Constraints';
+                    case 2
+                        str = 'File with Attenuation Constraints';
+                    case 3
+                        str = 'File with Reservoir Cells';
+                    case 4
+                        str = 'File with xi Constraints';
+                    case 5
+                        str = 'File with Tilt Angle Constraints';
+                end
+                
+                [file, rep] = uiputfile('*.con',str);
+                if file==0
+                    return
+                end
+                
+                if hprop.Value==3
+                    [iz,ix]=find(~isnan(values));
+                    xt = xx(ix);
+                    zt = zz(iz);
+                    cont = [xt(:) zt(:) ones(numel(ix),1) zeros(numel(ix),1)]; %#ok<NASGU>
+                    save([rep,file],'cont','-ascii')
+                else
+                    fillCont()
+                    switch hprop.Value
+                        case 1
+                            cont = [c.slowness.data(:,1:2) 1./c.slowness.data(:,3) ...
+                                c.slowness.data(:,4)./c.slowness.data(:,3).^4]; %#ok<NASGU>
+                            save([rep,file],'cont','-ascii')
+                        case 2
+                            save([rep,file],'c.attenuation.data','-ascii')
+                        case 4
+                            save([rep,file],'c.slowness.data_xi','-ascii')
+                        case 5
+                            save([rep,file],'c.slowness.data_theta','-ascii')
+                    end
+                end
+        end
+    end
     function reinit(varargin)
         c = grid.cont;
         fillValues();
@@ -462,15 +537,11 @@ uiwait(f)
         if enableY==false  % 2D
             if hprop.Value == 3  % reservoir (we don't care about variance)
                 if ~isempty(c.ind_reservoir)
-                    for n=1:size(c.ind_reservoir,1)
-                        if c.ind_reservoir(n,2)>=xx(1) && ...
-                                c.ind_reservoir(n,2)<=xx(end) && ...
-                                c.ind_reservoir(n,1)>=zz(1) && ...
-                                c.ind_reservoir(n,1)<=zz(end)
-                            ix = findnear(c.ind_reservoir(n,2), xx);
-                            iz = findnear(c.ind_reservoir(n,1), zz);
-                            values(iz,ix) = c.ind_reservoir(n,3);
-                        end
+                    nz=length(zz);
+                    ix = floor(0.0001+c.ind_reservoir/nz)+1;
+                    iz = c.ind_reservoir - (ix-1)*nz;
+                    for n=1:length(ix)
+                        values(iz(n),ix(n)) = 1;
                     end
                 end
                 return
@@ -480,27 +551,27 @@ uiwait(f)
                 case 1  % velocity
                     if ~isempty(c.slowness.data)
                         for n=1:size(c.slowness.data,1)
-                            if c.slowness.data(n,2)>=xx(1) && ...
-                                    c.slowness.data(n,2)<=xx(end) && ...
-                                    c.slowness.data(n,1)>=zz(1) && ...
-                                    c.slowness.data(n,1)<=zz(end)
-                                ix = findnear(c.slowness.data(n,2), xx);
-                                iz = findnear(c.slowness.data(n,1), zz);
-                                values(iz,ix) = 1/c.slowness.data(n,3);
+                            if c.slowness.data(n,1)>=xx(1) && ...
+                                    c.slowness.data(n,1)<=xx(end) && ...
+                                    c.slowness.data(n,2)>=zz(1) && ...
+                                    c.slowness.data(n,2)<=zz(end)
+                                ix = findnear(c.slowness.data(n,1), xx);
+                                iz = findnear(c.slowness.data(n,2), zz);
+                                values(iz(n),ix(n)) = 1/c.slowness.data(n,3);
                                 % http://math.stackexchange.com/questions/269216/inverse-of-random-variable
-                                valuesVar(iz,ix) = c.slowness.data(n,4)/c.slowness.data(n,3)^4;
+                                valuesVar(iz(n),ix(n)) = c.slowness.data(n,4)/c.slowness.data(n,3)^4;
                             end
                         end
                     end
                 case 2  % attenuation
                     if ~isempty(c.attenuation.data)
                         for n=1:size(c.attenuation.data,1)
-                            if c.attenuation.data(n,2)>=xx(1) && ...
-                                    c.attenuation.data(n,2)<=xx(end) && ...
-                                    c.attenuation.data(n,1)>=zz(1) && ...
-                                    c.attenuation.data(n,1)<=zz(end)
-                                ix = findnear(c.attenuation.data(n,2), xx);
-                                iz = findnear(c.attenuation.data(n,1), zz);
+                            if c.attenuation.data(n,1)>=xx(1) && ...
+                                    c.attenuation.data(n,1)<=xx(end) && ...
+                                    c.attenuation.data(n,2)>=zz(1) && ...
+                                    c.attenuation.data(n,2)<=zz(end)
+                                ix = findnear(c.attenuation.data(n,1), xx);
+                                iz = findnear(c.attenuation.data(n,2), zz);
                                 values(iz,ix) = c.attenuation.data(n,3);
                                 valuesVar(iz,ix) = c.attenuation.data(n,4);
                             end
@@ -509,12 +580,12 @@ uiwait(f)
                 case 4  % xi
                     if ~isempty(c.slowness.data_xi)
                         for n=1:size(c.slowness.data_xi,1)
-                            if c.slowness.data_xi(n,2)>=xx(1) && ...
-                                    c.slowness.data_xi(n,2)<=xx(end) && ...
-                                    c.slowness.data_xi(n,1)>=zz(1) && ...
-                                    c.slowness.data_xi(n,1)<=zz(end)
-                                ix = findnear(c.slowness.data_xi(n,2), xx);
-                                iz = findnear(c.slowness.data_xi(n,1), zz);
+                            if c.slowness.data_xi(n,1)>=xx(1) && ...
+                                    c.slowness.data_xi(n,1)<=xx(end) && ...
+                                    c.slowness.data_xi(n,2)>=zz(1) && ...
+                                    c.slowness.data_xi(n,2)<=zz(end)
+                                ix = findnear(c.slowness.data_xi(n,1), xx);
+                                iz = findnear(c.slowness.data_xi(n,2), zz);
                                 values(iz,ix) = c.slowness.data_xi(n,3);
                                 valuesVar(iz,ix) = c.slowness.data_xi(n,4);
                             end
@@ -523,12 +594,12 @@ uiwait(f)
                 case 5  % tilt angle
                     if ~isempty(c.slowness.data_theta)
                         for n=1:size(c.slowness.data_theta,1)
-                            if c.slowness.data_theta(n,2)>=xx(1) && ...
-                                    c.slowness.data_theta(n,2)<=xx(end) && ...
-                                    c.slowness.data_theta(n,1)>=zz(1) && ...
-                                    c.slowness.data_theta(n,1)<=zz(end)
-                                ix = findnear(c.slowness.data_theta(n,2), xx);
-                                iz = findnear(c.slowness.data_theta(n,1), zz);
+                            if c.slowness.data_theta(n,1)>=xx(1) && ...
+                                    c.slowness.data_theta(n,1)<=xx(end) && ...
+                                    c.slowness.data_theta(n,2)>=zz(1) && ...
+                                    c.slowness.data_theta(n,2)<=zz(end)
+                                ix = findnear(c.slowness.data_theta(n,1), xx);
+                                iz = findnear(c.slowness.data_theta(n,2), zz);
                                 values(iz,ix) = c.slowness.data_theta(n,3);
                                 valuesVar(iz,ix) = c.slowness.data_theta(n,4);
                             end
@@ -640,23 +711,25 @@ uiwait(f)
     end
     function fillCont()
         [iz,ix]=find(~isnan(values));
+        v=zeros(numel(ix),1);
+        vv=v;
+        for n=1:numel(ix)
+            v(n) = values(iz(n),ix(n));
+            vv(n)= valuesVar(iz(n),ix(n));
+        end
         if enableY==false  % 2D
             switch hprop.Value
                 case 1
-                    c.slowness.data = [xx(ix) zz(iz) 1./values(iz,ix) ...
-                        valuesVar(iz,ix)./values(iz,ix).^4];
+                    c.slowness.data = [xx(ix)' zz(iz)' 1./v vv./v.^4];
                 case 2
-                    c.attenuation.data = [xx(ix) zz(iz) values(iz,ix) ...
-                        valuesVar(iz,ix)];
+                    c.attenuation.data = [xx(ix)' zz(iz)' v vv];
                 case 3
-                    c.ind_reservoir = [xx(ix) zz(iz) values(iz,ix) ...
-                        valuesVar(iz,ix)];
+                    nz=length(zz);
+                    c.ind_reservoir = (ix-1)*nz+iz;
                 case 4
-                    c.slowness.data_xi = [xx(ix) zz(iz) values(iz,ix) ...
-                        valuesVar(iz,ix)];
+                    c.slowness.data_xi = [xx(ix)' zz(iz)' v vv];
                 case 5
-                    c.slowness.data_theta = [xx(ix) zz(iz) values(iz,ix) ...
-                        valuesVar(iz,ix)];
+                    c.slowness.data_theta = [xx(ix)' zz(iz)' v vv];
             end
         else  %3D
             y = grid.gry(hypopup.Value);

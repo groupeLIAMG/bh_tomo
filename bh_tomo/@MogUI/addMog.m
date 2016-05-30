@@ -65,7 +65,7 @@ newMog.initialize();
 debut=0;
 no = length(obj.mogs)+1;
 if no>1
-    debut = obj.mogs(no-1).no_traces( length(obj.mogs(no-1).no_traces) );
+    debut = obj.mogs(no-1).no_traces( end );
 end
 newMog.no_traces = debut + (1:newMog.data.ntrace);
 newMog.sorted = false;

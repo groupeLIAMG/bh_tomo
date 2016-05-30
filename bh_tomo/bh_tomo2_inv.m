@@ -1272,19 +1272,22 @@ f.Visible = 'on';
             cm.covar(sNo).range = cmUI(sNo).range;
             cm.covar(sNo).angle = cmUI(sNo).angle;
             cm.covar(sNo).sill = cmUI(sNo).sill;
-        elseif ~isempty(cmXiUI)
+        end
+        if ~isempty(cmXiUI)
             if src == cmXiUI(sNo)
                 cm.covar_xi(sNo).range = cmXiUI(sNo).range;
                 cm.covar_xi(sNo).angle = cmXiUI(sNo).angle;
                 cm.covar_xi(sNo).sill = cmXiUI(sNo).sill;
             end
-        elseif ~isempty(cmTiltUI)
+        end
+        if ~isempty(cmTiltUI)
             if src == cmTiltUI(sNo)
                 cm.covar_tilt(sNo).range = cmTiltUI(sNo).range;
                 cm.covar_tilt(sNo).angle = cmTiltUI(sNo).angle;
                 cm.covar_tilt(sNo).sill = cmTiltUI(sNo).sill;
             end
-        elseif src==httNugget
+        end
+        if src==httNugget
             cm.nugget_d = str2double(httNugget.String);
         elseif src==hmodelNugget
             cm.nugget_m = str2double(hmodelNugget.String);
@@ -1459,7 +1462,7 @@ f.Visible = 'on';
             return
         end
         cla(haxes1);cla(haxes2);cla(haxes3)
-        cbh = findobj( 0, 'tag', 'Colorbar' );
+        cbh = findobj( f, 'tag', 'Colorbar' );
         for i = 1: length(cbh)
             colorbar(cbh(i),'off')
         end
@@ -1586,7 +1589,7 @@ f.Visible = 'on';
             end
             param.cm = copy(cm);
             if cm.use_tilt==1
-                % TODO
+                tomo = invGeostatTiltEllipt(param,data,idata,model.grid,cm,L,hmessage,gh,gridViewer);
             elseif cm.use_xi==1
                 tomo = invGeostatEllipt(param,data,idata,model.grid,cm,L,hmessage,gh,gridViewer);
             else
@@ -1601,7 +1604,7 @@ f.Visible = 'on';
             param.alphaz = str2double(halphazLSQR.String);
             param.order = hopOrderLSQR.Value;
             param.nbreiter = str2double(hnitLSQR.String);
-            param.dv_max = str2double(hdeltamaxLSQR.String);
+            param.dv_max = 0.01*str2double(hdeltamaxLSQR.String);
 
             haxes1.Position = [hBorder+hSize+axBorder axBorder hSize2 vSize2];
             haxes2.Visible = 'off';

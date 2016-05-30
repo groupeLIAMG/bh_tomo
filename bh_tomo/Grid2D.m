@@ -189,9 +189,11 @@ classdef Grid2D < Grid
             end
             
             if isstruct(cont) % check if we have anisotropy
-                ncx = size(cont.data,1);
-                ncz = size(cont.data_xi,1);
-                indc = zeros(ncx+ncz,1);
+                nc = obj.getNumberOfCells();
+                nc1 = size(cont.data,1);
+                nc2 = size(cont.data_xi,1);
+                nc3 = size(cont.data_theta,1);
+                indc = zeros(nc1+nc2+nc3,1);
                 for i=1:size(cont.data,1)
                     ind11=findnear(cont.data(i,1),x(:,1));
                     ind22=findnear(cont.data(i,2),x(ind11,2));
@@ -200,7 +202,12 @@ classdef Grid2D < Grid
                 for i=1:size(cont.data_xi,1)
                     ind11=findnear(cont.data_xi(i,1),x(:,1));
                     ind22=findnear(cont.data_xi(i,2),x(ind11,2));
-                    indc(ncx+i)=nc+min(ind11(ind22));
+                    indc(nc1+i)=nc+min(ind11(ind22));
+                end
+                for i=1:size(cont.data_theta,1)
+                    ind11=findnear(cont.data_theta(i,1),x(:,1));
+                    ind22=findnear(cont.data_theta(i,2),x(ind11,2));
+                    indc(nc1+nc2+i)=2*nc+min(ind11(ind22));
                 end
             else
                 indc = zeros(size(cont,1),1);

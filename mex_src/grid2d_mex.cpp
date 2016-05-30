@@ -536,7 +536,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 }
                 jcL[nSlowness] = k;
 
-            } else if (dynamic_cast<gridaniso*>(grid_instance)) {
+            } else if (dynamic_cast<gridaniso*>(grid_instance) ||
+                    dynamic_cast<gridtilted*>(grid_instance)) {
                 mwSize nLmax = 0;
                 for ( size_t n=0; n<L_data.size(); ++n ) {
                     nLmax += L_data[n].size();

@@ -1,4 +1,4 @@
-function [diff1,diff2,diff1_min,diff2_min]=choixsimua(L,S_sim,dt,c0)
+function [diff1,diff2,diff1_min,diff2_min]=choixsimuaa(L,S_sim,dt,c0)
 % [diff1,diff2,diff1_min,diff2_min]=choixsimua(L,S_sim,dt,c0)
 
 % Copyright (C) 2005 Erwan Gloaguen
@@ -32,9 +32,12 @@ Lx = L(:,1:nCells);
 Lz = L(:,(1+nCells):end);
 
 for i=1:size(S_sim,2)
-    xi = S_sim((1+nCells):end,i);
+    th = S_sim((1+2*nCells):end,i);
+    xi = S_sim((1+nCells):2*nCells,i);
     s = S_sim(1:nCells, i);
-    t = Lx.^2 + Lz.^2.*kron(ones(nt,1),xi'.^2);
+    co = kron(ones(nt,1),cos(th)');
+    si = kron(ones(nt,1),sin(th)');
+    t = (Lx.*co + Lz.*si).^2 + (Lz.*co - Lx.*si).^2.*kron(ones(nt,1),xi'.^2);
     t = kron(ones(nt,1),s') .* sqrt(t);
     t = sum(t,2);
     

@@ -53,6 +53,32 @@ classdef MogData < handle
             obj.date = '';
             obj.tdata = [];
         end
+        function s = getSubset(obj,ind)
+            s = MogData;
+            s.ntrace = sum(ind);
+            s.nptsptrc = obj.nptsptrc;
+            s.rstepsz = obj.rstepsz;
+            s.cunits = obj.cunits;
+            s.rnomfreq = obj.rnomfreq;
+            s.csurvmod = obj.csurvmod;
+            s.timec = obj.timec;
+            s.rdata = obj.rdata(:,ind);
+            s.timestp = obj.timestp;
+            s.Tx_x = obj.Tx_x(ind);
+            s.Tx_y = obj.Tx_y(ind);
+            s.Tx_z = obj.Tx_z(ind);
+            s.Rx_x = obj.Rx_x(ind);
+            s.Rx_y = obj.Rx_y(ind);
+            s.Rx_z = obj.Rx_z(ind);
+            s.antennas = obj.antennas;
+            s.synthetique = obj.synthetique;
+            s.tunits = obj.tunits;
+            s.TxOffset = obj.TxOffset;
+            s.RxOffset = obj.RxOffset;
+            s.comment = obj.comment;
+            s.date = obj.date;
+            s.tdata = obj.tdata;
+        end
         function readRAMAC(obj, basename)
             obj.readRAD( basename )
             obj.readRD3( basename )

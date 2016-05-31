@@ -71,6 +71,7 @@ end
 WT = sparse(diag(wt));
 
 Wm = WT'*(p.lambda*speye(nc) + p.mux*(Dx'*Dx) + p.muy*(Dy'*Dy) + p.muz*(Dz'*Dz))*WT;
+
 WmWm = Wm'*Wm;
 WdiffWdiff=WmWm;
 

@@ -67,25 +67,28 @@ uimenu(hmenu,'Label','Close',...
     'Separator','on',...
     'Accelerator','W',...
     'Callback',@closeWindow);
-% hresultsMenu = uimenu(f,'Label','Results');
-% uimenu(hresultsMenu,'Label','Export ...',...
-%     'Accelerator','E',...
-%     'Callback',@exportTomo);
-% uimenu(hresultsMenu,'Label','Tomogram',...
-%     'Accelerator','T',...
-%     'Callback',@showTomo);
-% uimenu(hresultsMenu,'Label','Simulations',...
-%     'Accelerator','G',...
-%     'Callback',@showSim);
-% uimenu(hresultsMenu,'Label','Rays',...
-%     'Accelerator','R',...
-%     'Callback',@showRays);
-% uimenu(hresultsMenu,'Label','Ray Density',...
-%     'Accelerator','D',...
-%     'Callback',@showRayDensity);
-% uimenu(hresultsMenu,'Label','Residuals',...
-%     'Accelerator','L',...
-%     'Callback',@showResiduals);
+hresultsMenu = uimenu(f,'Label','Results');
+uimenu(hresultsMenu,'Label','Export ...',...
+    'Accelerator','E',...
+    'Callback',@exportTomo);
+uimenu(hresultsMenu,'Label','Tomograms',...
+    'Accelerator','T',...
+    'Callback',@showTomo);
+uimenu(hresultsMenu,'Label','Difference Tomogram',...
+    'Accelerator','G',...
+    'Callback',@showDiff);
+uimenu(hresultsMenu,'Label','Departure From Ref. Tomog.',...
+    'Accelerator','H',...
+    'Callback',@showDep);
+uimenu(hresultsMenu,'Label','Rays',...
+    'Accelerator','R',...
+    'Callback',@showRays);
+uimenu(hresultsMenu,'Label','Ray Density',...
+    'Accelerator','D',...
+    'Callback',@showRayDensity);
+uimenu(hresultsMenu,'Label','Residuals',...
+    'Accelerator','L',...
+    'Callback',@showResiduals);
 
 
 %
@@ -93,6 +96,9 @@ uimenu(hmenu,'Label','Close',...
 %
 
 pdata = uipanel(f,'Title','Data',...
+    'Units','points',...
+    'FontSize',fs+1);
+pprevious = uipanel(f,'Title','Previous Inversion',...
     'Units','points',...
     'FontSize',fs+1);
 pinv = uipanel(f,'Title','Inversion Parameters',...
@@ -109,7 +115,7 @@ hmessage = uicontrol('Style','text',...
     'Units','points',...
     'Parent',f);
 
-nLines=9;
+nLines=8;
 vSizeTot = nLines*22 + (nLines+1)*5;
 vSize = 22/vSizeTot;
 vSpace = 5/vSizeTot;
@@ -122,26 +128,26 @@ hmodelName = uicontrol('Style','text',...
     'FontSize',fs+1,...
     'HorizontalAlignment','left',...
     'Units','normalized',...
-    'Position',[0.05 8*vSize+9*vSpace 0.9 vSize],...
+    'Position',[0.05 7*vSize+8*vSpace 0.9 vSize],...
     'Parent',pdata);
 htypeData = uicontrol('Style','popupmenu',...
     'String',{'Traveltime','Amplitude - Peak-to-Peak','Amplitude - Centroid Frequency'},...
     'FontSize',fs,...
     'Units','normalized',...
-    'Position',[0.05 6.5*vSize+7.5*vSpace 0.5 vSize],...
+    'Position',[0.05 5.5*vSize+6.5*vSpace 0.5 vSize],...
     'Callback',@changeTypeData,...
     'Parent',pdata);
 uicontrol('Style','text',...
     'String','Baseline Data',...
     'FontSize',fs,...
     'Units','normalized',...
-    'Position',[0.03 5*vSize+6*vSpace 0.45 vSize],...
+    'Position',[0.03 4*vSize+5*vSpace 0.45 vSize],...
     'Parent',pdata);
 uicontrol('Style','text',...
     'String','Repeat Data',...
     'FontSize',fs,...
     'Units','normalized',...
-    'Position',[0.51 5*vSize+6*vSpace 0.45 vSize],...
+    'Position',[0.51 4*vSize+5*vSpace 0.45 vSize],...
     'Parent',pdata);
 hlistBaseline = uicontrol('Style','listbox',...
     'FontSize',fs,...
@@ -156,6 +162,33 @@ hlistRepeat = uicontrol('Style','listbox',...
     'Position',[0.51 vSpace 0.45 5*vSize+5*vSpace],...
     'Parent',pdata);
 
+% Previous Inversions
+
+nLines=1;
+vSizeTot = nLines*22 + (nLines+1)*5;
+vSize = 22/vSizeTot;
+vSpace = 5/vSizeTot;
+
+hpreviousInv = uicontrol('Style','popupmenu',...
+    'String','-',...
+    'FontSize',fs,...
+    'Units','normalized',...
+    'Position',[0.025 vSpace 0.6 vSize],...
+    'Parent',pprevious);
+uicontrol('Style','pushbutton',...
+    'String','Load',...
+    'FontSize',fs,...
+    'Units','normalized',...
+    'Position',[0.65 vSpace 0.15 vSize],...
+    'Callback',@loadPrevious,...
+    'Parent',pprevious);
+uicontrol('Style','pushbutton',...
+    'String','Delete',...
+    'FontSize',fs,...
+    'Units','normalized',...
+    'Position',[0.825 vSpace 0.15 vSize],...
+    'Callback',@deletePrevious,...
+    'Parent',pprevious);
 
 % Inversion params
 
@@ -204,7 +237,9 @@ uicontrol('Style','text',...
     'Position',[0.1 16*vSpace+14.75*vSize 0.3 vSize],...
     'Parent',pinv);
 htypeInv = uicontrol('Style','popupmenu',...
-    'String',{'Simultaneous Inversion','Difference Inversion'},...
+    'String',{'Simultaneous Inversion',...
+    'Difference Inversion',...
+    ['Straight-Ray ',char(916),'t Inversion']},...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.45 16*vSpace+14.75*vSize 0.4 vSize],...
@@ -235,7 +270,6 @@ hrefTomo = uicontrol('Style','popupmenu',...
     'FontSize',fs,...
     'Units','normalized',...
     'Position',[0.05 vSpace 0.5 vSize],...
-    'Callback',@changeTypeInv,...
     'Parent',pref);
 uicontrol('Style','pushbutton',...
     'String','View',...
@@ -562,10 +596,14 @@ f.Visible = 'on';
         rBorder = 2*hBorder;
         hSize = 420;
         
-        vSize2 = 9*vSize+10*vSpace;
+        vSize2 = 8*vSize+9*vSpace;
         vPos = height-2*vBorder-vSize2;
         pdata.Position = [hBorder vPos hSize vSize2];
 
+        vSize2 = 1.5*vSize+3*vSpace;
+        vPos = vPos-vBorder-vSize2;
+        pprevious.Position = [hBorder vPos hSize vSize2];
+        
         vSize2 = 17*vSize+18*vSpace;
         vPos = vPos-2*vBorder-vSize2;
         pinv.Position = [hBorder vPos hSize vSize2];
@@ -616,6 +654,64 @@ f.Visible = 'on';
             return
         end
         
+        switch htypeData.Value
+            case 1
+                dType = '-vel';
+            otherwise
+                dType = '-att';
+        end
+        switch htypeInv.Value
+            case 1
+                iType = 'simult';
+            case 2
+                iType = 'diff';
+            case 3
+                iType = 'dt';
+                
+        end
+        
+        nameDefault = ['tomo(',tomo.date,')',dType,iType];  
+        prompt = {'Inversion name:                                                               '};
+        title = 'Save inversion results';
+        nblines = 1;
+        answer = myinputdlg(prompt,title,nblines,{nameDefault},'on');
+        if ~isempty(answer)
+            name=answer{1};
+        end
+        
+        if isempty(model.tlinv_res)
+            no_tlinv_res = 1;
+        else
+            flag=0;
+            no_tlinv_res = 1+length(model.tlinv_res);
+            for n=1:length(model.tlinv_res)
+                if strcmp(model.tlinv_res(n).name, name)
+                    no_tlinv_res = n;
+                    flag = 1;
+                    break;
+                end
+            end
+            if flag==1
+                answer=questdlg(['Overwrite ',name,'?']);
+                if ~strcmp(answer,'Yes')
+                    return
+                end
+            end
+        end
+        model.tlinv_res(no_tlinv_res).name = name;
+        model.tlinv_res(no_tlinv_res).tomo = tomo;
+        model.tlinv_res(no_tlinv_res).param = param;
+        
+        load([rep,file],'models')
+        models(modelNo) = model; %#ok<NASGU>
+        save([rep,file],'models','-append')
+        saved = true;
+        
+        names = cell(numel(model.tlinv_res),1);
+        for n=1:numel(model.tlinv_res)
+            names{n} = model.tlinv_res(n).name;
+        end
+        hpreviousInv.String = names;
     end
     function openFile(varargin)
         [modelNo,file2,rep2] = chooseModel(rep,file);
@@ -648,6 +744,18 @@ f.Visible = 'on';
         hlistRepeat.String = mname;
         hlistRepeat.Max = numel(model.mogs);
         hmodelName.String = model.name;
+        
+        if ~isempty(model.tlinv_res)
+            nr = cell(numel(model.tlinv_res),1);
+            for n=1:numel(model.tlinv_res)
+                nr{n} = model.tlinv_res(n).name;
+            end
+        else
+            nr = cell(1);
+            nr{1} = '-';
+        end
+        hpreviousInv.String = nr;
+        hpreviousInv.Value = 1;
         
         inv_name = cell(1,length(model.inv_res));
         for n=1:length(model.inv_res)
@@ -690,7 +798,7 @@ f.Visible = 'on';
         if ~isempty(model.grid.cont.ind_reservoir) && hreservoir.Value == 1
             param.ind_reservoir = model.grid.cont.ind_reservoir;
         else
-            param.ind_reservoir = false(model.grid.getNCell());
+            param.ind_reservoir = false(model.grid.getNumberOfCells(),1);
         end
         param.weight_reservoir = str2double(hresWeight.String);
         param.max_it = str2double(hnumIt.String);
@@ -902,15 +1010,372 @@ f.Visible = 'on';
         end
         nf=figure;
         ax=axes('Parent',nf);
-        if param.tomoAtt == 1
-            gridViewer.plotTomo(model.inv_res(param.ref_inv_no).tomo.s,...
+        if model.inv_res(hrefTomo.Value).param.tomoAtt == 1
+            gridViewer.plotTomo(model.inv_res(hrefTomo.Value).tomo.s,...
                 'Reference Model: Attenuation','Distance [m]','Elevation [m]',ax)
         else
-            gridViewer.plotTomo(1./model.inv_res(param.ref_inv_no).tomo.s,...
+            gridViewer.plotTomo(1./model.inv_res(hrefTomo.Value).tomo.s,...
                 'Reference Model: Velocity','Distance [m]','Elevation [m]',ax)
         end
         colorbar('peer', ax)
         colormap(ax,hcmap.String{hcmap.Value})
     end
+
+    function exportTomo(varargin)
+        
+    end
+    function showTomo(varargin)
+        if isempty(tomo)
+            return
+        end
+        if param.tomoAtt==0
+            t1 = 1./tomo.s;
+            t0 = 1./tomo.s0;
+        else
+            t1 = tomo.s;
+            t0 = tomo.s0;
+        end
+        nf=figure;
+        ax0=subplot(1,2,1,'Parent',nf);
+        ax1=subplot(1,2,2,'Parent',nf);
+        
+        if strcmp(model.grid.type,'3D')==1
+            gv = GridViewer(model.grid);
+            gv.createSliders('Parent',nf);
+            gv.plotTomo(t0,'Baseline','Distance [m]','Elevation [m]',ax0)
+            gv.plotTomo(t1,'Repeat','Distance [m]','Elevation [m]',ax1)
+        else
+            gridViewer.plotTomo(t0,'Baseline','Distance [m]','Elevation [m]',ax0)
+            gridViewer.plotTomo(t1,'Repeat','Distance [m]','Elevation [m]',ax1)
+        end
+        
+        if hcolorbar.Value==1
+            cmin = str2double(hcmin.String);
+            cmax = str2double(hcmax.String);
+            caxis(ax0,[cmin cmax])
+            caxis(ax1,[cmin cmax])
+        end
+        colorbar('peer',ax0)
+        colorbar('peer',ax1)
+        colormap(nf,hcmap.String{hcmap.Value})
+        
+    end
+
+    function showDiff(varargin)
+        if isempty(tomo)
+            return
+        end
+        if param.tomoAtt==0
+            t = 1./tomo.s - 1./tomo.s0;
+        else
+            t = tomo.s - tomo.s0;
+        end
+        nf=figure;
+        ax=axes('Parent',nf);
+        if strcmp(model.grid.type,'3D')==1
+            gv = GridViewer(model.grid);
+            gv.createSliders('Parent',nf);
+            gv.slider2.Visible = 'off';
+            gv.plotTomo(t,'Difference','Distance [m]','Elevation [m]',ax)
+        else
+            gridViewer.plotTomo(t,'Difference','Distance [m]','Elevation [m]',ax)
+        end
+        colorbar('peer',ax)
+        colormap(nf,hcmap.String{hcmap.Value})
+    end
+
+    function showDep(varargin)
+        if isempty(tomo)
+            return
+        end
+        s_ref = model.inv_res(param.ref_inv_no).tomo.s;
+        if param.tomoAtt==0
+            t1 = 1./tomo.s - 1./s_ref;
+            t0 = 1./tomo.s0 - 1./s_ref;
+        else
+            t1 = tomo.s - s_ref;
+            t0 = tomo.s0 - s_ref;
+        end
+        
+        cmin = min([t1(:); t0(:)]);
+        cmax = max([t1(:); t0(:)]);
+        
+        
+        nf=figure;
+        ax0=subplot(1,2,1,'Parent',nf);
+        ax1=subplot(1,2,2,'Parent',nf);
+        
+        if strcmp(model.grid.type,'3D')==1
+            gv = GridViewer(model.grid);
+            gv.createSliders('Parent',nf);
+            gv.plotTomo(t0,'Baseline','Distance [m]','Elevation [m]',ax0)
+            gv.plotTomo(t1,'Repeat','Distance [m]','Elevation [m]',ax1)
+        else
+            gridViewer.plotTomo(t0,'Baseline','Distance [m]','Elevation [m]',ax0)
+            gridViewer.plotTomo(t1,'Repeat','Distance [m]','Elevation [m]',ax1)
+        end
+        caxis(ax0,[cmin cmax])
+        caxis(ax1,[cmin cmax])
+        colorbar('peer',ax0)
+        colorbar('peer',ax1)
+        colormap(nf,hcmap.String{hcmap.Value})
+        
+        
+    end
+
+    function showRays(varargin)
+        
+    end
+
+    function showRayDensity(varargin)
+        if isempty(tomo)
+            return
+        end
+        nf=figure;
+        ax0=subplot(1,2,1,'Parent',nf);
+        ax1=subplot(1,2,2,'Parent',nf);
+
+        if isfield(tomo,'xi')
+            nCells=size(tomo.L0,2)/2;
+            Lx = tomo.L0(:,1:nCells);
+            Lz = tomo.L0(:,(1+nCells):end);
+            rd0 = full(sum(sqrt(Lx.^2+Lz.^2)));
+            nCells=size(tomo.L,2)/2;
+            Lx = tomo.L(:,1:nCells);
+            Lz = tomo.L(:,(1+nCells):end);
+            rd1 = full(sum(sqrt(Lx.^2+Lz.^2)));
+        else
+            rd0 = full(sum(tomo.L0));
+            rd1 = full(sum(tomo.L));
+        end
+        if strcmp(model.grid.type,'3D')==1
+            gv = GridViewer(model.grid);
+            gv.createSliders('Parent',nf);
+            gv.plotTomo(rd0,'Repeat','Distance [m]','Elevation [m]',ax0)
+            gv.plotTomo(rd1,'Repeat','Distance [m]','Elevation [m]',ax1)
+        else
+            gridViewer.plotTomo(rd0,'Repeat','Distance [m]','Elevation [m]',ax0)
+            gridViewer.plotTomo(rd1,'Repeat','Distance [m]','Elevation [m]',ax1)
+        end
+        hb0=colorbar('peer',ax0);
+        hb1=colorbar('peer',ax1);
+        colormap(nf,hcmap.String{hcmap.Value})
+        set(get(hb0,'Title'),'String','Ray Density','FontSize',12)
+        set(get(hb1,'Title'),'String','Ray Density','FontSize',12)
+    end
+
+    function showResiduals(varargin)
+        if isempty(tomo)
+            return
+        end
+        
+        
+        if param.tomoAtt == 0
+            [data,idata] = Model.getModelData(model,[rep,file],'tt',param.mog_no0);
+            [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no0,[],'tt');
+            data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
+        else
+            switch htypeData.Value
+                case 2
+                    [data,idata] = Model.getModelData(model,[rep,file],'amp',param.mog_no0);
+                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no0,[],'tt');
+                case 3
+                    [data,idata] = Model.getModelData(model,[rep,file],'fce',param.mog_no0);
+                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no0,[],'fce');
+                case 4
+                    [data,idata] = Model.getModelData(model,[rep,file],'hyb',param.mog_no0);
+                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no0,[],'hyb');
+            end
+            data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
+        end
+        hyp = sqrt( sum((data(:,1:3)-data(:,4:6)).^2, 2) );
+        dz = data(:,6)-data(:,3);
+        theta = 180/pi*asin(dz./hyp);
+
+        nIt = length(tomo.invData);
+        rms = zeros(nIt,1);
+        for n=1:nIt
+            rms(n) = rmsv(tomo.invData(n).res0);
+        end
+        
+        
+        figure
+        subplot(2,2,1)
+        plot(1:nIt, rms,'o')
+        ylabel('||res||')
+        xlabel('Iteration')
+        
+        res = tomo.invData(nIt).res0;
+        subplot(2,2,2)
+        plot(theta, res,'o')
+        xlabel('Angle w/r to horizontal [deg]')
+        ylabel('Residuals')
+        
+        vres = var(res);
+        h1=subplot(2,2,3);
+        hist(res,30)
+        xlabel('Residuals')
+        ylabel('Count')
+        title(['\sigma^2 = ', num2str(vres)])
+        
+        dTx = sort(unique(depth(:,1)));
+        dRx = sort(unique(depth(:,2)));
+        imdata = nan(length(dTx),length(dRx));
+        for i=1:length(dTx)
+            for j=1:length(dRx)
+                ind = dTx(i)==depth(:,1) & dRx(j)==depth(:,2);
+                if sum(ind)==1
+                    imdata(i,j) = res(ind);
+                end
+            end
+        end
+        
+        p = [0 0 1;1 1 1;1 0 0];
+        p = interp1((-1:1)',p,(-1:0.02:1)');
+        
+        z=imdata;
+        z(isnan(imdata))=0;
+        z(~isnan(imdata))=1;
+        
+        h2=subplot(2,2,4);
+        imagesc(dRx,dTx,imdata);
+        set(gca,'color',[0.8 0.8 0.8]);
+        alpha(z);
+        axis image;
+        
+        ca = caxis;
+        caxis([-max(abs(ca)) max(abs(ca))])
+        
+        xlabel('Rx depth')
+        ylabel('Tx depth')
+        colorbar
+        
+        colormap(h2,p)
+        set(get(h1,'Children'),'FaceColor',[0 0 1])
+        suptitle('Baseline')
+        
+        
+        if param.tomoAtt == 0
+            [data,idata] = Model.getModelData(model,[rep,file],'tt',param.mog_no1);
+            [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no1,[],'tt');
+            data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
+        else
+            switch htypeData.Value
+                case 2
+                    [data,idata] = Model.getModelData(model,[rep,file],'amp',param.mog_no1);
+                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no1,[],'tt');
+                case 3
+                    [data,idata] = Model.getModelData(model,[rep,file],'fce',param.mog_no1);
+                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no1,[],'fce');
+                case 4
+                    [data,idata] = Model.getModelData(model,[rep,file],'hyb',param.mog_no1);
+                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no1,[],'hyb');
+            end
+            data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
+        end
+        hyp = sqrt( sum((data(:,1:3)-data(:,4:6)).^2, 2) );
+        dz = data(:,6)-data(:,3);
+        theta = 180/pi*asin(dz./hyp);
+
+        nIt = length(tomo.invData);
+        rms = zeros(nIt,1);
+        for n=1:nIt
+            rms(n) = rmsv(tomo.invData(n).res);
+        end
+        
+        
+        figure
+        subplot(2,2,1)
+        plot(1:nIt, rms,'o')
+        ylabel('||res||')
+        xlabel('Iteration')
+        
+        res = tomo.invData(nIt).res;
+        subplot(2,2,2)
+        plot(theta, res,'o')
+        xlabel('Angle w/r to horizontal [deg]')
+        ylabel('Residuals')
+        
+        vres = var(res);
+        h1=subplot(2,2,3);
+        hist(res,30)
+        xlabel('Residuals')
+        ylabel('Count')
+        title(['\sigma^2 = ', num2str(vres)])
+        
+        dTx = sort(unique(depth(:,1)));
+        dRx = sort(unique(depth(:,2)));
+        imdata = nan(length(dTx),length(dRx));
+        for i=1:length(dTx)
+            for j=1:length(dRx)
+                ind = dTx(i)==depth(:,1) & dRx(j)==depth(:,2);
+                if sum(ind)==1
+                    imdata(i,j) = res(ind);
+                end
+            end
+        end
+        
+        p = [0 0 1;1 1 1;1 0 0];
+        p = interp1((-1:1)',p,(-1:0.02:1)');
+        
+        z=imdata;
+        z(isnan(imdata))=0;
+        z(~isnan(imdata))=1;
+        
+        h2=subplot(2,2,4);
+        imagesc(dRx,dTx,imdata);
+        set(gca,'color',[0.8 0.8 0.8]);
+        alpha(z);
+        axis image;
+        
+        ca = caxis;
+        caxis([-max(abs(ca)) max(abs(ca))])
+        
+        xlabel('Rx depth')
+        ylabel('Tx depth')
+        colorbar
+        
+        colormap(h2,p)
+        set(get(h1,'Children'),'FaceColor',[0 0 1])
+        suptitle('Repeat')
+        
+    end
+
+    function loadPrevious(varargin)
+        if isempty(model)
+            return
+        end
+        if isempty(model.tlinv_res)
+            return
+        end
+        no = hpreviousInv.Value;
+        tomo = model.tlinv_res(no).tomo;
+        param = model.tlinv_res(no).param;
+    end
+    function deletePrevious(varargin)
+        if isempty(model)
+            return
+        end
+        if isempty(model.tlinv_res)
+            return
+        end
+        no = hpreviousInv.Value;
+        nos=1:numel(model.tlinv_res);
+        ind = nos~=no;
+        model.tlinv_res = model.tlinv_res(ind);
+        
+        if isempty(model.tlinv_res)
+            hpreviousInv.String = {'-'};
+        else
+            names = cell(numel(model.tlinv_res),1);
+            for n=1:numel(model.tlinv_res)
+                names{n} = model.tlinv_res(n).name;
+            end
+            hpreviousInv.String = names;
+        end
+        tomo = [];
+        saved = false;
+    end
+
 end
 

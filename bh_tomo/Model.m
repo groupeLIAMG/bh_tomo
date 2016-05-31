@@ -10,6 +10,7 @@ classdef Model < handle
         tt_covar     % covariance model - travel time
         amp_covar    % covariance model - amplitudes
         inv_res      % inversion results
+        tlinv_res    % time-lapse inversion results
     end
     
     methods

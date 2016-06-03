@@ -1055,10 +1055,19 @@ f.Visible = 'on';
             caxis(ax0,[cmin cmax])
             caxis(ax1,[cmin cmax])
         end
-        colorbar('peer',ax0)
-        colorbar('peer',ax1)
+        hb0=colorbar('peer',ax0);
+        hb1=colorbar('peer',ax1);
         colormap(nf,hcmap.String{hcmap.Value})
         
+        load([rep,file],'mogs')
+        d = mogs(hlistBaseline.Value).data;
+        if param.tomoAtt==0
+            units = [d.cunits,'/',d.tunits];
+        else
+            units = ['Np/',d.cunits];
+        end
+        set(get(hb0,'Title'),'String',units,'FontSize',12)
+        set(get(hb1,'Title'),'String',units,'FontSize',12)
     end
 
     function showDiff(varargin)
@@ -1080,8 +1089,16 @@ f.Visible = 'on';
         else
             gridViewer.plotTomo(t,'Difference','Distance [m]','Elevation [m]',ax)
         end
-        colorbar('peer',ax)
+        hb=colorbar('peer',ax);
         colormap(nf,hcmap.String{hcmap.Value})
+        load([rep,file],'mogs')
+        d = mogs(hlistBaseline.Value).data;
+        if param.tomoAtt==0
+            units = [d.cunits,'/',d.tunits];
+        else
+            units = ['Np/',d.cunits];
+        end
+        set(get(hb,'Title'),'String',units,'FontSize',12)
     end
 
     function showDep(varargin)
@@ -1116,15 +1133,82 @@ f.Visible = 'on';
         end
         caxis(ax0,[cmin cmax])
         caxis(ax1,[cmin cmax])
-        colorbar('peer',ax0)
-        colorbar('peer',ax1)
+        hb0=colorbar('peer',ax0);
+        hb1=colorbar('peer',ax1);
         colormap(nf,hcmap.String{hcmap.Value})
         
-        
+        load([rep,file],'mogs')
+        d = mogs(hlistBaseline.Value).data;
+        if param.tomoAtt==0
+            units = [d.cunits,'/',d.tunits];
+        else
+            units = ['Np/',d.cunits];
+        end
+        set(get(hb0,'Title'),'String',units,'FontSize',12)
+        set(get(hb1,'Title'),'String',units,'FontSize',12)
     end
 
     function showRays(varargin)
+        if isempty(tomo)
+            return
+        end
+        if isempty(tomo.rays)
+            return
+        end
+        nf=figure;
+        ax=axes('Parent',nf);
         
+        rmin = 1.001*min(tomo.invData(end).res);
+        rmax = 1.001*max(tomo.invData(end).res);
+        rmax = max(abs([rmin rmax]));
+        rmin = -rmax;
+        c = [0 0 1;0.8 0.8 0.8;1 0 0];
+        c = interp1((-1:1)',c,(-1:0.02:1)');
+        
+        m = (size(c,1)-1)/(rmax-rmin);
+        b = 1-rmin*m;
+        p = m*tomo.invData(end).res(1)+b;
+        
+        if strcmp(model.grid.type,'3D')
+            couleur = interp1(c,p);
+            plot3(ax,tomo.rays{1}(:,1),tomo.rays{1}(:,2),tomo.rays{1}(:,3),...
+                'Color',couleur)
+            hold(ax,'on')
+            for n=2:length(tomo.rays)
+                p = m*tomo.invData(end).res(n)+b;
+                couleur = interp1(c,p);
+                plot3(ax,tomo.rays{n}(:,1),tomo.rays{n}(:,2),tomo.rays{n}(:,3),...
+                    'Color',couleur)
+            end
+            hold(ax,'off')
+            xlabel(ax,'X','FontSize',12)
+            ylabel(ax,'Y','FontSize',12)
+            zlabel('Elevation [m]','FontSize',12)
+        else
+            couleur = interp1(c,p);
+            plot(ax,tomo.rays{1}(:,1),tomo.rays{1}(:,end),'Color',couleur)
+            hold(ax,'on')
+            for n=2:length(tomo.rays)
+                p = m*tomo.invData(end).res(n)+b;
+                if p>size(c,1)
+                    p=size(c,1);
+                elseif p<1
+                    p=1;
+                end
+                    
+                couleur = interp1(c,p);
+                plot(ax,tomo.rays{n}(:,1),tomo.rays{n}(:,end),'Color',couleur)
+            end
+            hold(ax,'off')
+            xlabel('Distance [m]','FontSize',12)
+            ylabel('Elevation [m]','FontSize',12)
+        end
+        set(ax,'DataAspectRatio',[1 1 1])
+        axis(ax,'tight')
+        colormap(c)%jet)
+        hb=colorbar('peer',ax);
+        caxis(ax,[rmin rmax])
+        set(get(hb,'Title'),'String','Residuals','FontSize',12)
     end
 
     function showRayDensity(varargin)

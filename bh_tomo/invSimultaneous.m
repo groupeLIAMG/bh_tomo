@@ -2,6 +2,7 @@ function tomo = invSimultaneous(model,p,hmessage,gh,gv)
 
 if ~isempty(hmessage)
     hmessage.String = 'Simultaneous Inversion - Starting ...';
+    drawnow
 else
     disp('Simultaneous Inversion - Starting ...');
 end

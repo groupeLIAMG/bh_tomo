@@ -2,6 +2,7 @@ function tomo = invGeostat(param,data,idata,grid,cm,L,t_handle,g_handles,gv)
 
 if ~isempty(t_handle)
     t_handle.String = 'Geostatistical Inversion - Starting ...';
+    drawnow
 else
     disp('Geostatistical Inversion - Starting ...');
 end

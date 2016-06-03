@@ -834,6 +834,8 @@ f.Visible = 'on';
         if ispc
             vFac = 0.81*vFac;
         end
+%        vFac = 0.95;
+        
         vSize = 22*vFac;
         vSpace = 5*vFac;
         vBorder = 10*vFac;
@@ -927,6 +929,8 @@ f.Visible = 'on';
         answer = myinputdlg(prompt,title,nblines,{nameDefault},'on');
         if ~isempty(answer)
             name=answer{1};
+        else
+            return
         end
         
         if isempty(model.inv_res)
@@ -1736,8 +1740,15 @@ f.Visible = 'on';
         else
             t = tomo.s;
         end
+        
         nf=figure;
-        ax=axes('Parent',nf);
+        if isfield(tomo,'xi')
+            ax=subplot(1,2,1,'Parent',nf);
+            ax1=subplot(1,2,2,'Parent',nf);
+        else
+            ax=axes('Parent',nf);
+        end
+        
         if strcmp(model.grid.type,'3D')==1
             gv = GridViewer(model.grid);
             gv.createSliders('Parent',nf);
@@ -1746,8 +1757,28 @@ f.Visible = 'on';
         else
             gridViewer.plotTomo(t,'','Distance [m]','Elevation [m]',ax)
         end
-        colorbar('peer',ax)
+        hb=colorbar('peer',ax);
         colormap(nf,hcmap.String{hcmap.Value})
+        
+        load([rep,file],'mogs')
+        d = mogs(hlistMog.Value).data;
+        if param.tomoAtt==0
+            units = [d.cunits,'/',d.tunits];
+        else
+            units = ['Np/',d.cunits];
+        end
+        set(get(hb,'Title'),'String',units,'FontSize',12)
+        
+        if isfield(tomo,'xi')
+            title(ax,'V_x','FontSize',14)
+            if strcmp(model.grid.type,'3D')==1
+                gv.slider2.Visible = 'on';
+                gv.plotTomo(tomo.xi,'\xi','Distance [m]','Elevation [m]',ax1)
+            else
+                gridViewer.plotTomo(tomo.xi,'\xi','Distance [m]','Elevation [m]',ax1)
+            end
+            colorbar('peer',ax1);
+        end
     end
     function showSim(varargin)
         if isempty(tomo)

@@ -557,9 +557,9 @@ uiwait(f)
                                     c.slowness.data(n,2)<=zz(end)
                                 ix = findnear(c.slowness.data(n,1), xx);
                                 iz = findnear(c.slowness.data(n,2), zz);
-                                values(iz(n),ix(n)) = 1/c.slowness.data(n,3);
+                                values(iz,ix) = 1/c.slowness.data(n,3);
                                 % http://math.stackexchange.com/questions/269216/inverse-of-random-variable
-                                valuesVar(iz(n),ix(n)) = c.slowness.data(n,4)/c.slowness.data(n,3)^4;
+                                valuesVar(iz,ix) = c.slowness.data(n,4)/c.slowness.data(n,3)^4;
                             end
                         end
                     end

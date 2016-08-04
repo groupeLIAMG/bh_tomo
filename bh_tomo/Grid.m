@@ -1,6 +1,6 @@
 classdef Grid < matlab.mixin.Copyable
     %GRID Base class for 2D and 3D grids
-    
+
     properties
         grx
         gry
@@ -140,19 +140,19 @@ classdef Grid < matlab.mixin.Copyable
             % order = boreholes_order( bh )
             %
             %
-            
+
             nd = length(bh);
             x = zeros(1,nd);
             y = x;
-            
+
             for n=1:nd
                 x(n) = bh(n).X;
                 y(n) = bh(n).Y;
             end
-            
+
             dx = max(x)-min(x);
             dy = max(y)-min(y);
-            
+
             if ( dx > dy )
                 v1 = x;
                 v2 = y;
@@ -160,13 +160,13 @@ classdef Grid < matlab.mixin.Copyable
                 v1 = y;
                 v2 = x;
             end
-            
+
             % premier forage a x min
             order = 1:nd;
             [v1, iv1] = sort( v1 );
             order = order(iv1);
             v2 = v2(iv1);
-            
+
             ind = v1==v1(1);
             % si x_min est repete
             if sum( ind ) > 1
@@ -174,7 +174,7 @@ classdef Grid < matlab.mixin.Copyable
                 v2(ind) = v2( iv2 );
                 order(ind) = order( iv2 );
             end
-            
+
             for n=1:nd-2
                 dist = sqrt( ( v1(n)-v1((n+1):nd) ).^2 + ( v2(n)-v2((n+1):nd) ).^2 );
                 [~, ind] = sort(dist);
@@ -221,9 +221,9 @@ classdef Grid < matlab.mixin.Copyable
             for n=1:size(data,1)
                 for nn=1:length(planes)
                     r = planes(nn).x0-data(n,:);           % vecteur pointant de data vers x0
-                    p(nn) = abs(dot(planes(nn).a, r));     % distance entre data et le plan
+                    p(nn) = dot(planes(nn).a, r);          % distance entre data et le plan
                 end
-                [~,no] = min(p);
+                [~,no] = min(abs(p));
                 % on va garder le plan pour lequel la distance est la plus faible
                 p_data(n,:) = data(n,:) + p(no)*planes(no).a;  % coord de data projete sur le plan
                 no_plane(n) = no;
@@ -231,7 +231,7 @@ classdef Grid < matlab.mixin.Copyable
         end
         function m_data = transl_rotat(data, origine, az, dip)
             % m_data = transl_rotat(data, origine, az, dip)
-            
+
             % translation p/r origine
             m_data = data-repmat(origine,size(data,1),1);
             % rotation p/r azimuth
@@ -242,7 +242,7 @@ classdef Grid < matlab.mixin.Copyable
                 end
                 % data(n,1:2)*rot' est egal a (rot*data(n,1:2)')'
             end
-            
+
             % rotation p/r pendage
             if abs(dip) > (pi/720)
                 rot = [cos(dip) -sin(dip); sin(dip) cos(dip)];
@@ -252,8 +252,7 @@ classdef Grid < matlab.mixin.Copyable
                 % data(n,2:3)*rot' est egal a (rot*data(n,2:3)')'
             end
         end
-        
-    end
-    
-end
 
+    end
+
+end

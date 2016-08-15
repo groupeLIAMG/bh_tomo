@@ -31,6 +31,7 @@
 #include "Grid2Drcsp.h"
 
 using namespace std;
+using namespace ttcr;
 
 typedef Grid2D<double,uint32_t,sxz<double>> grid;
 typedef Grid2Drcsp<double,uint32_t,Cell<double,Node2Dcsp<double,uint32_t>,sxz<double>>> gridiso;
@@ -84,7 +85,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         char type[64];
         if (mxGetString(prhs[2], type, sizeof(type)))
             mexErrMsgTxt("Second input should be a string less than 64 characters long.");
-        
+
         // ------------------------------------------------------
         // number of threads
         // ------------------------------------------------------
@@ -219,7 +220,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         size_t itx=3;
         size_t irx=4;
         size_t it0=5;
-        
+
         // check if next arg is xi (anisotropy ratio)
         if (!(mxIsDouble(prhs[3]))) {
             mexErrMsgTxt("Input must be double precision.");
@@ -383,10 +384,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         vector<sxz<double>> vRx;
         vector<vector<double>> tt( vTx.size() );
         vector<vector<vector<sxz<double>>>> r_data( vTx.size() );
-        vector<vector<siv2<double> > > L_data(nTx);
-        vector<vector<vector<siv2<double> > > > l_data( vTx.size() );
+        vector<vector<siv2<double>>> L_data(nTx);
+        vector<vector<vector<siv2<double>>>> l_data( vTx.size() );
 
-        
+
         if ( grid_instance->getNthreads() == 1 ) {
             for ( size_t nv=0; nv<vTx.size(); ++nv ) {
 
@@ -504,7 +505,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             }
         }
         if ( nlhs == 3 ) {
-            
+
             for ( size_t nv=0; nv<vTx.size(); ++nv ) {
                 for ( size_t ni=0; ni<iTx[nv].size(); ++ni ) {
                     L_data[ iTx[nv][ni] ] = l_data[nv][ni];
@@ -547,7 +548,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 double *Lval = mxGetPr( plhs[2] );
                 mwIndex *irL  = mxGetIr( plhs[2] );
                 mwIndex *jcL  = mxGetJc( plhs[2] );
-                
+
                 size_t k = 0;
                 for ( size_t j=0; j<nSlowness; ++j ) {
                     jcL[j] = k;
@@ -745,7 +746,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         }
         return;
     }
-    
+
 
     // Got here, so command not recognized
     mexErrMsgTxt("Command not recognized.");

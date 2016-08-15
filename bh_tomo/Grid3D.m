@@ -119,15 +119,15 @@ classdef Grid3D < Grid
                 obj.mexObj = grid3d_mex('new', s, obj.nthreads);
             else
                 % check that mexObj is consistent with current obj values
-                if abs(grid3d_mex('get_xmin', obj.mexObj)-obj.grx(1))>10*eps || ...
-                        abs(grid3d_mex('get_ymin', obj.mexObj)-obj.gry(1))>10*eps || ...
-                        abs(grid3d_mex('get_zmin', obj.mexObj)-obj.grz(1))>10*eps || ...
-                        abs(grid3d_mex('get_dx', obj.mexObj)-(obj.grx(2)-obj.grx(1)))>10*eps || ...
-                        abs(grid3d_mex('get_dy', obj.mexObj)-(obj.gry(2)-obj.gry(1)))>10*eps || ...
-                        abs(grid3d_mex('get_dz', obj.mexObj)-(obj.grz(2)-obj.grz(1)))>10*eps || ...
-                        abs(grid3d_mex('get_nx', obj.mexObj)-(length(obj.grx)-1))>10*eps || ...
-                        abs(grid3d_mex('get_ny', obj.mexObj)-(length(obj.gry)-1))>10*eps || ...
-                        abs(grid3d_mex('get_nz', obj.mexObj)-(length(obj.grz)-1))>10*eps
+                if abs(grid3d_mex('get_xmin', obj.mexObj)-obj.grx(1))>100*eps || ...
+                        abs(grid3d_mex('get_ymin', obj.mexObj)-obj.gry(1))>100*eps || ...
+                        abs(grid3d_mex('get_zmin', obj.mexObj)-obj.grz(1))>100*eps || ...
+                        abs(grid3d_mex('get_dx', obj.mexObj)-(obj.grx(2)-obj.grx(1)))>100*eps || ...
+                        abs(grid3d_mex('get_dy', obj.mexObj)-(obj.gry(2)-obj.gry(1)))>100*eps || ...
+                        abs(grid3d_mex('get_dz', obj.mexObj)-(obj.grz(2)-obj.grz(1)))>100*eps || ...
+                        abs(grid3d_mex('get_nx', obj.mexObj)-(length(obj.grx)-1))>100*eps || ...
+                        abs(grid3d_mex('get_ny', obj.mexObj)-(length(obj.gry)-1))>100*eps || ...
+                        abs(grid3d_mex('get_nz', obj.mexObj)-(length(obj.grz)-1))>100*eps
 
                     % delete old instance
                     grid3d_mex('delete', obj.mexObj);
@@ -214,7 +214,7 @@ classdef Grid3D < Grid
                 c=0;
                 return
             end
-            
+
             dy = obj.gry(2)-obj.gry(1);
             ymin = obj.gry(1)+dy/2;
             ymax = obj.gry(end)-dy/3;  % divide by 3 to avoid truncation error
@@ -227,7 +227,7 @@ classdef Grid3D < Grid
                 c=0;
                 return
             end
-            
+
             dz = obj.grz(2)-obj.grz(1);
             zmin = obj.grz(1)+dz/2;
             zmax = obj.grz(end)-dz/3;
@@ -475,14 +475,14 @@ classdef Grid3D < Grid
         function toXdmf(obj,field,fieldname,filename)
             % for some reason we have to permute x & z (which h5create and
             % h5write do already)
-            
+
             nx=length(obj.grx)-1;
             ny=length(obj.gry)-1;
             nz=length(obj.grz)-1;
             ox=obj.grx(1)+obj.dx/2;
             oy=obj.gry(1)+obj.dy/2;
             oz=obj.grz(1)+obj.dz/2;
-            
+
             fid = fopen(filename,'wt');
             fprintf(fid,'<?xml version="1.0" ?>\n');
             fprintf(fid,'<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>\n');
@@ -506,14 +506,14 @@ classdef Grid3D < Grid
             fprintf(fid,' </Domain>\n');
             fprintf(fid,'</Xdmf>\n');
             fclose(fid);
-            
+
             if exist([filename,'.h5'],'file')
                 delete([filename,'.h5'])
             end
             field=reshape(single(field),nx,ny,nz);
             h5create([filename,'.h5'],['/',fieldname],size(field),'Datatype','single');
             h5write([filename,'.h5'],['/',fieldname],field);
-            
+
         end
         % for saving in mat-files
         function s = saveobj(obj)

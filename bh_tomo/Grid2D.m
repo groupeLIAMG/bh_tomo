@@ -1,5 +1,5 @@
 classdef Grid2D < Grid
-    
+
     % when building vectors from 2D grids, Z is the "fast" axis, i.e.
     % indices are incremented for Z first: ind = (ix-1)*nz + iz
     properties
@@ -28,17 +28,17 @@ classdef Grid2D < Grid
             obj.nsnx = 10;
             obj.nsnz = 10;
         end
-    
+
         % Destructor - Destroy the C++ class instance
         function delete(obj)
             if ~isempty(obj.mexObj)
                 grid2d_mex('delete', obj.mexObj);
             end
         end
-        
+
         % raytrace
         function varargout = raytrace(obj, varargin)
-            
+
             % check if we have to raytrace in anisotropic media
             % possible arguments are:
             %   slowness, Tx, Rx, t0              -> isotropic
@@ -54,8 +54,8 @@ classdef Grid2D < Grid
             else
                 type = 'tilted';
             end
-            
-            
+
+
             if isempty(obj.mexObj)
                 s.xmin = obj.grx(1);
                 s.zmin = obj.grz(1);
@@ -69,19 +69,19 @@ classdef Grid2D < Grid
             else
                 % check that mexObj is consistent with current obj values
                 % (in bh_tomo, this should not happen)
-                if abs(grid2d_mex('get_xmin', obj.mexObj)-obj.grx(1))>10*eps || ...
-                        abs(grid2d_mex('get_zmin', obj.mexObj)-obj.grz(1))>10*eps || ...
-                        abs(grid2d_mex('get_dx', obj.mexObj)-(obj.grx(2)-obj.grx(1)))>10*eps || ...
-                        abs(grid2d_mex('get_dz', obj.mexObj)-(obj.grz(2)-obj.grz(1)))>10*eps || ...
-                        abs(grid2d_mex('get_nx', obj.mexObj)-(length(obj.grx)-1))>10*eps || ...
-                        abs(grid2d_mex('get_nz', obj.mexObj)-(length(obj.grz)-1))>10*eps || ...
+                if abs(grid2d_mex('get_xmin', obj.mexObj)-obj.grx(1))>100*eps || ...
+                        abs(grid2d_mex('get_zmin', obj.mexObj)-obj.grz(1))>100*eps || ...
+                        abs(grid2d_mex('get_dx', obj.mexObj)-(obj.grx(2)-obj.grx(1)))>100*eps || ...
+                        abs(grid2d_mex('get_dz', obj.mexObj)-(obj.grz(2)-obj.grz(1)))>100*eps || ...
+                        abs(grid2d_mex('get_nx', obj.mexObj)-(length(obj.grx)-1))>100*eps || ...
+                        abs(grid2d_mex('get_nz', obj.mexObj)-(length(obj.grz)-1))>100*eps || ...
                         strcmp(grid2d_mex('get_type', obj.mexObj), type)~=1
-                    
+
                     % (in bh_tomo, we should not get here)
-                    
+
                     % delete old instance
                     grid2d_mex('delete', obj.mexObj);
-                    
+
                     % create new instance with right dimensions
                     s.xmin = obj.grx(1);
                     s.zmin = obj.grz(1);
@@ -96,7 +96,7 @@ classdef Grid2D < Grid
             end
             [varargout{1:nargout}] = grid2d_mex('raytrace', obj.mexObj, varargin{:});
         end
-        
+
         function L = getForwardStraightRays(obj,varargin)
             % L = obj.getForwardStraightRays(ind,dx,dy,dz,aniso)
             aniso=false;
@@ -166,7 +166,7 @@ classdef Grid2D < Grid
                 c=0;
                 return
             end
-            
+
             dz = obj.grz(2)-obj.grz(1);
             zmin = obj.grz(1)+dz/2;
             zmax = obj.grz(end)-dz/3;
@@ -187,7 +187,7 @@ classdef Grid2D < Grid
             else
                 x = obj.getCellCenter();
             end
-            
+
             if isstruct(cont) % check if we have anisotropy
                 nc = obj.getNumberOfCells();
                 nc1 = size(cont.data,1);
@@ -237,7 +237,7 @@ classdef Grid2D < Grid
             if order==1
                 idx = 1/dx;
                 idz = 1/dz;
-                
+
                 i = zeros(1,nz*nx*2);
                 j = zeros(1,nz*nx*2);
                 v = zeros(1,nz*nx*2);
@@ -256,7 +256,7 @@ classdef Grid2D < Grid
                 j((1:2*nz)+(nx-1)*2*nz) = (nx-1)*nz+[-nz+(1:nz) 1:nz];
                 v((1:2*nz)+(nx-1)*2*nz) = [-idx+zeros(1,nz) idx+zeros(1,nz)];
                 Dx = sparse(i,j,v);
-                
+
                 i = kron(1:nx*nz,ones(1,2));
                 jj = [[1 1:nz-1];[2 3:nz nz]];
                 jj = reshape(jj,1,numel(jj));
@@ -271,7 +271,7 @@ classdef Grid2D < Grid
                 % order==2
                 idx2 = 1/(dx*dx);
                 idz2 = 1/(dz*dz);
-                
+
                 i = zeros(1,nz*nx*3);
                 j = zeros(1,nz*nx*3);
                 v = zeros(1,nz*nx*3);
@@ -290,7 +290,7 @@ classdef Grid2D < Grid
                 j((1:3*nz)+(nx-1)*3*nz) = (nx-1)*nz+[-2*nz+(1:nz) -nz+(1:nz) 1:nz];
                 v((1:3*nz)+(nx-1)*3*nz)=[idx2+zeros(1,nz) -2*idx2+zeros(1,nz) idx2+zeros(1,nz)];
                 Dx = sparse(i,j,v);
-                
+
                 i=kron(1:nx*nz,ones(1,3));
                 jj=[[1 1:nz-2 nz-2];[2 2:nz-1 nz-1];[3 3:nz nz]];
                 jj = reshape(jj,1,numel(jj));
@@ -308,24 +308,24 @@ classdef Grid2D < Grid
             small = 1e-6;
             Nx = 2*length(obj.grx);
             Nz = 2*length(obj.grz);
-            
+
             Nx2 = Nx/2;
             Nz2 = Nz/2;
-	
+
             x = obj.dx*(0:Nx2-1);
             x = [x fliplr(-x)]';
             z = obj.dz*(0:Nz2-1);
             z = [z fliplr(-z)]';
-	
+
             x = kron(x, ones(Nz,1));
             z = kron(ones(Nx,1), z);
-            
+
             d = cm(1).compute([x z],[0 0]);
             for n=2:numel(cm)
                 d = d + cm(n).compute([x z],[0 0]);
             end
             K = reshape(d,Nx,Nz)';  % transpose so that we get a Nz x Nx field
-            
+
             mk=0;
             if min(K(:,1))>small
                 % Enlarge grid to make sure that covariance falls to zero
@@ -339,15 +339,15 @@ classdef Grid2D < Grid
             if mk==1
                 Nx2 = Nx/2;
                 Nz2 = Nz/2;
-                
+
                 x = obj.dx*(0:Nx2-1);
                 x = [x fliplr(-x)]';
                 z = obj.dz*(0:Nz2-1);
                 z = [z fliplr(-z)]';
-                
+
                 x = kron(ones(Nz,1), x);
                 z = kron(z, ones(Nx,1));
-                
+
                 d = cm(1).compute([x z],[0 0]);
                 for n=2:numel(cm)
                     d = d + cm(n).compute([x z],[0 0]);
@@ -367,12 +367,12 @@ classdef Grid2D < Grid
         function toXdmf(obj,field,fieldname,filename)
             % for some reason we have to permute x & z (which h5create and
             % h5write do already)
-            
+
             nx=length(obj.grx)-1;
             nz=length(obj.grz)-1;
             ox=obj.grx(1)+obj.dx/2;
             oz=obj.grz(1)+obj.dz/2;
-            
+
             fid = fopen(filename,'wt');
             fprintf(fid,'<?xml version="1.0" ?>\n');
             fprintf(fid,'<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>\n');
@@ -396,7 +396,7 @@ classdef Grid2D < Grid
             fprintf(fid,' </Domain>\n');
             fprintf(fid,'</Xdmf>\n');
             fclose(fid);
-            
+
             if exist([filename,'.h5'],'file')
                 delete([filename,'.h5'])
             end
@@ -405,7 +405,7 @@ classdef Grid2D < Grid
             % h5create & h5write)
             h5create([filename,'.h5'],['/',fieldname],size(field),'Datatype','single');
             h5write([filename,'.h5'],['/',fieldname],field);
-            
+
         end
 
         % for saving in mat-files
@@ -435,7 +435,7 @@ classdef Grid2D < Grid
         function obj = loadobj(s)
             if isstruct(s)
                 obj = Grid2D(s.grx, s.grz, s.nthreads);
-                
+
                 obj.nsnx = s.nsnx;
                 obj.nsnz = s.nsnz;
                 obj.cont = s.cont;
@@ -455,6 +455,5 @@ classdef Grid2D < Grid
                 error('Wrong input arguments')
             end
         end
-    end    
+    end
 end
-

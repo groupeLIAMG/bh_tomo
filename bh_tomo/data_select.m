@@ -53,6 +53,7 @@ for i=1:M
     ind_max(i) = ind1;
     ind = ind1-nb_p:ind1+2*nb_p;
     
+    
     if ind(1) < 1
         ind = 1:ind1+60;
     elseif ind(end) > N

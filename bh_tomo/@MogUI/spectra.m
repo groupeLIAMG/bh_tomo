@@ -219,7 +219,7 @@ f.Visible = 'on';
         if hsnrscalePopup.Value==1
             haxes3.XScale = 'linear';
         else % log
-            haxes3.XScale = 'log';
+            haxes3.XScale = 'log'; 
         end
     end
     function updateFigs(varargin)
@@ -303,6 +303,7 @@ f.Visible = 'on';
         timestp = mog.data.timestp * mog.fac_dt;
         
         imagesc(timestp, z, traces','Parent',haxes1)
+        max(timestp)
         xlabel(haxes1,['Time [',mog.data.tunits,']'],'FontSize',fs)
         ylabel(haxes1,['Rx elevation [',mog.data.cunits,']'],'FontSize',fs)
         title(haxes1,'Normalized amplitudes','FontSize',fs+1)

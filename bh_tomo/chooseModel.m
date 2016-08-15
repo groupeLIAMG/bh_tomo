@@ -103,14 +103,14 @@ uiwait(f)
             return
         end
         try
-            load([rep2,file2],'models')
+            tmp=load([rep2,file2],'models');
         catch ME
             errordlg(ME.message)
             return
         end
-        names = cell(length(models),1);
-        for nn=1:length(models)
-            names{nn} = models(nn).name;
+        names = cell(length(tmp.models),1);
+        for nn=1:length(tmp.models)
+            names{nn} = tmp.models(nn).name;
         end
         hlist.String = names;
     end

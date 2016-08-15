@@ -64,3 +64,4 @@ if no>0 && no<=length(obj.mogs)
     
 end
 end
+

@@ -88,6 +88,7 @@ if no>0 && no<=length(obj.mogs)
     p = m*vapp(1)+b;
     couleur = interp1(c,p);
     
+    
     plot3([Tx(1,1) Rx(1,1)], [Tx(1,2) Rx(1,2)], [Tx(1,3) Rx(1,3)], 'Color',couleur)
     hold on
     for n=2:length(vapp)

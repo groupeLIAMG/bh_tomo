@@ -326,33 +326,36 @@ classdef Grid2D < Grid
             end
             K = reshape(d,Nx,Nz)';  % transpose so that we get a Nz x Nx field
 
-            mk=0;
-            if min(K(:,1))>small
-                % Enlarge grid to make sure that covariance falls to zero
-                Nz=5*Nz;
-                mk=1;
-            end
-            if min(K(1,:))>small
-                Nx=5*Nx;
-                mk=1;
-            end
-            if mk==1
-                Nx2 = Nx/2;
-                Nz2 = Nz/2;
-
-                x = obj.dx*(0:Nx2-1);
-                x = [x fliplr(-x)]';
-                z = obj.dz*(0:Nz2-1);
-                z = [z fliplr(-z)]';
-
-                x = kron(ones(Nz,1), x);
-                z = kron(z, ones(Nx,1));
-
-                d = cm(1).compute([x z],[0 0]);
-                for n=2:numel(cm)
-                    d = d + cm(n).compute([x z],[0 0]);
+            mk = 1;
+            while mk==1
+                mk=0;
+                if min(K(:,1))>small
+                    % Enlarge grid to make sure that covariance falls to zero
+                    Nz=2*Nz;
+                    mk=1;
                 end
-                K = reshape(d,Nx,Nz)';
+                if min(K(1,:))>small
+                    Nx=2*Nx;
+                    mk=1;
+                end
+                if mk==1
+                    Nx2 = Nx/2;
+                    Nz2 = Nz/2;
+                    
+                    x = obj.dx*(0:Nx2-1);
+                    x = [x fliplr(-x)]';
+                    z = obj.dz*(0:Nz2-1);
+                    z = [z fliplr(-z)]';
+                    
+                    x = kron(ones(Nz,1), x);
+                    z = kron(z, ones(Nx,1));
+                    
+                    d = cm(1).compute([x z],[0 0]);
+                    for n=2:numel(cm)
+                        d = d + cm(n).compute([x z],[0 0]);
+                    end
+                    K = reshape(d,Nx,Nz)';
+                end
             end
             G=fft2(K).^0.5;
         end

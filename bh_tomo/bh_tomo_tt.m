@@ -611,7 +611,11 @@ elseif (get(handles.radiobutton_av,'Value')==1)
     Rx_x = av.data.Rx_x(h.no_trace);
     Rx_y = av.data.Rx_y(h.no_trace);
     Rx_z = av.data.Rx_z(h.no_trace);
-    Tx_d = av.d_TxRx(h.no_trace);
+    if length(av.d_TxRx)>1
+        Tx_d = av.d_TxRx(h.no_trace);
+    else
+        Tx_d = av.d_TxRx;
+    end
 	in = av.in;
 elseif (get(handles.radiobutton_ap,'Value')==1)
     ap = getappdata(handles.fig_bh_tomo_tt, 'ap');
@@ -621,7 +625,11 @@ elseif (get(handles.radiobutton_ap,'Value')==1)
     Rx_x = ap.data.Rx_x(h.no_trace);
     Rx_y = ap.data.Rx_y(h.no_trace);
     Rx_z = ap.data.Rx_z(h.no_trace);
-    Tx_d = ap.d_TxRx(h.no_trace);
+    if length(ap.d_TxRx)>1
+        Tx_d = ap.d_TxRx(h.no_trace);
+    else
+        Tx_d = ap.d_TxRx;
+    end
 	in = ap.in;
 end
 texte{1} = '';

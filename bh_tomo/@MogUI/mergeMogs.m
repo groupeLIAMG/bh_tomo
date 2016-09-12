@@ -295,6 +295,12 @@ uiwait(f)
             obj.mogs = obj.mogs(keep);
         end
         
+        trNoMax = 0;
+        for no=1:length(obj.mogs)
+            trNoMax = max([trNoMax obj.mogs(no).no_traces]);
+        end
+        newMog.no_traces = trNoMax + (1:newMog.data.ntrace);
+        
         % append new MOG
         obj.mogs(end+1) = newMog;
             

@@ -143,7 +143,8 @@ classdef MogUI < handle
                 
                 obj.updateList()
                 obj.updateUIfields()
-                obj.notify('mogDeleted')
+                
+                obj.notify('mogDeleted', bh_tomo_EventData(no))
             end
         end
         function listMogs(obj,varargin)

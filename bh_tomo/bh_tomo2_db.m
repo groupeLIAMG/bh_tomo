@@ -105,7 +105,7 @@ addlistener(hborehole,'boreholeDeleted',@hmog.updateBHlist);
 addlistener(hborehole,'boreholeEdited',@dbEdited);
 
 addlistener(hmog,'mogAdded',@updateMogInfo);
-addlistener(hmog,'mogDeleted',@updateMogInfo);
+addlistener(hmog,'mogDeleted',@mogDeleted);
 addlistener(hmog,'mogEdited',@dbEdited);
 
 addlistener(hmodel,'modelAdded',@updateModelInfo);
@@ -251,5 +251,26 @@ f.Visible = 'on';
     end
     function quitUI(varargin)
         delete(f)
+    end
+    function mogDeleted(varargin)
+        eventData = varargin{2};
+        deletedMog = eventData.number;
+        for n=1:length(hmodel.models)
+            for nn=1:length(hmodel.models(n).mogs)
+                if hmodel.models(n).mogs(nn) > deletedMog
+                    hmodel.models(n).mogs(nn) = hmodel.models(n).mogs(nn)-1;
+                end
+            end
+            ind = hmodel.models(n).mogs~=deletedMog;
+            hmodel.models(n).mogs = hmodel.models(n).mogs(ind);
+            if ~all(ind)
+                % model contained deleted mog, we should rebuild de grid
+                warndlg('Mog removed from model, reinitializing grid')
+                hmodel.models(n).grid = Grid.empty;
+            end
+
+        end
+        updateMogInfo()
+        updateModelInfo()
     end
 end

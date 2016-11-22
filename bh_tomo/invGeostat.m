@@ -14,7 +14,7 @@ if size(data,2)>=9
     tomo.no_trace = data(:,9);
 end
 
-if any(sum(data(:,1:3)==data(:,4:6),2)==2)
+if any(sum(data(:,1:3)==data(:,4:6),2)==3)
     uiwait(errordlg('Coincident Tx & Rx positions, aborting inversion'))
     return
 end
@@ -46,7 +46,7 @@ Cm = cm.compute(x,x);
 
 if ~isempty(cont) && param.useCont==1
     indc = grid.getContIndices(cont,x);
-    
+
     Cm0 = Cm(indc,:);
     Cmc = Cm(indc,indc);
     Cmc = Cmc+diag(cont(:,end));
@@ -60,7 +60,7 @@ if length(data(1,:))>7 && cm.use_c0==1
 end
 
 for noIter=1:param.numItStraight + param.numItCurved
-    
+
     if ~isempty(t_handle)
         t_handle.String = ['Geostatistical Inversion - Solving System, Iteration ',num2str(noIter)];
         drawnow
@@ -79,14 +79,14 @@ for noIter=1:param.numItStraight + param.numItCurved
     if param.doSim==1 && noIter==(param.numItStraight+param.numItCurved)
         doSim = 1;
     end
-    
+
     if isempty(c0)
         Cd = L*Cm*L' + cm.nugget_d*eye(size(L,1));
     else
         Cd = L*Cm*L' + cm.nugget_d*diag(c0);
     end
     Cdm = L*Cm;
-    
+
     if doSim==0
         if ~isempty(cont) && param.useCont==1
             scont = cont(:,end-1)-l_moy;
@@ -99,13 +99,13 @@ for noIter=1:param.numItStraight + param.numItCurved
             Gamma = (Cd\dt)';
             m = (Gamma*Cdm)';
         end
-        
+
         if param.tomoAtt==1
             % negative attenuation set to zero
             m(m<-l_moy) = -l_moy;
         end
         tomo.s = m+l_moy;
-        
+
         if ~isempty(g_handles)
             if param.tomoAtt==0
                 gv.plotTomo(1./tomo.s,'Cokriging','Distance [m]','Elevation [m]',g_handles{3})
@@ -129,13 +129,13 @@ for noIter=1:param.numItStraight + param.numItCurved
             Lambda = (Cd\Cdm)';
             m = (Lambda*dt);
         end
-        
+
         mSim = zeros(length(m),param.nSim);
         G = grid.preFFTMA(cm.covar);
         for ns=1:param.nSim
             ms = grid.FFTMA(G);
             ms = ms(:);
-            
+
             % data computed with simulated model
             ds = L*ms + randn(length(dt),1)*cm.nugget_d;
             % cokriging estimator of the simulated data
@@ -146,22 +146,22 @@ for noIter=1:param.numItStraight + param.numItCurved
             end
             % conditional simulated model  (eq 34 of Giroux et al 2007)
             mSim(:,ns) = m + (ms-mss);
-            
+
         end
-                
+
         [~,~,diff1_min]=choixsimu(L,mSim,dt,c0);
         if ~isempty(cont) && param.useCont==1
             ms = mSim(:,diff1_min);
         else
             ms = deformationGraduelle(mSim,L,c0,dt,t_handle);
         end
-        
+
         tomo.s = m+l_moy;
         tomo.simu = mSim+l_moy;
         tomo.sgr = ms+l_moy;
         tomo.lmoy=l_moy;
         tomo.diff1_min=diff1_min;
-        
+
         if ~isempty(g_handles)
             if param.tomoAtt==0
                 gv.plotTomo(1./tomo.s,'Cokriging','Distance [m]','Elevation [m]',g_handles{3})
@@ -171,7 +171,7 @@ for noIter=1:param.numItStraight + param.numItCurved
             if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
             colorbar('peer', g_handles{3})
             eval(['colormap(',g_handles{2},')'])
-            
+
             if param.tomoAtt==0
                 gv.plotTomo(1./(tomo.sgr),'Simulation','Distance [m]',[],g_handles{4},2)
             else
@@ -182,7 +182,7 @@ for noIter=1:param.numItStraight + param.numItCurved
             drawnow
         end
     end
-    
+
     if param.tomoAtt==0 && noIter>=param.numItStraight && ...
             param.numItCurved > 0
         if any(tomo.s<0)
@@ -197,7 +197,7 @@ for noIter=1:param.numItStraight + param.numItCurved
             disp(['Geostatistical Inversion -  Raytracing, Iteration ',num2str(noIter)])
         end
         [~,tomo.rays,L] = grid.raytrace(tomo.s,data(:,1:3),data(:,4:6));
-    
+
     end
     if param.saveInvData == 1
         tt = L*tomo.s;

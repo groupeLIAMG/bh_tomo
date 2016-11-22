@@ -13,7 +13,7 @@ if size(data,2)>=9
     tomo.no_trace = data(:,9);
 end
 
-if any(sum(data(:,1:3)==data(:,4:6),2)==2)
+if any(sum(data(:,1:3)==data(:,4:6),2)==3)
     uiwait(errordlg('Coincident Tx & Rx positions, aborting inversion'))
     return
 end

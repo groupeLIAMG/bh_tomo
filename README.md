@@ -8,6 +8,10 @@ ray-based 2D and 3D tomography software package.
 Copy the files in the bh_tomo directory somewhere in your MATLABPATH or add
 the bh_tomo directory to your MATLABPATH.
 
+### Compatibility
+
+This version requires Matlab 2015b and onward.
+
 ### MEX files
 
 You might need to compile mex files if not already available for

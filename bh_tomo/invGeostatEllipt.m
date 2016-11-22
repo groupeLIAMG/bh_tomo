@@ -13,7 +13,7 @@ if size(data,2)>=9
     tomo.no_trace = data(:,9);
 end
 
-if any(sum(data(:,1:3)==data(:,4:6),2)==2)
+if any(sum(data(:,1:3)==data(:,4:6),2)==3)
     uiwait(errordlg('Coincident Tx & Rx positions, aborting inversion'))
     return
 end
@@ -80,39 +80,39 @@ error = cm.nugget_d;
 modeJ = 1;
 
 for noIter=1:param.numItStraight + param.numItCurved
-    
+
     if ~isempty(t_handle)
         t_handle.String = ['Geostatistical Inversion - Solving System, Iteration ',num2str(noIter)];
         drawnow
     else
         disp(['Geostatistical Inversion -  Solving System, Iteration ',num2str(noIter)])
     end
-    
-    
+
+
     doSim = 0;
     if param.doSim==1 && noIter==(param.numItStraight+param.numItCurved)
         doSim = 1;
     end
-    
-    
+
+
     res = norm(data(:,7) - t0, normOrder);
     resJ = zeros(nbreitJ,1)-1;
     resJ(1) = res;
-    
+
     if doSim==0
         for itJ=1:nbreitJ
-        
+
             dt = data(:,7) - t0;
-        
+
             J = calculJ(L, e0);
-        
+
             if isempty(c0)
                 Cd = J*Cm*J' + cm.nugget_d*eye(size(L,1));
             else
                 Cd = J*Cm*J' + cm.nugget_d*diag(c0);
             end
             Cdm = J*Cm;
-            
+
             if ~isempty( cont.data ) && param.useCont==1
                 scont = [];
                 if ~isempty(cont.data)
@@ -124,21 +124,21 @@ for noIter=1:param.numItStraight + param.numItCurved
                 scont = scont-e0(indc);
                 C = [Cmc Cdm(:,indc)';Cdm(:,indc) Cd];
                 C = C+eye(size(C))*1e-6;
-                
+
                 Gamma = (C\[scont;dt])';
                 de = (Gamma*[Cm0;Cdm])';
             else
                 Gamma = (Cd\dt)';
                 de = (Gamma*Cdm)';
             end
-        
+
             s = s0 + de(1:nCells);
             xi = xi0 + de((nCells+1):end);
             t = Lx.^2 + Lz.^2.*kron(ones(nt,1),xi'.^2);
             t = kron(ones(nt,1),s') .* sqrt(t);
             t = sum(t,2);
             res = norm(data(:,7)-t, normOrder);
-        
+
             t0 = t;
             s0 = s;
             xi0 = xi;
@@ -148,22 +148,22 @@ for noIter=1:param.numItStraight + param.numItCurved
                 break
             end
         end
-        
+
         tomo.s  = s0;
         tomo.xi = xi0;
-        
-        
+
+
     else
-        
+
         for itJ=1:nbreitJ
             if doSim==1 && itJ==nbreitJ
                 modeJ = 2;
             end
-        
+
             dt = data(:,7) - t0;
-        
+
             J = calculJ(L, e0);
-        
+
             if isempty(c0)
                 Cd = J*Cm*J' + cm.nugget_d*eye(size(L,1));
             else
@@ -179,14 +179,14 @@ for noIter=1:param.numItStraight + param.numItCurved
                 scont = scont-e0(indc);
                 C = [Cmc Cdm(:,indc)';Cdm(:,indc) Cd];
                 C=C+eye(size(C))*1e-6;
-                
+
                 Lambda = (C\[Cm0;Cdm])';
                 de = (Lambda*[scont;dt]);
             else
                 Lambda = (Cd\Cdm)';
                 de = (Lambda*dt);
             end
-        
+
             s = s0 + de(1:nCells);
             xi = xi0 + de((nCells+1):end);
             t = Lx.^2 + Lz.^2.*kron(ones(nt,1),xi'.^2);
@@ -213,7 +213,7 @@ for noIter=1:param.numItStraight + param.numItCurved
                     xis = grid.FFTMA(Gxi);
                     ms = ms(:);
                     xis = xis(:);
-                    
+
                     % data computed with simulated model
                     t = Lx.^2 + Lz.^2.*kron(ones(nt,1),xis'.^2);
                     t = kron(ones(nt,1),ms') .* sqrt(t);
@@ -230,39 +230,39 @@ for noIter=1:param.numItStraight + param.numItCurved
                     % conditional simulated model  (eq 34 of Giroux et al 2007)
                     e_sim(:,ns) = de + (es-ess);
                 end
-                
+
                 e_sim = [e_sim(1:nCells,:)+kron(ones(1,param.nSim),s0);
                     e_sim((nCells+1):end,:)+kron(ones(1,param.nSim),xi0)];
             end
         end
-       
+
         [~,~,diff1_min] = choixsimua(L,e_sim,dt,c0);
         if ~isempty(cont) && param.useCont==1
             sgr = e_sim(:,diff1_min);
         else
             sgr = deformationGraduelle(e_sim,L,c0,dt,t_handle);
         end
-        
+
         tomo.s    = s0;
         tomo.xi   = xi0;
         tomo.simu = e_sim;
         tomo.sgr  = sgr;
         tomo.diff1_min = diff1_min;
     end
-    
+
     if ~isempty(g_handles)
-        
+
         gv.plotTomo(1./(s0.*xi0),'V_z','Distance [m]','Elevation [m]',g_handles{3})
         if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
         colorbar('peer', g_handles{3})
-        
+
         gv.plotTomo(xi0,'\xi','Distance [m]','Elevation [m]',g_handles{4})
         colorbar('peer', g_handles{4})
-        
+
         eval(['colormap(',g_handles{2},')'])
         drawnow
     end
-    
+
     if param.tomoAtt==0 && noIter>=param.numItStraight && ...
             param.numItCurved > 0
         if any(tomo.s<0)
@@ -280,7 +280,7 @@ for noIter=1:param.numItStraight + param.numItCurved
         Lx = L(:,1:nCells);
         Lz = L(:,(1+nCells):np);
     end
-    
+
     if param.saveInvData == 1
         tt = Lx.^2 + Lz.^2.*kron(ones(nt,1),(tomo.xi'.^2));
         tt = sqrt(tt) .* kron(ones(nt,1),(tomo.s'));
@@ -302,4 +302,3 @@ if ~isempty(t_handle)
 end
 
 end
-

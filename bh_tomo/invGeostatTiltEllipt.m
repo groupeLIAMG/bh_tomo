@@ -13,7 +13,7 @@ if size(data,2)>=9
     tomo.no_trace = data(:,9);
 end
 
-if any(sum(data(:,1:3)==data(:,4:6),2)==2)
+if any(sum(data(:,1:3)==data(:,4:6),2)==3)
     uiwait(errordlg('Coincident Tx & Rx positions, aborting inversion'))
     return
 end
@@ -85,37 +85,37 @@ for noIter=1:param.numItStraight + param.numItCurved
     else
         disp(['Geostatistical Inversion -  Solving System, Iteration ',num2str(noIter)])
     end
-    
-    
+
+
     doSim = 0;
     if param.doSim==1 && noIter==(param.numItStraight+param.numItCurved)
         doSim = 1;
     end
-    
-    
+
+
     res = norm(data(:,7) - t0, normOrder);
     resJ = zeros(nbreitJ,1)-1;
     resJ(1) = res;
 
     if doSim==0
         for itJ=1:nbreitJ
-        
+
             dt = data(:,7) - t0;
-        
+
             J = calculJ2(L, e0);
-        
+
             if isempty(c0)
                 Cd = J*Cm*J' + cm.nugget_d*eye(size(L,1));
             else
                 Cd = J*Cm*J' + cm.nugget_d*diag(c0);
             end
             Cdm = J*Cm;
-            
+
             % center w/respect to J
             %        moy = mean(dt./sum(J,2));
             %        mt = sum(J*moy,2);
             %        dt = dt - mt;
-        
+
             if ~isempty( cont.data ) && param.useCont==1
                 scont = [];
                 if ~isempty(cont.data)
@@ -130,14 +130,14 @@ for noIter=1:param.numItStraight + param.numItCurved
                 scont = scont-e0(indc);
                 C = [Cmc Cdm(:,indc)';Cdm(:,indc) Cd];
                 C = C+eye(size(C))*1e-6;
-                
+
                 Gamma = (C\[scont;dt])';
                 de = (Gamma*[Cm0;Cdm])';
             else
                 Gamma = (Cd\dt)';
                 de = (Gamma*Cdm)';
             end
-            
+
             s = s0 + de(1:nCells);
             xi = xi0 + de((nCells+1):(2*nCells));
             th = th0 + de((2*nCells+1):end);
@@ -147,7 +147,7 @@ for noIter=1:param.numItStraight + param.numItCurved
             t = kron(ones(nt,1),s') .* sqrt(t);
             t = sum(t,2);
             res = norm(data(:,7)-t, normOrder);
-            
+
             t0 = t;
             s0 = s;
             xi0 = xi;
@@ -158,34 +158,34 @@ for noIter=1:param.numItStraight + param.numItCurved
                 break
             end
         end
-        
+
         tomo.s  = s0;
         tomo.xi = xi0;
         tomo.th = th0;
-        
+
     else
-        
+
         for itJ=1:nbreitJ
             if doSim==1 && itJ==nbreitJ
                 modeJ = 2;
             end
-        
+
             dt = data(:,7) - t0;
-        
+
             J = calculJ2(L, e0);
-        
+
             if isempty(c0)
                 Cd = J*Cm*J' + cm.nugget_d*eye(size(L,1));
             else
                 Cd = J*Cm*J' + cm.nugget_d*diag(c0);
             end
             Cdm = J*Cm;
-            
+
             % center w/respect to J
             %        moy = mean(dt./sum(J,2));
             %        mt = sum(J*moy,2);
             %        dt = dt - mt;
-        
+
             if ~isempty( cont.data ) && param.useCont==1
                 scont = [];
                 if ~isempty(cont.data)
@@ -200,14 +200,14 @@ for noIter=1:param.numItStraight + param.numItCurved
                 scont = scont-e0(indc);
                 C = [Cmc Cdm(:,indc)';Cdm(:,indc) Cd];
                 C = C+eye(size(C))*1e-6;
-                
+
                 Gamma = (C\[scont;dt])';
                 de = (Gamma*[Cm0;Cdm])';
             else
                 Gamma = (Cd\dt)';
                 de = (Gamma*Cdm)';
             end
-            
+
             s = s0 + de(1:nCells);
             xi = xi0 + de((nCells+1):(2*nCells));
             th = th0 + de((2*nCells+1):end);
@@ -217,7 +217,7 @@ for noIter=1:param.numItStraight + param.numItCurved
             t = kron(ones(nt,1),s') .* sqrt(t);
             t = sum(t,2);
             res = norm(data(:,7)-t, normOrder);
-            
+
             t0 = t;
             s0 = s;
             xi0 = xi;
@@ -227,9 +227,9 @@ for noIter=1:param.numItStraight + param.numItCurved
             if res < error
                 break
             end
-            
+
             if modeJ==2
-                
+
                 e_sim = zeros(length(e0),param.nSim);
                 Gs = grid.preFFTMA(cm.covar);
                 Gxi = grid.preFFTMA(cm.covar_xi);
@@ -242,14 +242,14 @@ for noIter=1:param.numItStraight + param.numItCurved
                     ms = ms(:);
                     xis = xis(:);
                     ths = ths(:);
-                    
+
                     % data computed with simulated model
                     co = kron(ones(nt,1),cos(ths)');
                     si = kron(ones(nt,1),sin(ths)');
                     t = (Lx.*co + Lz.*si).^2 + (Lz.*co - Lx.*si).^2.*kron(ones(nt,1),xis'.^2);
                     t = kron(ones(nt,1),ms') .* sqrt(t);
                     t = sum(t,2);
-                
+
                     ds = t + randn(length(dt),1)*cm.nugget_d;
                     % cokriging estimator of the simulated data
                     es = [ms; xis; ths];
@@ -261,14 +261,14 @@ for noIter=1:param.numItStraight + param.numItCurved
                     % conditional simulated model  (eq 34 of Giroux et al 2007)
                     e_sim(:,ns) = de + (es-ess);
                 end
-                
+
                 e_sim = [e_sim(1:nCells,:)+kron(ones(1,param.nSim),s0);
                     e_sim((nCells+1):2*nCells,:)+kron(ones(1,param.nSim),xi0);
                     e_sim((2*nCells+1):end,:)+kron(ones(1,param.nSim),th0);];
             end
-            
+
         end
-        
+
         [~,~,diff1_min] = choixsimuaa(L,e_sim,dt,c0);
         if ~isempty(cont) && param.useCont==1
             sgr = e_sim(:,diff1_min);
@@ -283,13 +283,13 @@ for noIter=1:param.numItStraight + param.numItCurved
         tomo.sgr  = sgr;
         tomo.diff1_min = diff1_min;
     end
-    
+
     if ~isempty(g_handles)
 
         gv.plotTomo(1./(s0.*xi0),'V_z','Distance [m]','Elevation [m]',g_handles{3})
         if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
         colorbar('peer', g_handles{3})
-        
+
         gv.plotTomo(xi0,'\xi','Distance [m]','',g_handles{4})
         colorbar('peer', g_handles{4})
 
@@ -317,7 +317,7 @@ for noIter=1:param.numItStraight + param.numItCurved
         Lx = L(:,1:nCells);
         Lz = L(:,(1+nCells):np);
     end
-    
+
     if param.saveInvData == 1
         co = kron(ones(nt,1),cos(tomo.th)');
             si = kron(ones(nt,1),sin(tomo.th)');

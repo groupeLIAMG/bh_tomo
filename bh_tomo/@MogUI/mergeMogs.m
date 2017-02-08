@@ -264,8 +264,8 @@ uiwait(f)
                             newMog.tauHyb_et = [newMog.tauHyb_et mog.tauHyb_et];
                             newMog.Tx_z_orig = [newMog.Tx_z_orig mog.Tx_z_orig];
                             newMog.Rx_z_orig = [newMog.Rx_z_orig mog.Rx_z_orig];
-                            newMog.TxCosDir  = [newMog.TxCosDir  mog.TxCosDir];
-                            newMog.RxCosDir  = [newMog.RxCosDir  mog.RxCosDir];
+                            newMog.TxCosDir  = [newMog.TxCosDir;  mog.TxCosDir];
+                            newMog.RxCosDir  = [newMog.RxCosDir;  mog.RxCosDir];
                             newMog.in = [newMog.in mog.in];
                             
                         end

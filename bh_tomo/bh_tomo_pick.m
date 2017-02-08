@@ -80,6 +80,7 @@ h.bin_no = 0;
 h.theta_int = 5;
 h.scale_fdom = 0;
 h.fdom = [];
+h.fmoy = 0;
 h.useDetrend = get(handles.UseDetrendMenuItem,'Checked');
 set(handles.text_bin_no,'String',num2str(h.bin_no))
 set(handles.edit_theta_int,'String',num2str(h.theta_int))

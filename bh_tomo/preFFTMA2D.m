@@ -141,6 +141,3 @@ end
 % Calcul de G
 
 G=fft2(K).^0.5;
-
-
-

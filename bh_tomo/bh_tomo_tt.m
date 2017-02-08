@@ -1234,15 +1234,18 @@ b = 1-rmin*m;
 p = m*vapp(1)+b;
 couleur = interp1(c,p);
 
+Tx_x = mog.data.Tx_x(ind);
+Tx_z = mog.data.Tx_z(ind);
+Rx_x = mog.data.Rx_x(ind);
+Rx_z = mog.data.Rx_z(ind);
+
 n=1;
-plot([mog.data.Tx_x(n) mog.data.Rx_x(n)],...
-    [mog.data.Tx_z(n) mog.data.Rx_z(n)], 'Color',couleur)
+plot([Tx_x(n) Rx_x(n)], [Tx_z(n) Rx_z(n)], 'Color',couleur)
 hold on    
 for n=2:length(no)
     p = m*vapp(n)+b;
     couleur = interp1(c,p);
-    plot([mog.data.Tx_x(n) mog.data.Rx_x(n)],...
-        [mog.data.Tx_z(n) mog.data.Rx_z(n)], 'Color',couleur)
+    plot([Tx_x(n) Rx_x(n)], [Tx_z(n) Rx_z(n)], 'Color',couleur)
 end
 hold off
 set(gca,'DataAspectRatio',[1 1 1],'YDir','normal')

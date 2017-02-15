@@ -195,7 +195,7 @@ uiwait(f)
         
         no = hrefPopup.Value;
         refMog = obj.mogs(no);
-        newMog.data = refMog.data;
+        newMog.data = refMog.data.copy();
         newMog.av = refMog.av;
         newMog.ap = refMog.ap;
         newMog.Tx = refMog.Tx;
@@ -225,6 +225,8 @@ uiwait(f)
         newMog.tauHyb_et = refMog.tauHyb_et;
         newMog.Tx_z_orig = refMog.Tx_z_orig;
         newMog.Rx_z_orig = refMog.Rx_z_orig;
+        newMog.TxCosDir = refMog.TxCosDir;
+        newMog.RxCosDir = refMog.RxCosDir;
         newMog.in = refMog.in;
         
         try

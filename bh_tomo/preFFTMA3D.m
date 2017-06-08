@@ -14,13 +14,13 @@ function [G, mk] = preFFTMA3D(xmin,dx,xmax,ymin,dy,ymax,zmin,dz,zmax,covar)
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 % GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <http://www.gnu.org/licenses/>.
-% 
-% 
-	
-	
+%
+%
+
+
 new = 0;
 
 small=1e-6;
@@ -45,11 +45,11 @@ if new
 	Nx = Nx*(fact+4);
 	Ny = Ny*(fact+4);
 	Nz = Nz*(fact+4);
-	
+
 	Nx2 = Nx/2;
 	Ny2 = Ny/2;
 	Nz2 = Nz/2;
-	
+
 	%Erwan
 	x = dx*(1:Nx2);
 	x = [0 x fliplr(-x(1:end-1))]';
@@ -57,18 +57,18 @@ if new
 	y = [0 y fliplr(-y(1:end-1))]';
 	z = dz*(1:Nz2);
 	z = [0 z fliplr(-z(1:end-1))]';
-	
+
 	x = kron(ones(Ny*Nz,1), x);
 	y = kron(kron(ones(Nz,1), y),ones(Nx,1));
 	z = kron(z, ones(Nx*Ny,1));
-	
+
 	d = covardm([x y z],[0 0 0],covar.model,covar.c);
 	K = reshape(d,Nx,Ny,Nz);
-	
+
 	%%%%%%%%%%%%%%%%%%%%%%%%%%
 	%On s'assure que la covariance tombe bien à zéro
-	
-	
+
+
 	mk=0;
 	if covar.model(1)>4 && min(K(:,1))>1e-6
 		Ny=2*Ny;
@@ -81,8 +81,8 @@ if new
 		Ny=2*Ny;
 		Nz=2*Nz;
 		mk=1;
-	end  
-	
+	end
+
 	if mk==1;
 		Nx2 = Nx/2;
 		Ny2 = Ny/2;
@@ -94,17 +94,17 @@ if new
 		y = [0 y fliplr(-y(1:end-1))]';
 		z = dz*(1:Nz2);
 		z = [0 z fliplr(-z(1:end-1))]';
-		
+
 		x = kron(ones(Ny*Nz,1), x);
 		y = kron(kron(ones(Nz,1), y),ones(Nx,1));
 		z = kron(z, ones(Nx*Ny,1));
-		
+
 		d = covardm([x y z],[0 0 0],covar.model,covar.c);
 		K = reshape(d,Nx,Ny,Nz);
 	end
-	
+
 else
-	
+
 	Nx2 = Nx/2;
 	Ny2 = Ny/2;
 	Nz2 = Nz/2;
@@ -115,11 +115,11 @@ else
 	y = [y fliplr(-y)]';
 	z = dz*(0:Nz2-1);
 	z = [z fliplr(-z)]';
-	
+
 	x = kron(ones(Ny*Nz,1), x);
 	y = kron(kron(ones(Nz,1), y),ones(Nx,1));
 	z = kron(z, ones(Nx*Ny,1));
-	
+
 	d = covardm([x y z],[0 0 0],covar.model,covar.c);
 	K = reshape(d,Nx,Ny,Nz);
 
@@ -141,8 +141,8 @@ else
 	if min(tmp)>small
 		Nx=5*Nx;
 		mk=1;
-	end  
-	
+	end
+
 	if mk==1;
 		Nx2 = Nx/2;
 		Ny2 = Ny/2;
@@ -154,19 +154,18 @@ else
 		y = [y fliplr(-y)]';
 		z = dz*(0:Nz2-1);
 		z = [z fliplr(-z)]';
-	
+
 		x = kron(ones(Ny*Nz,1), x);
 		y = kron(kron(ones(Nz,1), y),ones(Nx,1));
 		z = kron(z, ones(Nx*Ny,1));
-	
+
 		d = covardm([x y z],[0 0 0],covar.model,covar.c);
 		K = reshape(d,Nx,Ny,Nz);
 
 	end
 end
-	
-	
+
+
 % Calcul de G
 
 G=fftn(K).^0.5;
-

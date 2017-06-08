@@ -1681,6 +1681,7 @@ f.Visible = 'on';
             end
             ind = ind(1:ndata);
             L = model.inv_res(hrays.Value-1).tomo.L(ind,:);
+            xc = model.grid.getCellCenter();
         else
             % straight rays
             dx = str2double(hdx.String);

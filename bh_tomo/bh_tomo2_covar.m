@@ -1203,6 +1203,41 @@ f.Visible = 'on';
         end
         updateCov()
     end
+    function updateCovUI(varargin)
+        if isempty(cm)
+            return
+        end
+        helliptical.Value = cm.use_xi;
+        htilted.Value = cm.use_tilt;
+        
+        httNugget.String = num2str(cm.nugget_d);
+        hmodelNugget.String = num2str(cm.nugget_m);
+        hxiNugget.String = num2str(cm.nugget_xi);
+        htiltNugget.String = num2str(cm.nugget_tilt);
+        ns = numel(cm.covar);
+        names = {};
+        for n=1:ns
+            cmUI(n).range = cm.covar(n).range;
+            cmUI(n).angle = cm.covar(n).angle;
+            cmUI(n).sill = cm.covar(n).sill;
+            cmUI(n).refresh();
+            if helliptical.Value==1
+                cmXiUI(n).range = cm.covar_xi(n).range;
+                cmXiUI(n).angle = cm.covar_xi(n).angle;
+                cmXiUI(n).sill = cm.covar_xi(n).sill;
+                cmXiUI(n).refresh();
+                if htilted.Value==1
+                    cmTiltUI(n).range = cm.covar_tilt(n).range;
+                    cmTiltUI(n).angle = cm.covar_tilt(n).angle;
+                    cmTiltUI(n).sill = cm.covar_tilt(n).sill;
+                    cmTiltUI(n).refresh();
+                end
+            end
+            names{ns} = ['Structure no ',num2str(ns)];
+        end
+        hstructList.String = names;
+        hstructList.Value = 1;
+    end
     function updateCov(varargin)
         if isempty(cm)
             return
@@ -1620,6 +1655,17 @@ f.Visible = 'on';
             if previousType == 1
                 model.tt_covar = cm;
                 cm = model.amp_covar;
+                if isempty(cm.covar)
+                    cm.covar = model.tt_covar.covar;
+                end
+                cm.use_xi = model.tt_covar.use_xi;
+                if cm.use_xi == 1 && isempty(cm.covar_xi)
+                    cm.covar_xi = model.tt_covar.covar_xi;
+                end
+                cm.use_tilt = model.tt_covar.use_tilt;
+                if cm.use_tilt == 1 && isempty(cm.covar_tilt)
+                    cm.covar_tilt = model.tt_covar.covar_tilt;
+                end
                 hvar.String = 'Attenuation';
             elseif hTypeData.Value == 1
                 model.amp_covar = cm;
@@ -1627,7 +1673,8 @@ f.Visible = 'on';
                 hvar.String = 'Slowness';
             end
             previousType = hTypeData.Value;
-            fillUI()
+            updateCovUI()
+            %fillUI()
             loadData()
         end
     end
@@ -1681,14 +1728,6 @@ f.Visible = 'on';
             end
             ind = ind(1:ndata);
             L = model.inv_res(hrays.Value-1).tomo.L(ind,:);
-            % check if tomo anniso
-            if model.inv_res(hrays.Value-1).param.cm.use_xi == 1
-                [m,n] = size(L);
-                nc = n/2;
-                Lx = L(:,1:nc);
-                Lz = L(:,nc+1:end);
-                L = sqrt( Lx.^2 + Lz.^2);
-            end 
             xc = model.grid.getCellCenter();
         else
             % straight rays

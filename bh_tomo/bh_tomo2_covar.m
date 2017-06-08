@@ -1681,6 +1681,14 @@ f.Visible = 'on';
             end
             ind = ind(1:ndata);
             L = model.inv_res(hrays.Value-1).tomo.L(ind,:);
+            % check if tomo anniso
+            if model.inv_res(hrays.Value-1).param.cm.use_xi == 1
+                [m,n] = size(L);
+                nc = n/2;
+                Lx = L(:,1:nc);
+                Lz = L(:,nc+1:end);
+                L = sqrt( Lx.^2 + Lz.^2);
+            end 
             xc = model.grid.getCellCenter();
         else
             % straight rays

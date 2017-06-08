@@ -1505,6 +1505,12 @@ f.Visible = 'on';
         
         param.numItStraight = str2double(hnStraight.String);
         param.numItCurved = str2double(hnCurved.String);
+        
+        if param.tomoAtt == 1 && param.numItCurved > 0
+            warndlg('Number of curved rays iterations set to 0 for attenuation tomography')
+            param.numItCurved = 0;
+        end
+        
         param.saveInvData = 1;
         param.useCont = huseCont.Value;
         L = [];
@@ -1770,7 +1776,12 @@ f.Visible = 'on';
         set(get(hb,'Title'),'String',units,'FontSize',12)
         
         if isfield(tomo,'xi')
-            title(ax,'V_x','FontSize',14)
+            if param.tomoAtt==0
+                titre = 'V_x';
+            else
+                titre = '\alpha_x';
+            end
+            title(ax,titre,'FontSize',14)
             if strcmp(model.grid.type,'3D')==1
                 gv.slider2.Visible = 'on';
                 gv.plotTomo(tomo.xi,'\xi','Distance [m]','Elevation [m]',ax1)

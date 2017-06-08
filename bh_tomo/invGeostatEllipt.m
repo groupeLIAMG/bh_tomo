@@ -255,8 +255,11 @@ for noIter=1:param.numItStraight + param.numItCurved
     end
 
     if ~isempty(g_handles)
-
-        gv.plotTomo(1./(s0.*xi0),'V_z','Distance [m]','Elevation [m]',g_handles{3})
+        if param.tomoAtt==0
+            gv.plotTomo(1./(s0.*xi0),'V_z','Distance [m]','Elevation [m]',g_handles{3})
+        else
+            gv.plotTomo((s0.*xi0),'\alpha_z','Distance [m]','Elevation [m]',g_handles{3})
+        end
         if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
         colorbar('peer', g_handles{3})
 

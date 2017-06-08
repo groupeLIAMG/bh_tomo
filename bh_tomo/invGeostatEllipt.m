@@ -43,6 +43,10 @@ if param.tomoAtt==0
     if ~isempty( grid.cont.slowness )
         cont = grid.cont.slowness;
     end
+else
+    if ~isempty( grid.cont.attenuation )
+        cont = grid.cont.attenuation;
+    end
 end
 
 x = grid.getCellCenter();

@@ -14,6 +14,8 @@ classdef Constraints < matlab.mixin.Copyable
             obj.slowness.data_xi = [];
             obj.slowness.data_theta = [];
             obj.attenuation.data = [];
+            obj.attenuation.data_xi = [];
+            obj.attenuation.data_theta = [];
             obj.ind_reservoir = [];
         end
     end

@@ -1537,9 +1537,9 @@ f.Visible = 'on';
                 end
             end
             L = model.inv_res(noL).tomo.L(ind,:);
-            rays = rays{ind};
+            %rays = rays{ind};
             
-            if model.inv_res(noL).covar.use_xi==1 && cm.use_xi==0
+            if model.inv_res(noL).param.cm.use_xi==1 && cm.use_xi==0
                 % we need to transform matrix L
                 % we are in 2D
                 np = size(L,2)/2;

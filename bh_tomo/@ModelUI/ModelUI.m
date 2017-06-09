@@ -276,7 +276,12 @@ classdef ModelUI < handle
             if no>0 && no<=numel(obj.models)
                 names_mog = cell(1,length(obj.models(no).mogs));
                 for n=1:length(obj.models(no).mogs)
-                    names_mog{n} = obj.mogUI.mogs( obj.models(no).mogs(n) ).name;
+                    if isempty(obj.mogUI.mogs( obj.models(no).mogs(n) ).date)
+                        names_mog{n} = obj.mogUI.mogs( obj.models(no).mogs(n) ).name;
+                    else
+                        names_mog{n} = [obj.mogUI.mogs( obj.models(no).mogs(n) ).name,' - ',...
+                            obj.mogUI.mogs( obj.models(no).mogs(n) ).date];
+                    end
                 end
                 obj.handles.listMOGs.String = names_mog;
             end

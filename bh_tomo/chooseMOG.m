@@ -36,7 +36,11 @@ if nargin>=1
     elseif isa(varargin{1},'MogUI')
         names_mog = cell(1,length(varargin{1}.mogs));
         for n=1:length(varargin{1}.mogs)
-            names_mog{n} = varargin{1}.mogs(n).name;
+            if isempty(varargin{1}.mogs(n).date)
+                names_mog{n} = varargin{1}.mogs(n).name;
+            else
+                names_mog{n} = [varargin{1}.mogs(n).name, ' - ', varargin{1}.mogs(n).date];
+            end
         end
         enableNewDB = 'off';
     end

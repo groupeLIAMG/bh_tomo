@@ -226,6 +226,11 @@ classdef ModelUI < handle
                         return
                     end
                 end
+                if ~isempty(obj.models(n).grid)
+                    warndlg('Mog added: model grid must be recreated')
+                    obj.models(n).grid = Grid.empty;
+                end
+                
                 obj.models(no).mogs(end+1) = no_mog;
                 obj.models(no).boreholes = unique([obj.models(no).boreholes ...
                     obj.mogUI.mogs(no_mog).Tx obj.mogUI.mogs(no_mog).Rx]);

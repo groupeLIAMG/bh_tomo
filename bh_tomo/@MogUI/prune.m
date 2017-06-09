@@ -302,7 +302,7 @@ uiwait(f)
         
         mog.in = inTx & inRx & SNR>seuil_SB & inTheta;
         
-        [~, a]=lsplane([uTx;uRx]);
+        [~, a]=Grid.lsplane([uTx;uRx]);
         el = (pi-a(3))*180/pi;
         az = atan( cos(a(2))/cos(a(1)) )*180/pi;
         

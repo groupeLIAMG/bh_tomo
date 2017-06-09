@@ -1475,10 +1475,10 @@ f.Visible = 'on';
         
         if htypeData.Value == 1
             tomoAtt = 0;
-            titre = '\Delta t';
+            titre = '\Delta t (t_1 - t_0)';
         else
             tomoAtt = 1;
-            titre = '\Delta \tau';
+            titre = '\Delta \tau (\tau_1 - \tau_0)';
         end
         
         mog_no0 = hlistBaseline.Value;

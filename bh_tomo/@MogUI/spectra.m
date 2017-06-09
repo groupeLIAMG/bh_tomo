@@ -265,6 +265,8 @@ f.Visible = 'on';
             
             [b,a] = cheby1(nc,0.5,Wn);
             
+            %[b,a] = ellip(10, Rp, Rs, Wp);
+            
             for nt=1:size(traces,2)
                 traces(:,nt) = filtfilt(b,a,traces(:,nt));
             end

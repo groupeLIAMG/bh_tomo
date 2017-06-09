@@ -997,7 +997,8 @@ f.Visible = 'on';
         end
     end
     function doMap(varargin)
-        colormap(f, hcmap.String{hcmap.Value})
+        colormap(haxes1, hcmap.String{hcmap.Value})
+        colormap(haxes2, hcmap.String{hcmap.Value})
     end
     function showRef(varargin)
         if isempty(model)

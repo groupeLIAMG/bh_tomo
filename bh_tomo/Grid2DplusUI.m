@@ -493,8 +493,8 @@ classdef Grid2DplusUI <handle
             end
         end
         function showFit(obj,varargin)
-            [Tx_p, Tx_no_plan] = proj_plans(obj.data.Tx, obj.data.planes);
-            [Rx_p, Rx_no_plan] = proj_plans(obj.data.Rx, obj.data.planes);
+            [Tx_p, Tx_no_plan] = Grid.proj_planes(obj.data.Tx, obj.data.planes);
+            [Rx_p, Rx_no_plan] = Grid.proj_planes(obj.data.Rx, obj.data.planes);
             for n=1:obj.data.n_planes
                 figure
                 

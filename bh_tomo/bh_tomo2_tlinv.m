@@ -137,6 +137,13 @@ htypeData = uicontrol('Style','popupmenu',...
     'Position',[0.05 5.5*vSize+6.5*vSpace 0.5 vSize],...
     'Callback',@changeTypeData,...
     'Parent',pdata);
+uicontrol('Style','pushbutton',...
+    'String',['Show ',char(916),' data'],...
+    'FontSize',fs,...
+    'Units','normalized',...
+    'Position',[0.6 5.5*vSize+6.5*vSpace 0.3, vSize],...
+    'Callback',@showDelta,...
+    'Parent',pdata);
 uicontrol('Style','text',...
     'String','Baseline Data',...
     'FontSize',fs,...
@@ -867,7 +874,7 @@ f.Visible = 'on';
             end
             
             tomo = invSimultaneous(model,param,hmessage,gh,gridViewer);
-        else
+        elseif htypeInv.Value == 2
             % Difference
             param.beta = str2double(hbetaD.String);
             param.lambda = str2double(hlambdaD.String);
@@ -893,6 +900,8 @@ f.Visible = 'on';
             drawnow
             
             tomo = invDifference(model,param,hmessage,gh,gridViewer);
+        else
+            warndlg('Not implemented yet')
         end
         saved = false;
         hmessage.String = '';
@@ -1460,6 +1469,127 @@ f.Visible = 'on';
         end
         tomo = [];
         saved = false;
+    end
+
+    function showDelta(varargin)
+        
+        if htypeData.Value == 1
+            tomoAtt = 0;
+            titre = '\Delta t';
+        else
+            tomoAtt = 1;
+            titre = '\Delta \tau';
+        end
+        
+        mog_no0 = hlistBaseline.Value;
+        mog_no1 = hlistRepeat.Value;
+            
+        if tomoAtt == 0
+            [data0,idata] = Model.getModelData(model,[rep,file],'tt',mog_no0);
+            [depth0,~] = Model.getModelData(model,[rep,file],'depth',mog_no0,[],'tt');
+            data0 = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data0];
+        else
+            switch htypeData.Value
+                case 2
+                    [data0,idata] = Model.getModelData(model,[rep,file],'amp',mog_no0);
+                    [depth0,~] = Model.getModelData(model,[rep,file],'depth',mog_no0,[],'tt');
+                case 3
+                    [data0,idata] = Model.getModelData(model,[rep,file],'fce',mog_no0);
+                    [depth0,~] = Model.getModelData(model,[rep,file],'depth',mog_no0,[],'fce');
+                case 4
+                    [data0,idata] = Model.getModelData(model,[rep,file],'hyb',mog_no0);
+                    [depth0,~] = Model.getModelData(model,[rep,file],'depth',mog_no0,[],'hyb');
+            end
+            data0 = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data0];
+        end
+
+        if tomoAtt == 0
+            [data1,idata] = Model.getModelData(model,[rep,file],'tt',mog_no1);
+%            [depth1,~] = Model.getModelData(model,[rep,file],'depth',mog_no1,[],'tt');
+            data1 = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data1];
+        else
+            switch htypeData.Value
+                case 2
+                    [data1,idata] = Model.getModelData(model,[rep,file],'amp',mog_no1);
+%                    [depth1,~] = Model.getModelData(model,[rep,file],'depth',mog_no1,[],'tt');
+                case 3
+                    [data1,idata] = Model.getModelData(model,[rep,file],'fce',mog_no1);
+%                    [depth1,~] = Model.getModelData(model,[rep,file],'depth',mog_no1,[],'fce');
+                case 4
+                    [data1,idata] = Model.getModelData(model,[rep,file],'hyb',mog_no1);
+%                    [depth1,~] = Model.getModelData(model,[rep,file],'depth',mog_no1,[],'hyb');
+            end
+            data1 = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data1];
+        end
+
+        dx = model.grid.grx(2) - model.grid.grx(1);
+        dz = model.grid.grz(2) - model.grid.grz(1);
+        tol = 0.5*(dx+dz);
+        
+        dTx = sort(unique(depth0(:,1)));
+        dRx = sort(unique(depth0(:,2)));
+        if length(dTx) > 2*length(model.grid.grz)
+            o = floor(log10(dz)-1);
+            fac = 10^o;
+            depth0(:,1) = round(depth0(:,1)/fac) * fac;
+            dTx = sort(unique(depth0(:,1)));
+        end
+        if length(dRx) > 2*length(model.grid.grz)
+            o = floor(log10(dz)-1);
+            fac = 10^o;
+            depth0(:,2) = round(depth0(:,2)/fac) * fac;
+            dRx = sort(unique(depth0(:,2)));
+        end
+            
+            
+        ddata = nan(length(dTx),length(dRx));
+        nval = zeros(length(dTx),length(dRx));
+        
+        for n0=1:size(data0,1)
+            for n1=1:size(data1,1)
+                
+                if sqrt(sum((data0(n0,1:3)-data1(n1,1:3)).^2)) < tol && ...
+                        sqrt(sum((data0(n0,4:6)-data1(n1,4:6)).^2)) < tol
+                    iTx = (dTx == depth0(n0,1));
+                    iRx = (dRx == depth0(n0,2));
+                    if isnan(ddata(iTx,iRx))
+                        ddata(iTx,iRx) = data1(n1,7) - data0(n0,7);
+                    else
+                        ddata(iTx,iRx) = ddata(iTx,iRx) + data1(n1,7) - data0(n0,7);
+                    end
+                    nval(iTx,iRx) = nval(iTx,iRx) + 1;
+                    
+                end
+            end
+        end
+        
+        ind = nval>0;
+        ddata(ind) = ddata(ind) ./ nval(ind);
+        
+        figure
+        
+        p = [0 0 1;1 1 1;1 0 0];
+        p = interp1((-1:1)',p,(-1:0.02:1)');
+        
+        z=ddata;
+        z(isnan(ddata))=0;
+        z(~isnan(ddata))=1;
+        
+        imagesc(dRx,dTx,ddata);
+        set(gca,'color',[0.8 0.8 0.8]);
+        alpha(z);
+        axis image;
+        
+        ca = caxis;
+        caxis([-max(abs(ca)) max(abs(ca))])
+        
+        xlabel('Rx depth')
+        ylabel('Tx depth')
+        colorbar
+        colormap(p)
+        
+        title(titre, 'FontSize',16)
+        
     end
 
 end

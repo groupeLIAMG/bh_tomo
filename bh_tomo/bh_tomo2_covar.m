@@ -973,7 +973,7 @@ f.Visible = 'on';
         
     end
     function [g,gt] = computeCov(varargin)
-        hmbox = msgbox('Computing Covariance');
+        hmbox = msgbox('Computing Covariance - please wait');
         Cm = cm.compute(xc,xc);
         
         if cm.use_xi==1
@@ -1006,7 +1006,7 @@ f.Visible = 'on';
         
         [Cm,ind] = sort(Cm(:),1,'descend');
         lclas = str2double(hbinlength.String);
-        afi = 1/str2double(hfracbin.String);
+        afi = str2double(hfracbin.String);
         
         gt = moy_bloc(Cm,lclas);
         ind0 = find(gt<Inf);
@@ -1016,7 +1016,7 @@ f.Visible = 'on';
         g = moy_bloc(g,lclas);
         g = g(ind0);
 
-        N = round(length(g)/afi);
+        N = round(length(g)*afi);
         g = g(1:N);
         gt = gt(1:N);
 

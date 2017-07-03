@@ -98,52 +98,39 @@ if ~isempty(db_file)
 	end
 	set(handles.text_db,'String',file)
 
-%     load(db_file,'panels')
-%     noms_panels = {};
-%     for n=1:length(panels)
-%         noms_panels{n} = char( panels(n).name );
+%     load(db_file,'models')
+%     noms_models = {};
+%     for n=1:length(models)
+%         noms_models{n} = char( models(n).name );
 %     end
-%     set(handles.popupmenu_pannneaux,'String',noms_panels)
+%     set(handles.popupmenu_pannneaux,'String',noms_models)
 % 
-%     if isfield(panels(1), 'inv_res')
+%     if isfield(models(1), 'inv_res')
 %         noms_inv_res = {};
-%         for n=1:length(panels(1).inv_res)
-%             noms_inv_res{n} = char( panels(1).inv_res(n).name );
+%         for n=1:length(models(1).inv_res)
+%             noms_inv_res{n} = char( models(1).inv_res(n).name );
 %         end
 %         set(handles.popupmenu_inv_res,'String',noms_inv_res)        
 %     end
 %%%%%%%%%%%%%%%%%%%%%%  YH
-    noms_panels = {};
+    noms_models = {};
     noms_inv_res = {};
-  	load(db_file,'panels')
-    load(db_file,'model3d')
-    nb_panels = length(panels);
-    nb_model3d = length(model3d);
-    if nb_panels > 0
-        for n=1:nb_panels
-            noms_panels{n} = char(panels(n).name );
+  	load(db_file,'models')
+    nb_models = length(models);
+    if nb_models > 0
+        for n=1:nb_models
+            noms_models{n} = char(models(n).name );
         end
-        if isfield(panels(1), 'inv_res')        
-            for n=1:length(panels(1).inv_res)
-                noms_inv_res{n} = char(panels(1).inv_res(n).name );
+        if isfield(models(1), 'inv_res')        
+            for n=1:length(models(1).inv_res)
+                noms_inv_res{n} = char(models(1).inv_res(n).name );
             end
         end
     end
-    if nb_model3d > 0
-        for n=1:nb_model3d
-            noms_panels{n+nb_panels} = char(model3d(n).name );
-        end
-        if isfield(model3d(1), 'inv_res')
-            noms_inv_res = {};
-            for n=1:length(model3d(1).inv_res)
-                noms_inv_res{n} = char( model3d(1).inv_res(n).name );
-            end
-        end
-    end
-    if isempty(noms_panels{1})
+    if isempty(noms_models{1})
         set(handles.popupmenu_pannneaux,'Value',1,'String','-');
     else
-        set(handles.popupmenu_pannneaux,'Value',1,'String',noms_panels);
+        set(handles.popupmenu_pannneaux,'Value',1,'String',noms_models);
     end
     
     if isempty(noms_inv_res{1})
@@ -180,53 +167,40 @@ end
 set(handles.text_db,'String',file)
 db_file = [rep,file];
 
-% load([rep,file],'panels')
-% noms_panels = {};
-% for n=1:length(panels)
-%     noms_panels{n} = char( panels(n).name );
+% load([rep,file],'models')
+% noms_models = {};
+% for n=1:length(models)
+%     noms_models{n} = char( models(n).name );
 % end
-% set(handles.popupmenu_pannneaux,'String',noms_panels)
-% if isfield(panels(1), 'inv_res')
+% set(handles.popupmenu_pannneaux,'String',noms_models)
+% if isfield(models(1), 'inv_res')
 %     noms_inv_res = {};
-%     for n=1:length(panels(1).inv_res)
-%         noms_inv_res{n} = char( panels(1).inv_res(n).name );
+%     for n=1:length(models(1).inv_res)
+%         noms_inv_res{n} = char( models(1).inv_res(n).name );
 %     end
 %     set(handles.popupmenu_inv_res,'String',noms_inv_res)
 % else
 %     %warning
 % end
 %%%%%%%%%%%%%%%%%%%% YH     
-noms_panels = {};
+noms_models = {};
 noms_inv_res = {};
-load(db_file,'panels')
-load(db_file,'model3d')
-nb_panels = length(panels);
-nb_model3d = length(model3d);
-if nb_panels > 0
-    for n=1:nb_panels
-        noms_panels{n} = char(panels(n).name );
+load(db_file,'models')
+nb_models = length(models);
+if nb_models > 0
+    for n=1:nb_models
+        noms_models{n} = char(models(n).name );
     end
-    if isfield(panels(1), 'inv_res')        
-        for n=1:length(panels(1).inv_res)
-            noms_inv_res{n} = char(panels(1).inv_res(n).name );
+    if isfield(models(1), 'inv_res')        
+        for n=1:length(models(1).inv_res)
+            noms_inv_res{n} = char(models(1).inv_res(n).name );
         end
     end
 end
-if nb_model3d > 0
-    for n=1:nb_model3d
-        noms_panels{n+nb_panels} = char(model3d(n).name );
-    end
-    if isfield(model3d(1), 'inv_res')
-        noms_inv_res = {};
-        for n=1:length(model3d(1).inv_res)
-            noms_inv_res{n} = char( model3d(1).inv_res(n).name );
-        end
-    end
-end
-if isempty(noms_panels)
+if isempty(noms_models)
     set(handles.popupmenu_pannneaux,'Value',1,'String','-');
 else
-    set(handles.popupmenu_pannneaux,'Value',1,'String',noms_panels);
+    set(handles.popupmenu_pannneaux,'Value',1,'String',noms_models);
 end
 
 if isempty(noms_inv_res)
@@ -242,11 +216,11 @@ function popupmenu_pannneaux_Callback(hObject, eventdata, handles)
 no = get(hObject,'Value');
 db_file = getappdata(handles.fig_get_Ldc,'db_file');
 
-% load(db_file,'panels')
-% if isfield(panels(no), 'inv_res')
+% load(db_file,'models')
+% if isfield(models(no), 'inv_res')
 %     noms_inv_res = {};
-%     for n=1:length(panels(no).inv_res)
-%         noms_inv_res{n} = char( panels(no).inv_res(n).name );
+%     for n=1:length(models(no).inv_res)
+%         noms_inv_res{n} = char( models(no).inv_res(n).name );
 %     end
 %     set(handles.popupmenu_inv_res,'String',noms_inv_res)
 % else
@@ -255,25 +229,14 @@ db_file = getappdata(handles.fig_get_Ldc,'db_file');
 % end
 %%%%%%%%%%%%%%%%%%%% YH
  
-load(db_file,'panels')
-load(db_file,'model3d')
-nb_panels = length(panels);
-nb_model3d = length(model3d);
+load(db_file,'models')
+nb_models = length(models);
 noms_inv_res = {};
-if nb_panels > 0 || nb_model3d > 0
-    if no <= nb_panels
-        if isfield(panels(no), 'inv_res')
-            for n=1:length(panels(no).inv_res)
-                noms_inv_res{n} = char( panels(no).inv_res(n).name );
-            end
-        else
-            str = get_str_locale();
-            uiwait(warndlg(str.s183))
-        end
-    else
-        if isfield(model3d(no-nb_panels), 'inv_res')
-            for n=1:length(model3d(no-nb_panels).inv_res)
-                noms_inv_res{n} = char( model3d(no-nb_panels).inv_res(n).name );
+if nb_models > 0
+    if no <= nb_models
+        if isfield(models(no), 'inv_res')
+            for n=1:length(models(no).inv_res)
+                noms_inv_res{n} = char( models(no).inv_res(n).name );
             end
         else
             str = get_str_locale();
@@ -298,37 +261,25 @@ no1 = get(handles.popupmenu_pannneaux,'Value');
 no2 = get(handles.popupmenu_inv_res,'Value');
 db_file = getappdata(handles.fig_get_Ldc,'db_file');
 
-% load(db_file,'panels')
-% handles.output = panels(no1).inv_res(no2).tomo;
-% handles.second_output = {panels(no1).name; panels(no1).inv_res(no2).name};
+% load(db_file,'models')
+% handles.output = models(no1).inv_res(no2).tomo;
+% handles.second_output = {models(no1).name; models(no1).inv_res(no2).name};
 
 %%%%%%%%%%%%%%%%%YH
-load(db_file,'panels')
-load(db_file,'model3d')
-nb_panels = length(panels);
-nb_model3d = length(model3d);
-if nb_panels > 0 || nb_model3d > 0
-    if no1 <= nb_panels
-        if isfield(panels(no1), 'inv_res')
-            if isempty(panels(no1).inv_res)
+load(db_file,'models')
+nb_models = length(models);
+if nb_models > 0
+    if no1 <= nb_models
+        if isfield(models(no1), 'inv_res')
+            if isempty(models(no1).inv_res)
                 handles.output = [];
-                handles.second_output = {panels(no1).name; '?'};
+                handles.second_output = {models(no1).name; '?'};
             else
-                handles.output = panels(no1).inv_res(no2).tomo;
-                handles.second_output = {panels(no1).name; panels(no1).inv_res(no2).name};
+                handles.output = models(no1).inv_res(no2).tomo;
+                handles.second_output = {models(no1).name; models(no1).inv_res(no2).name};
             end
         end
-    else        
-        if isfield(model3d(no1-nb_panels), 'inv_res')
-            if isempty(model3d(no1-nb_panels).inv_res)
-                handles.output = [];
-                handles.second_output = {model3d(no1-nb_panels).name; '?'};
-            else
-                handles.output = model3d(no1-nb_panels).inv_res(no2).tomo;
-                handles.second_output = {model3d(no1-nb_panels).name; model3d(no1-nb_panels).inv_res(no2).name};
-            end
-        end
-  	end
+    end
 end
 %%%%%%%%%%%%%
 % Update handles structure

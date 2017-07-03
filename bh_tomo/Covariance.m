@@ -64,7 +64,7 @@ classdef Covariance < matlab.mixin.Heterogeneous & matlab.mixin.Copyable
             end
             if d>1
                 
-                if d==2,
+                if d==2
                     cang=cos(obj.angle/180*pi); sang=sin(obj.angle/180*pi);
                     rot=[cang,-sang;sang,cang];
                 else

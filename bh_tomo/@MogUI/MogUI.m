@@ -269,7 +269,7 @@ classdef MogUI < handle
                 ind1 = mog.tt==-1 & mog.in;
                 ind2 = mog.tt~=-1 & mog.in;
                 
-                [~, a]=lsplane([boreholes(mog.Tx).fdata; boreholes(mog.Rx).fdata]);
+                [~, a]=Grid.lsplane([boreholes(mog.Tx).fdata; boreholes(mog.Rx).fdata]);
                 el = (pi-a(3))*180/pi - 15;
                 az = atan( cos(a(2))/cos(a(1)) )*180/pi - 10;
                 

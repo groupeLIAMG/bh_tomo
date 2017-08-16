@@ -78,7 +78,7 @@ if no>0 && no<=length(obj.mogs)
     vmax = max(vapp);
     c=cmr;
     
-    [~, a]=lsplane([Tx; Rx]);
+    [~, a]=Grid.lsplane([Tx; Rx]);
     el = (pi-a(3))*180/pi;
     az = atan( cos(a(2))/cos(a(1)) )*180/pi;
     

@@ -226,9 +226,9 @@ classdef ModelUI < handle
                         return
                     end
                 end
-                if ~isempty(obj.models(n).grid)
+                if ~isempty(obj.models(no).grid)
                     warndlg('Mog added: model grid must be recreated')
-                    obj.models(n).grid = Grid.empty;
+                    obj.models(no).grid = Grid.empty;
                 end
                 
                 obj.models(no).mogs(end+1) = no_mog;

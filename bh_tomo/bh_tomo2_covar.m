@@ -1290,13 +1290,13 @@ f.Visible = 'on';
         dz = str2double(hdz.String);
         xc = model.grid.getCellCenter(dx,dy,dz);
 
-        nx=numel( str2double(hxmin.String):dx:str2double(hxmax.String) );
+        nx=numel( str2double(hxmin.String):dx:str2double(hxmax.String)) - 1;
         if ~strcmp(hdy.String,'0')
-            ny=numel( str2double(hymin.String):dy:str2double(hymax.String) );
+            ny=numel( str2double(hymin.String):dy:str2double(hymax.String)) - 1;
         else
             ny=1;
         end
-        nz=numel( str2double(hzmin.String):dz:str2double(hzmax.String) );
+        nz=numel( str2double(hzmin.String):dz:str2double(hzmax.String)) - 1;
         hncells.String = [num2str(nx*ny*nz), ' Cells'];
         loadRays()
         updateCov()

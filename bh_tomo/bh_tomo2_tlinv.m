@@ -739,6 +739,10 @@ f.Visible = 'on';
             errordlg('Grid not created, inversion cannot be computed')
             return
         end
+        if isempty(model.inv_res)
+            errordlg('Previous inversion not found, reference model cannot be defined')
+            return
+        end
         
         %
         % Reset UI

@@ -59,21 +59,71 @@ classdef CovarianceModel < matlab.mixin.Copyable
                 % Hole_Effect_Cosine (10)
                 % Nugget (11)
                 conv = int8([11 4 3 2 5 1 6 7 8 9 10]);
-                for n=1:size(s.modele,1)
-                    % we have 2d models
-                    obj.covar(n) = CovarianceModels.buildCov(conv(s.modele(n,1)),...
-                        s.modele(n,3:-1:2), s.modele(n,4), s.c(n));
+                if isfield(s, 'model')
+                    for n=1:size(s.model,1)
+                        % we have 2d models
+                        obj.covar(n) = CovarianceModels.buildCov(conv(s.model(n,1)),...
+                            s.model(n,3:-1:2), s.model(n,4), s.c(n));
+                    end
+                elseif isfield(s, 'modele')
+                    for n=1:size(s.modele,1)
+                        % we have 2d models
+                        obj.covar(n) = CovarianceModels.buildCov(conv(s.modele(n,1)),...
+                            s.modele(n,3:-1:2), s.modele(n,4), s.c(n));
+                    end
+                else
+                    error('Invalid input')
                 end
-                for n=1:size(s.modele_xi,1)
-                    obj.covar_xi(n) = CovarianceModels.buildCov(conv(s.modele_xi(n,1)),...
-                        s.modele_xi(n,3:-1:2), s.modele_xi(n,4), s.c_xi(n));
+                if isfield(s, 'model_xi')
+                    for n=1:size(s.model_xi,1)
+                        obj.covar_xi(n) = CovarianceModels.buildCov(conv(s.model_xi(n,1)),...
+                            s.model_xi(n,3:-1:2), s.model_xi(n,4), s.c_xi(n));
+                    end
+                elseif isfield(s, 'modele_xi')
+                    for n=1:size(s.modele_xi,1)
+                        obj.covar_xi(n) = CovarianceModels.buildCov(conv(s.modele_xi(n,1)),...
+                            s.modele_xi(n,3:-1:2), s.modele_xi(n,4), s.c_xi(n));
+                    end
+                else
+                    obj.covar_xi = Covariance.empty;
                 end
-                obj.covar_tilt = Covariance.empty;
-                
-                obj.nugget_d = s.pepite_t;
-                obj.nugget_m = s.pepite_l;
-                obj.nugget_xi = 0;
-                obj.nugget_tilt = 0;
+                if isfield(s, 'model_th')
+                    for n=1:size(s.model_th,1)
+                        obj.covar_tilt(n) = CovarianceModels.buildCov(conv(s.model_th(n,1)),...
+                            s.model_th(n,3:-1:2), s.model_th(n,4), s.c_th(n));
+                    end
+                elseif isfield(s, 'modele_th')
+                    for n=1:size(s.modele_th,1)
+                        obj.covar_tilt(n) = CovarianceModels.buildCov(conv(s.modele_th(n,1)),...
+                            s.modele_th(n,3:-1:2), s.modele_th(n,4), s.c_th(n));
+                    end
+                else
+                    obj.covar_tilt = Covariance.empty;
+                end
+                if isfield(s, 'nugget_t')
+                    obj.nugget_d = s.nugget_t;
+                elseif isfield(s, 'pepite_t')
+                    obj.nugget_d = s.pepite_t;
+                else
+                    error('Invalid input')
+                end
+                if isfield(s, 'nugget_l')
+                    obj.nugget_m = s.nugget_l;
+                elseif isfield(s, 'pepite_l')
+                    obj.nugget_m = s.pepite_l;
+                else
+                    error('Invalid input')
+                end
+                if isfield(s, 'nugget_xi')
+                    obj.nugget_xi = s.nugget_xi;
+                else
+                    obj.nugget_xi = 0;
+                end
+                if isfield(s, 'nugget_th')
+                    obj.nugget_tilt = s.nugget_th;
+                else
+                    obj.nugget_tilt = 0;
+                end
                 obj.use_c0 = s.use_c0;
                 if isfield(s, 'aniso')
                     obj.use_xi = s.aniso;

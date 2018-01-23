@@ -57,7 +57,30 @@ classdef Borehole < handle
                 end
                 obj.diam = n.diam;
                 obj.scont = n.scont;
-                obj.acont = n.acont;
+                if ~isempty(obj.scont)
+                    npts = max([numel(obj.scont.x) numel(obj.scont.y) numel(obj.scont.z)]);
+                    if numel(obj.scont.x) == 1
+                        obj.scont.x = obj.scont.x + zeros(npts,1);
+                    end
+                    if numel(obj.scont.y) == 1
+                        obj.scont.y = obj.scont.y + zeros(npts,1);
+                    end
+                    if numel(obj.scont.z) == 1
+                        obj.scont.z = obj.scont.z + zeros(npts,1);
+                    end
+                end
+                if ~isempty(obj.acont)
+                    npts = max([numel(obj.acont.x) numel(obj.acont.y) numel(obj.acont.z)]);
+                    if numel(obj.acont.x) == 1
+                        obj.acont.x = obj.acont.x + zeros(npts,1);
+                    end
+                    if numel(obj.acont.y) == 1
+                        obj.acont.y = obj.acont.y + zeros(npts,1);
+                    end
+                    if numel(obj.acont.z) == 1
+                        obj.acont.z = obj.acont.z + zeros(npts,1);
+                    end
+                end
                 obj.fdata = n.fdata;
             else
                 error('Invalid input')

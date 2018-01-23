@@ -23,8 +23,25 @@ classdef Constraints < matlab.mixin.Copyable
                     error('Invalid input')
                 end
                 s = varargin{1};
-                obj.slowness.data = s.slowness;
-                obj.attenuation.data = s.attenuation;
+                if isstruct(s.slowness)
+                    obj.slowness.data = s.slowness.data;
+                    obj.slowness.data_xi = [];
+                    obj.slowness.data_theta = [];
+                else
+                    obj.slowness.data = s.slowness;
+                end
+                if isstruct(s.attenuation)
+                    obj.attenuation.data = s.attenuation.data;
+                    obj.attenuation.data_xi = [];
+                    obj.attenuation.data_theta = [];
+                else
+                    obj.attenuation.data = s.attenuation;
+                end
+                if isfield(s, 'ind_reservoir')
+                    obj.ind_reservoir = s.ind_reservoir;
+                else
+                    obj.ind_reservoir = [];
+                end
             end
         end
     end

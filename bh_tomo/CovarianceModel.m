@@ -62,11 +62,11 @@ classdef CovarianceModel < matlab.mixin.Copyable
                 for n=1:size(s.modele,1)
                     % we have 2d models
                     obj.covar(n) = CovarianceModels.buildCov(conv(s.modele(n,1)),...
-                        s.modele(n,2:3), s.modele(n,4), s.c(n));
+                        s.modele(n,3:-1:2), s.modele(n,4), s.c(n));
                 end
                 for n=1:size(s.modele_xi,1)
                     obj.covar_xi(n) = CovarianceModels.buildCov(conv(s.modele_xi(n,1)),...
-                        s.modele_xi(n,2:3), s.modele_xi(n,4), s.c_xi(n));
+                        s.modele_xi(n,3:-1:2), s.modele_xi(n,4), s.c_xi(n));
                 end
                 obj.covar_tilt = Covariance.empty;
                 

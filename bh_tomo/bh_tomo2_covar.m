@@ -1377,10 +1377,12 @@ f.Visible = 'on';
         end
     end
     function doElliptical(varargin)
-        cm.use_xi = helliptical.Value;
-        fillEllipticalUI()
-        loadRays()
-        computeCd()
+        if ~isempty(cm)
+            cm.use_xi = helliptical.Value;
+            fillEllipticalUI()
+            loadRays()
+            computeCd()
+        end
     end
     function fillTiltUI()
         if htilted.Value == 1

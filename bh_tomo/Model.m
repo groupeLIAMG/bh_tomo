@@ -56,6 +56,7 @@ classdef Model < handle
                 end
                 obj.grid.in = n.grid.in;
                 obj.grid.flip = n.grid.flip;
+                obj.grid.type = '2D';
                 if isfield(n.grid, 'borehole_x0')
                     obj.grid.borehole_x0 = n.grid.borehole_x0;
                 elseif isfield(n.grid, 'forage_x0')

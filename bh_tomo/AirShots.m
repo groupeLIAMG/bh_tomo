@@ -16,8 +16,32 @@ classdef AirShots < handle
     
     methods
         function obj = AirShots(n)
-            obj.name = n;
-            obj.data = MogData.empty;
+            if isstring(n)
+                obj.name = n;
+                obj.data = MogData.empty;
+            elseif isstruct(n)
+                if isfield(n, 'name')
+                    obj.name = n.name;
+                elseif isfield(n, 'nom')
+                    obj.name = n.nom;
+                else
+                    error('Invalid input')
+                end
+                obj.data = MogData(n.data);
+                obj.tt = n.tt;
+                obj.et = n.et;
+                obj.tt_done = n.tt_done;
+                obj.d_TxRx = n.d_TxRx;
+                obj.fac_dt = n.fac_dt;
+                obj.in = n.in;
+                if isfield(n, 'method')
+                    obj.method = n.method;
+                else
+                    obj.method = 'fixed_antenna';
+                end
+            else
+                error('Invalid input')
+            end
         end
         function set.name(obj, n)
             if ischar(n)

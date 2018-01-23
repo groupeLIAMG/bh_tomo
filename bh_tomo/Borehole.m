@@ -19,19 +19,49 @@ classdef Borehole < handle
     
     methods
         function obj = Borehole(n)
-            obj.name = n;
-            obj.X = 0;
-            obj.Y = 0;
-            obj.Z = 0;
-            obj.Xmax = 0;
-            obj.Ymax = 0;
-            obj.Zmax = 0;
-            obj.Z_surf = 0;
-            obj.Z_water = NaN;
-            obj.diam = 0;
-            obj.scont = [];
-            obj.acont = [];
-            obj.fdata = [0 0 0;0 0 0];
+            if isstring(n)
+                obj.name = n;
+                obj.X = 0;
+                obj.Y = 0;
+                obj.Z = 0;
+                obj.Xmax = 0;
+                obj.Ymax = 0;
+                obj.Zmax = 0;
+                obj.Z_surf = 0;
+                obj.Z_water = NaN;
+                obj.diam = 0;
+                obj.scont = [];
+                obj.acont = [];
+                obj.fdata = [0 0 0;0 0 0];
+            elseif isstruct(n)
+                if isfield(n, 'name')
+                    obj.name = n.name;
+                elseif isfield(n, 'nom')
+                    obj.name = n.nom;
+                else
+                    error('Invalid input')
+                end
+                obj.X = n.X;
+                obj.Y = n.Y;
+                obj.Z = n.Z;
+                obj.Xmax = n.Xmax;
+                obj.Ymax = n.Ymax;
+                obj.Zmax = n.Zmax;
+                obj.Z_surf = n.Z_surf;
+                if isfield(n, 'Z_water')
+                    obj.Z_water = n.Z_water;
+                elseif isfield(n, 'Z_eau')
+                    obj.Z_water = n.Z_eau;
+                else
+                    error('Invalid input')
+                end
+                obj.diam = n.diam;
+                obj.scont = n.scont;
+                obj.acont = n.acont;
+                obj.fdata = n.fdata;
+            else
+                error('Invalid input')
+            end
         end
         function set.name(obj, n)
             if ischar(n)

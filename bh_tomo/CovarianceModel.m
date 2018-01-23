@@ -16,17 +16,73 @@ classdef CovarianceModel < matlab.mixin.Copyable
     end
     
     methods
-        function obj = CovarianceModel()
+        function obj = CovarianceModel(varargin)
             obj.covar = Covariance.empty;
             obj.covar_xi = Covariance.empty;
             obj.covar_tilt = Covariance.empty;
-            obj.nugget_d = 0;
-            obj.nugget_m = 0;
-            obj.nugget_xi = 0;
-            obj.nugget_tilt = 0;
-            obj.use_c0 = 0;
-            obj.use_xi = 0;
-            obj.use_tilt = 0;
+            if nargin == 0
+                obj.nugget_d = 0;
+                obj.nugget_m = 0;
+                obj.nugget_xi = 0;
+                obj.nugget_tilt = 0;
+                obj.use_c0 = 0;
+                obj.use_xi = 0;
+                obj.use_tilt = 0;
+            else
+                if ~isstruct(varargin{1})
+                    error('Invalid input')
+                end
+                s = varargin{1};
+                % old indices in covardm are
+                % 1 -> nugget
+                % 2 -> exponential
+                % 3 -> gaussian
+                % 4 -> spherical
+                % 5 -> linear
+                % 6 -> cubic
+                % 7 -> thin plate
+                % 8 -> gravimetric
+                % 9 -> magnetic
+                % 10 -> hole effect sine
+                % 11 -> hole effect cosine
+                %
+                % new indices are (CovarianceModels enum)
+                % Cubic (1)
+                % Spherical (2)
+                % Gaussian (3)
+                % Exponential (4)
+                % Linear (5)
+                % Thin_Plate (6)
+                % Gravimetric (7)
+                % Magnetic (8)
+                % Hole_Effect_Sine (9)
+                % Hole_Effect_Cosine (10)
+                % Nugget (11)
+                conv = int8([11 4 3 2 5 1 6 7 8 9 10]);
+                for n=1:size(s.modele,1)
+                    % we have 2d models
+                    obj.covar(n) = CovarianceModels.buildCov(conv(s.modele(n,1)),...
+                        s.modele(n,2:3), s.modele(n,4), s.c(n));
+                end
+                for n=1:size(s.modele_xi,1)
+                    obj.covar_xi(n) = CovarianceModels.buildCov(conv(s.modele_xi(n,1)),...
+                        s.modele_xi(n,2:3), s.modele_xi(n,4), s.c_xi(n));
+                end
+                obj.covar_tilt = Covariance.empty;
+                
+                obj.nugget_d = s.pepite_t;
+                obj.nugget_m = s.pepite_l;
+                obj.nugget_xi = 0;
+                obj.nugget_tilt = 0;
+                obj.use_c0 = s.use_c0;
+                if isfield(s, 'aniso')
+                    obj.use_xi = s.aniso;
+                else
+                    obj.use_xi = 0;
+                end
+                obj.use_tilt = 0;
+                
+            end
         end
         
         function Cm = compute(obj,x,x0)

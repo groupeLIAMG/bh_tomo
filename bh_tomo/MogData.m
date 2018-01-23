@@ -28,30 +28,68 @@ classdef MogData < handle
     end
 
     methods
-        function obj = MogData
-            obj.ntrace = 0;
-            obj.nptsptrc = 0;
-            obj.rstepsz = 0;
-            obj.cunits = '';
-            obj.rnomfreq = 0;
-            obj.csurvmod = '';
-            obj.timec = 0;
-            obj.rdata = 0;
-            obj.timestp = 0;
-            obj.Tx_x = 0;
-            obj.Tx_y = 0;
-            obj.Tx_z = 0;
-            obj.Rx_x = 0;
-            obj.Rx_y = 0;
-            obj.Rx_z = 0;
-            obj.antennas = '';
-            obj.synthetique = 0;
-            obj.tunits = '';
-            obj.TxOffset = 0;
-            obj.RxOffset = 0;
-            obj.comment = '';
-            obj.date = '';
-            obj.tdata = [];
+        function obj = MogData(varargin)
+            if nargin == 0
+                obj.ntrace = 0;
+                obj.nptsptrc = 0;
+                obj.rstepsz = 0;
+                obj.cunits = '';
+                obj.rnomfreq = 0;
+                obj.csurvmod = '';
+                obj.timec = 0;
+                obj.rdata = 0;
+                obj.timestp = 0;
+                obj.Tx_x = 0;
+                obj.Tx_y = 0;
+                obj.Tx_z = 0;
+                obj.Rx_x = 0;
+                obj.Rx_y = 0;
+                obj.Rx_z = 0;
+                obj.antennas = '';
+                obj.synthetique = 0;
+                obj.tunits = '';
+                obj.TxOffset = 0;
+                obj.RxOffset = 0;
+                obj.comment = '';
+                obj.date = '';
+                obj.tdata = [];
+            else
+                if ~isstruct(varargin{1})
+                    error('Invalid input')
+                end
+                s = varargin{1};
+                obj.ntrace = s.ntrace;
+                obj.nptsptrc = s.nptsptrc;
+                obj.rstepsz = s.rstepsz;
+                obj.cunits = s.cunits;
+                obj.rnomfreq = s.rnomfreq;
+                obj.csurvmod = s.csurvmod;
+                obj.timec = s.timec;
+                obj.rdata = s.rdata;
+                obj.timestp = s.timestp;
+                obj.Tx_x = s.Tx_x;
+                obj.Tx_y = s.Tx_y;
+                obj.Tx_z = s.Tx_z;
+                obj.Rx_x = s.Rx_x;
+                obj.Rx_y = s.Rx_y;
+                obj.Rx_z = s.Rx_z;
+                obj.antennas = s.antennas;
+                obj.synthetique = s.synthetique;
+                obj.tunits = s.tunits;
+                obj.TxOffset = s.TxOffset;
+                obj.RxOffset = s.RxOffset;
+                obj.comment = s.comment;
+                if isfield(s, 'data')
+                    obj.date = s.date
+                else
+                    obj.date = '';
+                end
+                if isfield(s, 'tdata')
+                    obj.tdata = s.tdata;
+                else
+                    obj.tdata = [];
+                end
+            end
         end
         
         % Make a copy of a handle object.

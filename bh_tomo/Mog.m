@@ -69,30 +69,120 @@ classdef Mog < handle
     end
     methods
         function obj = Mog(n)
-            obj.name = n;
-            obj.date = '';
-            obj.data = MogData.empty;
-            obj.av = [];        % no du tir aerien pre acquisition
-            obj.ap = [];        % no du tir aerien post acquisition
-            obj.Tx = 1;         % no du Tx
-            obj.Rx = 1;         % no du Rx
-            obj.tau_params = [];
-            obj.fw = [];                       % donnees filtrees par transf. ondelettes
-            obj.f_et = 1;
-            obj.amp_name_Ldc = {};
-            obj.type = 1;                      % X-hole (1) ou VRP (2)
-            obj.fac_dt = 1;
-            obj.user_fac_dt = 0;
-            obj.pruneParams.sautTx = 0;
-            obj.pruneParams.sautRx = 0;
-            obj.pruneParams.arrondi = 0;
-            obj.pruneParams.use_SB = 0;
-            obj.pruneParams.seuil_SB = 0;
-            obj.pruneParams.zmin = -1e99;
-            obj.pruneParams.zmax = 1e99;
-            obj.pruneParams.thetaMin = -90;
-            obj.pruneParams.thetaMax = 90;
-            obj.useAirShots = 0;
+            if isstring(n)
+                obj.name = n;
+                obj.date = '';
+                obj.data = MogData.empty;
+                obj.av = [];        % no du tir aerien pre acquisition
+                obj.ap = [];        % no du tir aerien post acquisition
+                obj.Tx = 1;         % no du Tx
+                obj.Rx = 1;         % no du Rx
+                obj.tau_params = [];
+                obj.fw = [];                       % donnees filtrees par transf. ondelettes
+                obj.f_et = 1;
+                obj.amp_name_Ldc = {};
+                obj.type = 1;                      % X-hole (1) ou VRP (2)
+                obj.fac_dt = 1;
+                obj.user_fac_dt = 0;
+                obj.pruneParams.sautTx = 0;
+                obj.pruneParams.sautRx = 0;
+                obj.pruneParams.arrondi = 0;
+                obj.pruneParams.use_SB = 0;
+                obj.pruneParams.seuil_SB = 0;
+                obj.pruneParams.zmin = -1e99;
+                obj.pruneParams.zmax = 1e99;
+                obj.pruneParams.thetaMin = -90;
+                obj.pruneParams.thetaMax = 90;
+                obj.useAirShots = 0;
+            elseif isstruct(n)
+                if isfield(n, 'name')
+                    obj.name = n.name;
+                elseif isfield(n, 'nom')
+                    obj.name = n.nom;
+                else
+                    error('Invalid input')
+                end
+                obj.data = MogData(n.data);
+                if ~isempty(n.av)
+                    obj.av = AirShot(n.av);
+                end
+                if ~isempty(n.ap)
+                    obj.ap = AirShot(n.ap);
+                end
+                obj.Tx = n.Tx;
+                obj.Rx = n.Rx;
+                obj.tt = n.tt;
+                obj.et = n.et;
+                if isfield(n, 'tt_done')
+                    obj.tt_done = n.tt_done;
+                elseif isfield(n, 'tt_fait')
+                    obj.tt_done = n.tt_fait;
+                end
+                if isfield(n, 'ttTx')
+                    obj.ttTx = n.ttTx;
+                end
+                if isfield(n, 'ttTx_done')
+                    obj.ttTx_done = n.ttTx_done;
+                elseif isfield(n, 'ttTx_fait')
+                    obj.ttTx_done = n.ttTx_fait;
+                end
+                obj.amp_tmin = n.amp_tmin;
+                obj.amp_tmax = n.amp_tmax;
+                if isfield(n, 'amp_done')
+                    obj.amp_done = n.amp_done;
+                elseif isfield(n, 'amp_fait')
+                    obj.amp_done = n.amp_fait;
+                end
+                obj.App = n.App;
+                obj.fcentroid = n.fcentroid;
+                obj.scentroid = n.scentroid;
+                obj.tauApp = n.tauApp;
+                obj.tauApp_et = n.tauApp_et;
+                obj.tauFce = n.tauFce;
+                obj.tauFce_et = n.tauFce_et;
+                obj.tauHyb = n.tauHyb;
+                obj.tauHyb_et = n.tauHyb_et;
+                obj.tau_params = n.tau_params;
+                obj.fw = n.fw;
+                obj.f_et = n.f_et;
+                if isfield(n, 'amp_name_Ldc')
+                    obj.amp_name_Ldc = n.amp_name_Ldc;
+                elseif isfield(n, 'amp_nom_Ldc')
+                    obj.amp_name_Ldc = n.amp_nom_Ldc;
+                end
+                obj.type = n.type;
+                obj.Tx_z_orig = n.Tx_z_orig;
+                obj.Rx_z_orig = n.Rx_z_orig;
+                obj.fac_dt = n.fac_dt;
+                obj.user_fac_dt = n.user_fac_dt;
+                obj.in = n.in;
+                obj.no_traces = n.no_traces;
+                if isfield(n, 'sorted')
+                    obj.sorted = n.sorted;
+                end
+                obj.TxCosDir = n.TxCosDir;
+                obj.RxCosDir = n.RxCosDir;
+                if isfield(n, 'pruneParams')
+                    obj.pruneParams = n.pruneParams;
+                else
+                    obj.pruneParams.sautTx = 0;
+                    obj.pruneParams.sautRx = 0;
+                    obj.pruneParams.arrondi = 0;
+                    obj.pruneParams.use_SB = 0;
+                    obj.pruneParams.seuil_SB = 0;
+                    obj.pruneParams.zmin = -1e99;
+                    obj.pruneParams.zmax = 1e99;
+                    obj.pruneParams.thetaMin = -90;
+                    obj.pruneParams.thetaMax = 90;
+                end
+                if isfield(n, 'useAirShots')
+                    obj.useAirShots = n.useAirShots;
+                else
+                    obj.useAirShots = 0;
+                end
+            else
+                error('Invalid input')
+            end
             obj.ID = Mog.getID();
         end
         function set.name(obj, n)

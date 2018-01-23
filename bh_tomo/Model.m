@@ -15,10 +15,63 @@ classdef Model < handle
     
     methods
         function obj = Model(n)
-            obj.name = n;
-            obj.grid = Grid.empty;
-            obj.tt_covar = CovarianceModel();
-            obj.amp_covar = CovarianceModel();
+            if isstring(n)
+                obj.name = n;
+                obj.grid = Grid.empty;
+                obj.tt_covar = CovarianceModel();
+                obj.amp_covar = CovarianceModel();
+            elseif isstruct(n)
+                if ~strcmp(n.type, 'normal')
+                    error('Super panel not handled')
+                end
+                if isfield(n, 'name')
+                    obj.name = n.name;
+                elseif isfield(n, 'nom')
+                    obj.name = n.nom;
+                else
+                    error('Invalid input')
+                end
+                obj.mogs = n.mogs;
+                if isfield(n, 'boreholes')
+                    obj.boreholes = n.boreholes;
+                elseif isfield(n, 'forages')
+                    obj.boreholes = n.forages;
+                end
+                obj.grid = Grid2D(n.grid.grx, n.grid.grz);
+                obj.grid.cont = Constraints(n.grid.cont);
+                obj.grid.Tx = n.grid.Tx;
+                obj.grid.Rx = n.grid.Rx;
+                obj.grid.TxCosDir = n.grid.TxCosDir;
+                obj.grid.RxCosDir = n.grid.RxCosDir;
+                obj.grid.bord = n.grid.bord;
+                if isfield(n.grid, 'Tx_Z_water')
+                    obj.grid.Tx_Z_water = n.grid.Tx_Z_water;
+                elseif isfield(n.grid, 'Tx_Z_eau')
+                    obj.grid.Tx_Z_water = n.grid.Tx_Z_eau;
+                end
+                if isfield(n.grid, 'Rx_Z_water')
+                    obj.grid.Rx_Z_water = n.grid.Rx_Z_water;
+                elseif isfield(n.grid, 'Rx_Z_eau')
+                    obj.grid.Rx_Z_water = n.grid.Rx_Z_eau;
+                end
+                obj.grid.in = n.grid.in;
+                obj.grid.flip = n.grid.flip;
+                if isfield(n.grid, 'borehole_x0')
+                    obj.grid.borehole_x0 = n.grid.borehole_x0;
+                elseif isfield(n.grid, 'forage_x0')
+                    obj.grid.borehole_x0 = n.grid.forage_x0;
+                end
+                obj.grid.x0 = n.grid.x0;
+                if isfield(n, 'tt_covar')
+                    obj.tt_covar = CovarianceModel(n.tt_covar);
+                end
+                if isfield(n, 'amp_covar')
+                    obj.amp_covar = CovarianceModel();
+                end
+                
+            else
+                error('Invalid input')
+            end
         end
         function set.name(obj, n)
             if ischar(n)

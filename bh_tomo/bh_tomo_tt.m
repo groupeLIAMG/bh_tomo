@@ -1228,7 +1228,7 @@ else
     rmin = 0.999*rmin;
 end
 rmax = 1.001*max(vapp);
-c=jet;%cmr;
+c=plasma;
 m = (size(c,1)-1)/(rmax-rmin);
 b = 1-rmin*m;
 p = m*vapp(1)+b;
@@ -1251,7 +1251,7 @@ hold off
 set(gca,'DataAspectRatio',[1 1 1],'YDir','normal')
 axis tight
 caxis([rmin rmax])
-colormap jet
+colormap plasma
 hb=colorbar;
 set(get(hb,'Title'),'String','App. Vel. (m/ns)')
 xlabel(h.str.s119)

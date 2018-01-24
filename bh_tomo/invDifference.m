@@ -47,8 +47,8 @@ else
 end
 ind = model.inv_res(p.ref_inv_no).tomo.no_trace;
 
-Tx = [model.grid.Tx(ind,1) model.grid.Tx(ind,3)];
-Rx = [model.grid.Rx(ind,1) model.grid.Rx(ind,3)];
+Tx = model.grid.Tx(ind,:);
+Rx = model.grid.Rx(ind,:);
 
 tomo.x = 0.5*(model.grid.grx(1:end-1)+model.grid.grx(2:end));
 tomo.z = 0.5*(model.grid.grz(1:end-1)+model.grid.grz(2:end));
@@ -130,9 +130,9 @@ for noIter=1:p.max_it
             disp(['Traveltime inversion - Raytracing, Iteration ',num2str(noIter)]); drawnow
         end
         if noIter==p.max_it
-            [tt,tomo.rays,L] = grid.raytrace(s,Tx,Rx);
+            [tt,tomo.rays,L] = model.grid.raytrace(s,Tx,Rx);
         else
-            [tt,~,L] = grid.raytrace(s,Tx,Rx);
+            [tt,~,L] = model.grid.raytrace(s,Tx,Rx);
         end
             
     else
@@ -151,7 +151,7 @@ for noIter=1:p.max_it
     end
             
     if p.saveInvData==1
-        tomo.invData(noIter).res = t2_obs(i2,1)-tt;
+        tomo.invData(noIter).res = t1_obs(i1,1)-tt;
         tomo.invData(noIter).s = s;
     end
 end
@@ -161,6 +161,7 @@ load(p.db_file,'mogs')
 tomo.L = L;
 tomo.no_trace = mogs(p.mog_no).no_traces;
 tomo.s = s;
+tomo.s0 = s0;
 tomo.date = mogs(p.mog_no).date;
 
 if p.saveInvData == 1

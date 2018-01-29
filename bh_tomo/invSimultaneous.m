@@ -58,7 +58,7 @@ else
 end
 
 
-[Dx,Dy,Dz] = model.grid.derivative(2);
+[Dx,Dy,Dz] = model.grid.derivative(p.Dorder);
 if isempty(Dy)
     Dy=0;
 end
@@ -188,7 +188,6 @@ for noIter=1:p.max_it
         tomo.invData(noIter).res = t1_obs(:,1)-tt1;
         tomo.invData(noIter).s = s1;
     end
-
 end
 
 load(p.db_file,'mogs')

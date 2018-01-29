@@ -58,7 +58,7 @@ else
     tomo.y = [];
 end
 
-[Dx,Dy,Dz] = model.grid.derivative(2);
+[Dx,Dy,Dz] = model.grid.derivative(p.Dorder);
 if isempty(Dy)
     Dy=0;
 end

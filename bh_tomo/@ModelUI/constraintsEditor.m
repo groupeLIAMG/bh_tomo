@@ -297,6 +297,10 @@ uiwait(f)
             return
         end
         val = str2double(hvalueEdit.String);
+        if hprop.Value == 3 && val == 0
+            % for reservoir
+            val = NaN;
+        end
         if ~isnumeric(val)
             warndlg('Property value should be numeric')
             return            
@@ -310,6 +314,7 @@ uiwait(f)
             warndlg('Variance value should be numeric')
             return            
         end
+        
         axes(haxes)
         b=1;
         while b==1

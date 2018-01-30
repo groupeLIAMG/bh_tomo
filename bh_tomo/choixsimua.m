@@ -1,6 +1,6 @@
 function [diff1,diff2,diff1_min,diff2_min]=choixsimua(L,S_sim,dt,c0)
 % [diff1,diff2,diff1_min,diff2_min]=choixsimua(L,S_sim,dt,c0)
-  
+
 % Copyright (C) 2005 Erwan Gloaguen
 %
 % This program is free software; you can redistribute it and/or modify
@@ -12,18 +12,18 @@ function [diff1,diff2,diff1_min,diff2_min]=choixsimua(L,S_sim,dt,c0)
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 % GNU General Public License for more details.
-% 
+%
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <http://www.gnu.org/licenses/>.
-% 
-% 
+%
+%
 
 diff1 = zeros(1, size(S_sim,2));
 diff2 = zeros(1, size(S_sim,2));
 if isempty( c0 )
-	w = 1;
+    w = 1;
 else
-	w = max(c0)./c0;
+    w = max(c0)./c0;
 end
 
 nCells = size(L,2)/2;
@@ -32,14 +32,14 @@ Lx = L(:,1:nCells);
 Lz = L(:,(1+nCells):end);
 
 for i=1:size(S_sim,2)
-	xi = S_sim((1+nCells):end,i);
-	s = S_sim(1:nCells, i);
-	t = Lx.^2 + Lz.^2.*kron(ones(nt,1),xi'.^2);
-	t = kron(ones(nt,1),s') .* sqrt(t);
-	t = sum(t,2);
-
-	diff1(i)=sum(w.*(abs(t-dt)));
-  diff2(i)=sum(w.*(t-dt).^2);  
+    xi = S_sim((1+nCells):end,i);
+    s = S_sim(1:nCells, i);
+    t = Lx.^2 + Lz.^2.*kron(ones(nt,1),xi'.^2);
+    t = kron(ones(nt,1),s') .* sqrt(t);
+    t = sum(t,2);
+    
+    diff1(i)=sum(w.*(abs(t-dt)));
+    diff2(i)=sum(w.*(t-dt).^2);
 end
 
 diff1_min=find(diff1==min(diff1));

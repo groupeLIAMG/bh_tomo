@@ -10,6 +10,7 @@ function s = read_segy(segyfile, varargin)
 %                - indices are given as a vector such as [3 6 8:9]
 %                - names are separated by commas such as 'sx,sy,gx,gy' (see
 %                  read_segy_tr_headers for details)
+%                - names can also be given in a cell array
 %    dict (optional)  : custom dictionary for trace header (cell array
 %                       of strings)
 %    word_length (optional)  : word length in bytes for trace header
@@ -62,3 +63,5 @@ else
     s.th = read_segy_tr_headers(segyfile, traces, fields, dict, word_length);
 end
 s.data = read_segy_data(segyfile, traces);
+
+end

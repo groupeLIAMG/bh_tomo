@@ -309,7 +309,7 @@ function update_tout(hObject, eventdata, handles)
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 set(handles.trace_traite,'String',num2str(h.no_trace))
 if h.pick_et(h.no_trace) ~= -1
-    set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace)),' ± ',num2str(h.pick_et(h.no_trace))])
+    set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace)),' ï¿½ ',num2str(h.pick_et(h.no_trace))])
 else
     set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace))])
 end
@@ -328,9 +328,9 @@ if get(handles.checkbox_pickTx,'Value')==0
     if get(handles.filtre_ondelette,'Value')==1
         plot(handles.trace_simple, mog.data.timestp, detrend_rad(mog.data.rdata(:,h.no_trace))-dc, 'color',[0.8 0.8 0.8])
         hold(handles.trace_simple, 'on')
-        plot(handles.trace_simple, mog.data.timestp, h.proc_data(:,h.no_trace)-dc)
+        plot(handles.trace_simple, h.timestp, h.proc_data(:,h.no_trace)-dc)
     else
-        plot(handles.trace_simple, mog.data.timestp, h.proc_data(:,h.no_trace)-dc)
+        plot(handles.trace_simple, h.timestp, h.proc_data(:,h.no_trace)-dc)
         hold(handles.trace_simple, 'on')
     end
     if ~isempty(mog.data.tdata)
@@ -376,9 +376,9 @@ else
     if get(handles.filtre_ondelette,'Value')==1
         plot(handles.trace_simple, mog.data.timestp, detrend_rad(mog.data.rdata(:,h.no_trace))-dc, 'color',[0.8 0.8 0.8],'LineStyle','-.')
         hold(handles.trace_simple, 'on')
-        plot(handles.trace_simple, mog.data.timestp, h.proc_data(:,h.no_trace)-dc,'-.')
+        plot(handles.trace_simple, h.timestp, h.proc_data(:,h.no_trace)-dc,'-.')
     else
-        plot(handles.trace_simple, mog.data.timestp, h.proc_data(:,h.no_trace)-dc,'-.')
+        plot(handles.trace_simple, h.timestp, h.proc_data(:,h.no_trace)-dc,'-.')
         hold(handles.trace_simple, 'on')
     end
     m1 = max(abs(h.proc_data(:,h.no_trace)-dc));
@@ -465,7 +465,7 @@ elseif (get(handles.radiobutton_ap,'Value')==1)
   out = false(size(ind));
 end
 
-imagesc(no_traces(ind), mog.data.timestp, h.proc_data(:,ind),'Parent',handles.traces_contigues)
+imagesc(no_traces(ind), h.timestp, h.proc_data(:,ind),'Parent',handles.traces_contigues)
 caxis(handles.traces_contigues, h.cminmax)
 ylabel(handles.traces_contigues, [h.str.s22,' [',mog.data.tunits,']'])
 xlabel(handles.traces_contigues, h.str.s24)
@@ -611,7 +611,11 @@ elseif (get(handles.radiobutton_av,'Value')==1)
     Rx_x = av.data.Rx_x(h.no_trace);
     Rx_y = av.data.Rx_y(h.no_trace);
     Rx_z = av.data.Rx_z(h.no_trace);
-    Tx_d = av.d_TxRx(h.no_trace);
+    if length(av.d_TxRx)>1
+        Tx_d = av.d_TxRx(h.no_trace);
+    else
+        Tx_d = av.d_TxRx;
+    end
 	in = av.in;
 elseif (get(handles.radiobutton_ap,'Value')==1)
     ap = getappdata(handles.fig_bh_tomo_tt, 'ap');
@@ -621,7 +625,11 @@ elseif (get(handles.radiobutton_ap,'Value')==1)
     Rx_x = ap.data.Rx_x(h.no_trace);
     Rx_y = ap.data.Rx_y(h.no_trace);
     Rx_z = ap.data.Rx_z(h.no_trace);
-    Tx_d = ap.d_TxRx(h.no_trace);
+    if length(ap.d_TxRx)>1
+        Tx_d = ap.d_TxRx(h.no_trace);
+    else
+        Tx_d = ap.d_TxRx;
+    end
 	in = ap.in;
 end
 texte{1} = '';
@@ -708,7 +716,7 @@ while pointe_actif
 			update_images(hObject, eventdata, handles, tt, et)
         end
         if et ~= -1
-            set(handles.text_tt_info,'String',['Picked Time: ',num2str(tt),' ± ',num2str(et)])
+            set(handles.text_tt_info,'String',['Picked Time: ',num2str(tt),' ï¿½ ',num2str(et)])
         else
             set(handles.text_tt_info,'String',['Picked Time: ',num2str(tt)])
         end
@@ -1220,27 +1228,30 @@ else
     rmin = 0.999*rmin;
 end
 rmax = 1.001*max(vapp);
-c=jet;%cmr;
+c=plasma;
 m = (size(c,1)-1)/(rmax-rmin);
 b = 1-rmin*m;
 p = m*vapp(1)+b;
 couleur = interp1(c,p);
 
+Tx_x = mog.data.Tx_x(ind);
+Tx_z = mog.data.Tx_z(ind);
+Rx_x = mog.data.Rx_x(ind);
+Rx_z = mog.data.Rx_z(ind);
+
 n=1;
-plot([mog.data.Tx_x(n) mog.data.Rx_x(n)],...
-    [mog.data.Tx_z(n) mog.data.Rx_z(n)], 'Color',couleur)
+plot([Tx_x(n) Rx_x(n)], [Tx_z(n) Rx_z(n)], 'Color',couleur)
 hold on    
 for n=2:length(no)
     p = m*vapp(n)+b;
     couleur = interp1(c,p);
-    plot([mog.data.Tx_x(n) mog.data.Rx_x(n)],...
-        [mog.data.Tx_z(n) mog.data.Rx_z(n)], 'Color',couleur)
+    plot([Tx_x(n) Rx_x(n)], [Tx_z(n) Rx_z(n)], 'Color',couleur)
 end
 hold off
 set(gca,'DataAspectRatio',[1 1 1],'YDir','normal')
 axis tight
 caxis([rmin rmax])
-colormap jet
+colormap plasma
 hb=colorbar;
 set(get(hb,'Title'),'String','App. Vel. (m/ns)')
 xlabel(h.str.s119)
@@ -1294,12 +1305,14 @@ end
 if get(hObject,'Value')==0
 	if get(handles.radiobutton_data,'Value')==1
 		h.proc_data = detrend_rad(mog.data.rdata);
+        h.timestp = mog.data.timestp;
 	end
 else
   if isempty( mog.fw )
     mog.fw = filtrage_wavelet2(mog.data.rdata);
   end
   h.proc_data = detrend_rad(mog.fw);
+  h.timestp = mog.data.timestp;
 end
 cmin=-max(max(abs(h.proc_data)));
 cmax= -cmin;
@@ -1351,7 +1364,8 @@ set(handles.trace_traite,'String',num2str(h.no_trace))
 off = [handles.radiobutton_data,handles.radiobutton_ap];
 mutual_exclude(off)
 h.proc_data = detrend_rad(av.data.rdata);
-cmin=-max(max(abs(h.proc_data)));
+h.timestp = av.data.timestp;
+cmin= -max(max(abs(h.proc_data)));
 cmax= -cmin;
 h.cminmax = [cmin cmax];
 setappdata(handles.fig_bh_tomo_tt, 'h', h)
@@ -1395,6 +1409,7 @@ set(handles.trace_traite,'String',num2str(h.no_trace))
 off = [handles.radiobutton_data,handles.radiobutton_av];
 mutual_exclude(off)
 h.proc_data = detrend_rad(ap.data.rdata);
+h.timestp = ap.data.timestp;
 cmin=-max(max(abs(h.proc_data)));
 cmax= -cmin;
 h.cminmax = [cmin cmax];
@@ -1442,6 +1457,7 @@ off = [handles.radiobutton_av,handles.radiobutton_ap];
 mutual_exclude(off)
 
 h.proc_data = detrend_rad(mog.data.rdata);
+h.timestp = mog.data.timestp;
 cmin=-max(max(abs(h.proc_data)));
 cmax= -cmin;
 h.cminmax = [cmin cmax];
@@ -1554,7 +1570,7 @@ while pointe_actif==1
 	setappdata(handles.fig_bh_tomo_tt, 'h', h)
 	update_tout(hObject, eventdata, handles)
     if h.pick_et(h.no_trace) ~= -1
-        set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace)),' ± ',num2str(h.pick_et(h.no_trace))])
+        set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace)),' ï¿½ ',num2str(h.pick_et(h.no_trace))])
     else
         set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace))])
     end

@@ -1070,7 +1070,7 @@ no=no(ind);
 fac_f = 1.0;
 fac_t = 1.0;
 if strcmp(mog.data.tunits,'ns')
-    % radar: freq nominale donnée en MHz
+    % radar: freq nominale donnï¿½e en MHz
     fac_f = 10^6;
     fac_t = 10^-9;
 elseif strcmp(mog.data.tunits,'ms')
@@ -1087,7 +1087,7 @@ freq = mog.data.rnomfreq * fac_f;
 dt = mog.data.timec * fac_t;
 
 traces = detrend(mog.data.rdata(:, no));
-% bruit pris sur dernière 20 ns
+% bruit pris sur derniï¿½re 20 ns
 win_snr = round(20/mog.data.timec);
 SB = data_select(traces, freq, dt, win_snr);
 

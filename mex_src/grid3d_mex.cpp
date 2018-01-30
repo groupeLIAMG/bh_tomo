@@ -30,6 +30,7 @@
 #include "Grid3Drcfs.h"
 
 using namespace std;
+using namespace ttcr;
 
 typedef Grid3Drcfs<double,uint32_t> grid;
 

@@ -24,7 +24,7 @@ w = warcone(t,fdom2,0,m,n);
 xc = xcorr(trace,w)';
 xc = xc(ne:end) * (1/max(abs(xc(ne:end))));
 %save toto xc
-[imin,imax] = extr(xc);
+[~,imax] = extr(xc);
 i2max = xc(imax) > seuil_selection;
 imax = imax(i2max);
 if isempty(imax)
@@ -44,6 +44,9 @@ if idebut-npt > 1
 	taper(idebut-npt:idebut-1) = ct;
 end
 taper(ifin+1:ifin+npt) = fliplr(ct);
-
+if numel(trace) ~= numel(taper)
+    out = trace;
+    return
+end
 out = trace.*taper;
 

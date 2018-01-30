@@ -8,6 +8,10 @@ ray-based 2D and 3D tomography software package.
 Copy the files in the bh_tomo directory somewhere in your MATLABPATH or add
 the bh_tomo directory to your MATLABPATH.
 
+### Compatibility
+
+This version requires Matlab 2015b and onward.
+
 ### MEX files
 
 You might need to compile mex files if not already available for
@@ -20,6 +24,7 @@ mex -O -largeArrayDims Lsr2da.c
 mex -O -largeArrayDims ttcr2d.cpp
 mex -O -largeArrayDims ttcr2da.cpp
 mex -O -largeArrayDims ttcr2daa.cpp
+mex -O -largeArrayDims grid2d_mex.cpp
 mex -O -largeArrayDims grid3d_mex.cpp
 mex -O -largeArrayDims read_segy_b_header.c
 mex -O -largeArrayDims read_segy_tr_headers.c

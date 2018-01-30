@@ -1,5 +1,8 @@
 # bh_tomo
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](./01_LICENSE.txt)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1162858.svg)](https://doi.org/10.5281/zenodo.1162858)
+
 bh_tomo is an open source borehole georadar/seismic data processing and
 ray-based 2D and 3D tomography software package.
 

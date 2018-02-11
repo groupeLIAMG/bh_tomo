@@ -24,9 +24,6 @@ cd /path/to/bh_tomo/mex_src    ( where the source code is )
 mex -O -largeArrayDims Lsr2d.c
 mex -O -largeArrayDims Lsr3d.c
 mex -O -largeArrayDims Lsr2da.c
-mex -O -largeArrayDims ttcr2d.cpp
-mex -O -largeArrayDims ttcr2da.cpp
-mex -O -largeArrayDims ttcr2daa.cpp
 mex -O -largeArrayDims grid2d_mex.cpp
 mex -O -largeArrayDims grid3d_mex.cpp
 mex -O -largeArrayDims read_segy_b_header.c

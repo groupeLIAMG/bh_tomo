@@ -15,7 +15,7 @@ classdef Model < handle
     
     methods
         function obj = Model(n)
-            if isstring(n)
+            if isstring(n) || ischar(n)
                 obj.name = n;
                 obj.grid = Grid.empty;
                 obj.tt_covar = CovarianceModel();

@@ -16,7 +16,7 @@ classdef AirShots < handle
     
     methods
         function obj = AirShots(n)
-            if isstring(n)
+            if isstring(n) || ischar(n)
                 obj.name = n;
                 obj.data = MogData.empty;
             elseif isstruct(n)

@@ -19,7 +19,7 @@ classdef Borehole < handle
     
     methods
         function obj = Borehole(n)
-            if isstring(n)
+            if isstring(n) || ischar(n)
                 obj.name = n;
                 obj.X = 0;
                 obj.Y = 0;

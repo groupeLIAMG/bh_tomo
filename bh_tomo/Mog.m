@@ -69,7 +69,7 @@ classdef Mog < handle
     end
     methods
         function obj = Mog(n)
-            if isstring(n)
+            if isstring(n) || ischar(n)
                 obj.name = n;
                 obj.date = '';
                 obj.data = MogData.empty;

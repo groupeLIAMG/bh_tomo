@@ -79,8 +79,8 @@ classdef MogData < handle
                 obj.TxOffset = s.TxOffset;
                 obj.RxOffset = s.RxOffset;
                 obj.comment = s.comment;
-                if isfield(s, 'data')
-                    obj.date = s.date
+                if isfield(s, 'date')
+                    obj.date = s.date;
                 else
                     obj.date = '';
                 end

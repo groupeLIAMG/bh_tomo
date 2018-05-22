@@ -385,7 +385,7 @@ classdef Mog < handle
                     errorbar(d,times*fac,std_times,'o')
                     xlabel('Distance')
                     ylabel('Time')
-                    title('After \Delta t corection')
+                    title('After \Delta t correction')
                     text(d(2), b(1), ['t_0 at ',num2str(t0*fac)])
                     ylim=get(gca,'YLim');
                     ylim(1)=0;

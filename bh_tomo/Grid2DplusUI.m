@@ -350,27 +350,30 @@ classdef Grid2DplusUI <handle
 
             z0 = obj.grid.x0(3);
             [az,dip] = obj.get_azimuth_dip();
+            l = 0;
             for n=1:obj.data.n_planes
                 no_f = obj.data.order_boreholes(n);
                 no_plan = obj.data.order_planes(n);
                 ind = obj.data.Tx_no_plan==no_plan;
                 oo = [obj.data.boreholes(no_f).X obj.data.boreholes(no_f).Y 0];
+
                 obj.grid.Tx(ind,:) = Grid.transl_rotat(obj.data.Tx(ind,:), oo,...
                     az(no_plan), dip(no_plan));
                 obj.grid.TxCosDir(ind,:) = Grid.transl_rotat(obj.data.TxCosDir(ind,:),...
                     [0 0 0], az(no_plan), dip(no_plan));
                 if n>1
-                    obj.grid.Tx(ind,1) = obj.grid.Tx(ind,1)+obj.data.planes(n-1).l;
+                    l = l + obj.data.planes(n-1).l;
+                    obj.grid.Tx(ind,1) = obj.grid.Tx(ind,1)+l;
                 end
                 
-                %     figure
-                %     subplot(121)
-                %     plot(obj.data.Tx(ind,1),obj.data.Tx(ind,3),'ro')
-                %     hold on
-                %
-                %     subplot(122)
-                %     plot(obj.grid.Tx(ind,1),obj.grid.Tx(ind,3),'ro')
-                %     hold on
+%                 figure
+%                 subplot(121)
+%                 plot(obj.data.Tx(ind,1),obj.data.Tx(ind,3),'ro')
+%                 hold on
+%                 
+%                 subplot(122)
+%                 plot(obj.grid.Tx(ind,1),obj.grid.Tx(ind,3),'ro')
+%                 hold on
                 
                 ind = obj.data.Rx_no_plan==no_plan;
                 obj.grid.Rx(ind,:) = Grid.transl_rotat(obj.data.Rx(ind,:), oo,...
@@ -378,16 +381,16 @@ classdef Grid2DplusUI <handle
                 obj.grid.RxCosDir(ind,:) = Grid.transl_rotat(obj.data.RxCosDir(ind,:),...
                     [0 0 0], az(no_plan), dip(no_plan));
                 if n>1
-                    obj.grid.Rx(ind,1) = obj.grid.Rx(ind,1)+obj.data.planes(n-1).l;
+                    obj.grid.Rx(ind,1) = obj.grid.Rx(ind,1)+l;
                 end
                 
-                %     subplot(121)
-                %     plot(obj.data.Rx(ind,1),obj.data.Rx(ind,3),'x')
-                %     hold off
-                %
-                %     subplot(122)
-                %     plot(obj.grid.Rx(ind,1),obj.grid.Rx(ind,3),'x')
-                %     hold off
+%                 subplot(121)
+%                 plot(obj.data.Rx(ind,1),obj.data.Rx(ind,3),'x')
+%                 hold off
+% 
+%                 subplot(122)
+%                 plot(obj.grid.Rx(ind,1),obj.grid.Rx(ind,3),'x')
+%                 hold off
             end
             obj.grid.Tx(:,3) = obj.grid.Tx(:,3);
             obj.grid.Rx(:,3) = obj.grid.Rx(:,3);

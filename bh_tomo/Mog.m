@@ -211,7 +211,7 @@ classdef Mog < handle
                 airBefore = air(obj.av);
                 airAfter = air(obj.ap);
                 [t0,fac_dt_av,fac_dt_ap] = obj.corr_t0(length(obj.tt), ...
-                    airBefore, airAfter, true);
+                    airBefore, airAfter);
             end
             if ~isempty(obj.av), air( obj.av ).fac_dt = fac_dt_av; end
             if ~isempty(obj.ap), air( obj.ap ).fac_dt = fac_dt_ap; end
@@ -263,11 +263,52 @@ classdef Mog < handle
             obj.pruneParams.zmin = min([obj.data.Tx_z obj.data.Rx_z]);
             obj.pruneParams.zmax = max([obj.data.Tx_z obj.data.Rx_z]);
         end
+        function sort_by_Tx(obj)
+            uTx_z = sort(unique(obj.Tx_z_orig));
+            ind = zeros(1, obj.data.ntrace);
+            start = 0;
+            for n=1:numel(uTx_z)
+                nos = find(uTx_z(n) == obj.Tx_z_orig);
+                nfound = numel(nos);
+                ind(start+(1:nfound)) = nos;
+                start = start+nfound;
+            end
+            obj.tt = obj.tt(ind);
+            obj.et = obj.et(ind);
+            obj.tt_done = obj.tt_done(ind);
+            obj.ttTx = obj.ttTx(ind);
+            obj.ttTx_done = obj.ttTx_done(ind);
+            obj.amp_tmin = obj.amp_tmin(ind);
+            obj.amp_tmax = obj.amp_tmax(ind);
+            obj.amp_done = obj.amp_done(ind);
+            obj.App = obj.App(ind);
+            obj.fcentroid = obj.fcentroid(ind);
+            obj.scentroid = obj.scentroid(ind);
+            obj.tauApp = obj.tauApp(ind);
+            obj.tauApp_et = obj.tauApp_et(ind);
+            obj.tauFce = obj.tauFce(ind);
+            obj.tauFce_et = obj.tauFce_et(ind);
+            obj.tauHyb = obj.tauHyb(ind);
+            obj.tauHyb_et = obj.tauHyb_et(ind);
+            obj.Tx_z_orig = obj.Tx_z_orig(ind);
+            obj.Rx_z_orig = obj.Rx_z_orig(ind);
+            obj.in = obj.in(ind);
+            obj.no_traces = obj.no_traces(ind);
+            obj.TxCosDir = obj.TxCosDir(ind, :);
+            obj.RxCosDir = obj.RxCosDir(ind, :);
+            obj.data.rdata = obj.data.rdata(:, ind);
+            obj.data.Tx_x = obj.data.Tx_x(ind);
+            obj.data.Tx_y = obj.data.Tx_y(ind);
+            obj.data.Tx_z = obj.data.Tx_z(ind);
+            obj.data.Rx_x = obj.data.Rx_x(ind);
+            obj.data.Rx_y = obj.data.Rx_y(ind);
+            obj.data.Rx_z = obj.data.Rx_z(ind);
+        end
     end
     
     methods (Access=private)
         function [t0,fac_dt_av,fac_dt_ap] = corr_t0(obj,ndata,before,after,varargin)
-            if nargin>=4
+            if nargin>=5
                 show = varargin{1};
             else
                 show = false;

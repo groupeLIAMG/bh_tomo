@@ -685,7 +685,7 @@ hcmax = uicontrol('Style','edit',...
     'Callback',@setClim,...
     'Parent',pfig);
 
-m = {'plasma','magma','inferno','viridis','cmr','polarmap','parula','jet',...
+m = {'viridis','plasma','magma','inferno','cmr','polarmap','parula','jet',...
     'hsv','hot','cool','autumn','spring','winter',...
     'summer','gray','bone','copper','pink','prism','flag','colorcube','lines'};
 
@@ -820,7 +820,9 @@ hdeltamaxLSQR = uicontrol('Style','edit',...
 haxes1 = axes('Units','points','Parent',f,'Visible','on');
 haxes2 = axes('Units','points','Parent',f,'Visible','off');
 haxes3 = axes('Units','points','Parent',f,'Visible','off');
-
+colormap(haxes1, 'viridis')
+colormap(haxes2, 'viridis')
+colormap(haxes3, 'viridis')
 
 f.Visible = 'on';
 

@@ -877,6 +877,7 @@ f.Visible = 'on';
         end
         hlistMog.String = mname;
         hlistMog.Max = numel(model.mogs);
+        hlistMog.Value = 1:numel(model.mogs);
         hpanelName.String = [model.name,' - ',num2str(model.grid.getNumberOfCells()),...
             ' Cells'];
         

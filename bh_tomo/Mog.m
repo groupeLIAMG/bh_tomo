@@ -396,7 +396,7 @@ classdef Mog < handle
                     plot([0;d],b(1)*[0;d]+b(2),'k')
                     xlabel('Distance')
                     ylabel('Time')
-                    title([tir.name,' - correction factor: ',num2str(fac)])
+                    title([tir.name,' - correction factor: ',num2str(fac)], 'Interpreter','none')
                     text(d(2), b(1), ['t_0 at ',num2str(t0)])
                     hold off
                 end
@@ -414,7 +414,7 @@ classdef Mog < handle
                     errorbar(d,times,std_times,'o')
                     xlabel('Distance')
                     ylabel('Time')
-                    title([tir.name,' - correction factor: ',num2str(fac)])
+                    title([tir.name,' - correction factor: ',num2str(fac)], 'Interpreter','none')
                     text(d(2), b(1), ['t_0 at ',num2str(t0)])
                     ylim=get(gca,'YLim');
                     ylim(1)=0;

@@ -438,7 +438,7 @@ if (get(handles.radiobutton_data,'Value')==1)
 	ind = false(size(mog.data.Tx_z));
 	ind(h.no_trace)=true;
 	nn=h.no_trace+1;
-	while  nn<=mog.data.ntrace && ...
+	while nn<=mog.data.ntrace && ...
 			   mog.data.Tx_x(nn) == mog.data.Tx_x(h.no_trace)
 	  ind(nn)=true;
 	  nn=nn+1;

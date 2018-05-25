@@ -91,6 +91,7 @@ classdef Grid3DUI < handle
             grid.TxCosDir = data.TxCosDir;
             grid.RxCosDir = data.RxCosDir;
             grid.type = '3D';
+            grid.nthreads = data.nthreads;
         end
     end
 
@@ -192,6 +193,26 @@ classdef Grid3DUI < handle
                 'Callback',@obj.inputEdit,...
                 'Parent',obj.handles.params);
 
+            obj.handles.numCores = uicontrol('Style','text',...
+                'String','Number of Cores',...
+                'FontSize',fs,...
+                'Units','points',...
+                'HorizontalAlignment','right',...
+                'Parent',obj.handles.params);
+            
+            ncores = feature('NumCores');
+            cnc = cell(1, ncores);
+            for n=1:ncores
+                cnc{n} = sprintf('%d', n);
+            end
+            obj.handles.ncoreList = uicontrol('Style','popupmenu',...
+                'String',cnc,...
+                'Value',obj.grid.nthreads,...
+                'FontSize',fs,...
+                'Units','points',...
+                'Callback',@obj.inputEdit,...
+                'Parent',obj.handles.params);
+            
 
             obj.axPanel = uipanel(f,'Title','Grid View',...
                 'FontSize',fs+1,...
@@ -246,6 +267,9 @@ classdef Grid3DUI < handle
             obj.handles.nzp.Position = [hBorder+2*hSize+2*hSpace height-vBorderTop-3*vSize-2*vSpace hSize vSize];
             obj.handles.dz.Position = [hBorder+3*hSize+3*hSpace height-vBorderTop-3*vSize-2*vSpace hSize vSize];
 
+            obj.handles.numCores.Position = [2*hBorder height-vBorderTop-5*vSize-4*vSpace 2*hSize vSize];
+            obj.handles.ncoreList.Position = [3*hBorder+2*hSize height-vBorderTop-5*vSize-4*vSpace hSize vSize];
+
             obj.handles.params.Visible = 'on';
         end
         function resizeAx(obj,varargin)
@@ -271,6 +295,7 @@ classdef Grid3DUI < handle
             obj.grid.bord(4) = str2double( obj.handles.nyp.String );
             obj.grid.bord(5) = str2double( obj.handles.nzm.String );
             obj.grid.bord(6) = str2double( obj.handles.nzp.String );
+            obj.grid.nthreads = obj.handles.ncoreList.Value;
 
             obj.updateGrid()
 

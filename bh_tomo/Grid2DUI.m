@@ -80,6 +80,7 @@ classdef Grid2DUI < handle
             grid.borehole_x0 = 1;
             grid.x0 = [data.boreholes(1).X data.boreholes(1).Y data.boreholes(1).Z];
             grid.type = '2D';
+            grid.nthreads = data.nthreads;
             uTx = unique(data.Tx(data.in,:), 'rows');
             uRx = unique(data.Rx(data.in,:), 'rows');
 
@@ -220,6 +221,26 @@ classdef Grid2DUI < handle
                 'Callback',@obj.inputEdit,...
                 'Parent',obj.handles.params);
 
+            obj.handles.numCores = uicontrol('Style','text',...
+                'String','Nb of Cores',...
+                'FontSize',fs,...
+                'Units','points',...
+                'HorizontalAlignment','right',...
+                'Parent',obj.handles.params);
+            
+            ncores = feature('NumCores');
+            cnc = cell(1, ncores);
+            for n=1:ncores
+                cnc{n} = sprintf('%d', n);
+            end
+            obj.handles.ncoreList = uicontrol('Style','popupmenu',...
+                'String',cnc,...
+                'Value',obj.grid.nthreads,...
+                'FontSize',fs,...
+                'Units','points',...
+                'Callback',@obj.inputEdit,...
+                'Parent',obj.handles.params);
+            
             obj.handles.showFit = uicontrol('Style','pushbutton',...
                 'String','Adjustment of Best-Fit Plane',...
                 'FontSize',fs,...
@@ -276,7 +297,9 @@ classdef Grid2DUI < handle
             obj.handles.x0y.Position = [hBorder+2*hSize+2*hSpace height-vBorderTop-4*vSize-2*vSpace-2*vBorder hSize vSize];
             obj.handles.x0z.Position = [hBorder+3*hSize+3*hSpace height-vBorderTop-4*vSize-2*vSpace-2*vBorder hSize vSize];
 
-            obj.handles.flip.Position = [1.5*hSize 2*vBorder+vSize 2*hSize vSize];
+            obj.handles.flip.Position = [hBorder 2*vBorder+vSize 1.75*hSize vSize];
+            obj.handles.numCores.Position = [2*hBorder+1.75*hSize 2*vBorder+vSize 1.25*hSize vSize];
+            obj.handles.ncoreList.Position = [2.5*hBorder+3*hSize 2*vBorder+vSize 0.9*hSize vSize];
             obj.handles.showFit.Position = [hSize vBorder 3*hSize vSize];
 
             obj.handles.params.Visible = 'on';
@@ -306,6 +329,7 @@ classdef Grid2DUI < handle
             obj.handles.x0x.String = num2str(obj.grid.x0(1));
             obj.handles.x0y.String = num2str(obj.grid.x0(2));
             obj.handles.x0z.String = num2str(obj.grid.x0(3));
+            obj.grid.nthreads = obj.handles.ncoreList.Value;
 
             obj.updateProj();
 
@@ -327,10 +351,10 @@ classdef Grid2DUI < handle
             obj.grid.TxCosDir = Grid.transl_rotat(obj.data.TxCosDir, [0 0 0], az, dip);
             obj.grid.RxCosDir = Grid.transl_rotat(obj.data.RxCosDir, [0 0 0], az, dip);
             if ~isnan(obj.data.Tx_Z_water(1,1))
-                obj.grid.Tx_Z_water = Grid.transl_rotat(obj.data.Tx_Z_water, origine, az, dip);
+                obj.grid.Tx_Z_water = Grid.transl_rotat(obj.data.Tx_Z_water, obj.grid.x0, az, dip);
             end
             if ~isnan(obj.data.Rx_Z_water(1,1))
-                obj.grid.Rx_Z_water = Grid.transl_rotat(obj.data.Rx_Z_water, origine, az, dip);
+                obj.grid.Rx_Z_water = Grid.transl_rotat(obj.data.Rx_Z_water, obj.grid.x0, az, dip);
             end
             obj.grid.in = obj.data.in;
 

@@ -73,7 +73,6 @@
 classdef Grid3D < Grid
     properties (Access = private, Hidden = true)
         mexObj   % Handle to the underlying C++ class instance
-        nthreads
     end
     methods
         % Constructor - Create a new C++ class instance
@@ -127,7 +126,8 @@ classdef Grid3D < Grid
                         abs(grid3d_mex('get_dz', obj.mexObj)-(obj.grz(2)-obj.grz(1)))>100*eps || ...
                         abs(grid3d_mex('get_nx', obj.mexObj)-(length(obj.grx)-1))>100*eps || ...
                         abs(grid3d_mex('get_ny', obj.mexObj)-(length(obj.gry)-1))>100*eps || ...
-                        abs(grid3d_mex('get_nz', obj.mexObj)-(length(obj.grz)-1))>100*eps
+                        abs(grid3d_mex('get_nz', obj.mexObj)-(length(obj.grz)-1))>100*eps || ...
+                        grid3d_mex('get_nthreads', obj.mexObj) ~= obj.nthreads
 
                     % delete old instance
                     grid3d_mex('delete', obj.mexObj);

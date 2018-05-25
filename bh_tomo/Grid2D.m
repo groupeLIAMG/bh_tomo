@@ -9,7 +9,6 @@ classdef Grid2D < Grid
     end
     properties (Access = private, Hidden = true)
         mexObj   % Handle to the underlying C++ class instance
-        nthreads
         nsnx
         nsnz
     end
@@ -75,9 +74,10 @@ classdef Grid2D < Grid
                         abs(grid2d_mex('get_dz', obj.mexObj)-(obj.grz(2)-obj.grz(1)))>100*eps || ...
                         abs(grid2d_mex('get_nx', obj.mexObj)-(length(obj.grx)-1))>100*eps || ...
                         abs(grid2d_mex('get_nz', obj.mexObj)-(length(obj.grz)-1))>100*eps || ...
-                        strcmp(grid2d_mex('get_type', obj.mexObj), type)~=1
+                        strcmp(grid2d_mex('get_type', obj.mexObj), type)~=1 || ...
+                        grid2d_mex('get_nthreads', obj.mexObj) ~= obj.nthreads
 
-                    % (in bh_tomo, we should not get here)
+                    % (in bh_tomo, we should not get here unless nthreads has changed)
 
                     % delete old instance
                     grid2d_mex('delete', obj.mexObj);

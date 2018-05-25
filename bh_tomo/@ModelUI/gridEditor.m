@@ -357,6 +357,8 @@ uiwait(f)
         data.RxCosDir = [];
         data.Tx_Z_water = [];
         data.Rx_Z_water = [];
+        ncores = feature('NumCores');
+        data.nthreads = ncores-1;
         for nn=model.mogs
             data.in = [data.in; mogs(nn).in'];
             data.Tx = [data.Tx; [mogs(nn).data.Tx_x' ...

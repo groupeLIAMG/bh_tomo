@@ -15,6 +15,7 @@ classdef Grid < matlab.mixin.Copyable
         Rx_Z_water
         in
         type
+        nthreads
     end
     methods
         function obj = Grid()

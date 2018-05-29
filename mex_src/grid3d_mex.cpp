@@ -373,15 +373,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                         }
 
                         if ( nlhs == 3 ) {
-                            if ( grid_instance->raytrace(vTx[nv], t0[nv], vRx, tt[nv], r_data[nv], l_data[nv], i+1) == 1 ) {
+                            if ( grid_instance->raytrace(vTx[nv], t0[nv], vRx, tt[nv], r_data[nv], l_data[nv], i) == 1 ) {
                                 mexErrMsgTxt("Problem while raytracing.");
                             }
                         } else if ( nlhs == 2 ) {
-                            if ( grid_instance->raytrace(vTx[nv], t0[nv], vRx, tt[nv], r_data[nv], i+1) == 1 ) {
+                            if ( grid_instance->raytrace(vTx[nv], t0[nv], vRx, tt[nv], r_data[nv], i) == 1 ) {
                                 mexErrMsgTxt("Problem while raytracing.");
                             }
                         } else {
-                            if ( grid_instance->raytrace(vTx[nv], t0[nv], vRx, tt[nv], i+1) == 1 ) {
+                            if ( grid_instance->raytrace(vTx[nv], t0[nv], vRx, tt[nv], i) == 1 ) {
                                 mexErrMsgTxt("Problem while raytracing.");
                             }
                         }

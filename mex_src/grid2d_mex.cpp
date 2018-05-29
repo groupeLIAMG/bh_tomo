@@ -417,8 +417,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             vector<size_t> blk_size(num_threads, 0);
             size_t nj = vTx.size();
             while (nj > 0) {
-                for ( size_t n=0; n<num_threads; ++n ) {
-                    blk_size[n] += 1;
+                for ( size_t i=0; i<num_threads; ++i ) {
+                    blk_size[i] += 1;
                     nj -= 1;
                     if ( nj == 0 ) {
                         break;
@@ -445,15 +445,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                             vRx.push_back( sxz_tmp );
                         }
                         if ( nlhs == 3 ) {
-                            if ( grid_instance->raytrace(vTx[nv], t0[nv], vRx, tt[nv], r_data[nv], l_data[nv], i+1) == 1 ) {
+                            if ( grid_instance->raytrace(vTx[nv], t0[nv], vRx, tt[nv], r_data[nv], l_data[nv], i) == 1 ) {
                                 mexErrMsgTxt("Problem while raytracing.");
                             }
                         } else if ( nlhs == 2 ) {
-                            if ( grid_instance->raytrace(vTx[nv], t0[nv], vRx, tt[nv], r_data[nv], i+1) == 1 ) {
+                            if ( grid_instance->raytrace(vTx[nv], t0[nv], vRx, tt[nv], r_data[nv], i) == 1 ) {
                                 mexErrMsgTxt("Problem while raytracing.");
                             }
                         } else {
-                            if ( grid_instance->raytrace(vTx[nv], t0[nv], vRx, tt[nv], i+1) == 1 ) {
+                            if ( grid_instance->raytrace(vTx[nv], t0[nv], vRx, tt[nv], i) == 1 ) {
                                 mexErrMsgTxt("Problem while raytracing.");
                             }
                         }

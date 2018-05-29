@@ -6,6 +6,11 @@ else
     disp('Geostatistical Inversion - Starting ...');
 end
 
+if ~isempty(g_handles)
+    hideUnvisited = g_handles{6};
+    showTxRx = g_handles{7};
+end    
+
 tomo.rays = {};
 tomo.L = [];
 tomo.invData = [];
@@ -285,18 +290,39 @@ for noIter=1:param.numItStraight + param.numItCurved
     end
 
     if ~isempty(g_handles)
+        if hideUnvisited == 1
+            rd = full(sum(sqrt(Lx.^2+Lz.^2)));
+            mask = zeros(size(tomo.s));
+            mask(rd == 0) = nan;
+        else
+            mask = zeros(size(tomo.s));
+        end
 
-        gv.plotTomo(1./(s0.*xi0),'V_z','Distance [m]','Elevation [m]',g_handles{3})
+        gv.plotTomo(mask+1./(s0.*xi0),'V_z','Distance [m]','Elevation [m]',g_handles{3})
         if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
         colorbar('peer', g_handles{3})
 
-        gv.plotTomo(xi0,'\xi','Distance [m]','',g_handles{4})
+        gv.plotTomo(mask+xi0,'\xi','Distance [m]','',g_handles{4})
         colorbar('peer', g_handles{4})
 
-        gv.plotTomo(th0*180/pi,'\theta','Distance [m]','',g_handles{5})
+        gv.plotTomo(mask+th0*180/pi,'\theta','Distance [m]','',g_handles{5})
         colorbar('peer', g_handles{5})
 
         eval(['colormap(',g_handles{2},')'])
+        if showTxRx == 1 && ~isa(grid, 'Grid3D')
+            hold(g_handles{3}, 'on')
+            hold(g_handles{4}, 'on')
+            hold(g_handles{5}, 'on')
+            plot(g_handles{3}, data(:,1), data(:,3), 'r+')
+            plot(g_handles{3}, data(:,4), data(:,6), 'ro')
+            plot(g_handles{4}, data(:,1), data(:,3), 'r+')
+            plot(g_handles{4}, data(:,4), data(:,6), 'ro')
+            plot(g_handles{5}, data(:,1), data(:,3), 'r+')
+            plot(g_handles{5}, data(:,4), data(:,6), 'ro')
+            hold(g_handles{3}, 'off')
+            hold(g_handles{4}, 'off')
+            hold(g_handles{5}, 'off')
+        end
         drawnow
     end
 

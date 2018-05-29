@@ -6,6 +6,11 @@ else
     disp('Geostatistical Inversion - Starting ...');
 end
 
+if ~isempty(g_handles)
+    hideUnvisited = g_handles{6};
+    showTxRx = g_handles{7};
+end    
+
 tomo.rays = {};
 tomo.L = [];
 tomo.invData = [];
@@ -92,12 +97,10 @@ for noIter=1:param.numItStraight + param.numItCurved
         disp(['Geostatistical Inversion -  Solving System, Iteration ',num2str(noIter)])
     end
 
-
     doSim = 0;
     if param.doSim==1 && noIter==(param.numItStraight+param.numItCurved)
         doSim = 1;
     end
-
 
     res = norm(data(:,7) - t0, normOrder);
     resJ = zeros(nbreitJ,1)-1;
@@ -155,7 +158,6 @@ for noIter=1:param.numItStraight + param.numItCurved
 
         tomo.s  = s0;
         tomo.xi = xi0;
-
 
     else
 
@@ -255,18 +257,35 @@ for noIter=1:param.numItStraight + param.numItCurved
     end
 
     if ~isempty(g_handles)
-        if param.tomoAtt==0
-            gv.plotTomo(1./(s0.*xi0),'V_z','Distance [m]','Elevation [m]',g_handles{3})
+        if hideUnvisited == 1
+            rd = full(sum(sqrt(Lx.^2+Lz.^2)));
+            mask = zeros(size(tomo.s));
+            mask(rd == 0) = nan;
         else
-            gv.plotTomo((s0.*xi0),'\alpha_z','Distance [m]','Elevation [m]',g_handles{3})
+            mask = zeros(size(tomo.s));
+        end
+            
+        if param.tomoAtt==0
+            gv.plotTomo(mask+1./(s0.*xi0),'V_z','Distance [m]','Elevation [m]',g_handles{3})
+        else
+            gv.plotTomo(mask+(s0.*xi0),'\alpha_z','Distance [m]','Elevation [m]',g_handles{3})
         end
         if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
         colorbar('peer', g_handles{3})
 
-        gv.plotTomo(xi0,'\xi','Distance [m]','Elevation [m]',g_handles{4})
+        gv.plotTomo(mask+xi0,'\xi','Distance [m]','',g_handles{4})
         colorbar('peer', g_handles{4})
-
         eval(['colormap(',g_handles{2},')'])
+        if showTxRx == 1 && ~isa(grid, 'Grid3D')
+            hold(g_handles{3}, 'on')
+            hold(g_handles{4}, 'on')
+            plot(g_handles{3}, data(:,1), data(:,3), 'r+')
+            plot(g_handles{3}, data(:,4), data(:,6), 'ro')
+            plot(g_handles{4}, data(:,1), data(:,3), 'r+')
+            plot(g_handles{4}, data(:,4), data(:,6), 'ro')
+            hold(g_handles{3}, 'off')
+            hold(g_handles{4}, 'off')
+        end
         drawnow
     end
 

@@ -696,11 +696,25 @@ hcmap = uicontrol('Style','popupmenu',...
     'Position',[0.41 vSpace 0.12 vSize],...
     'Callback',@doMap,...
     'Parent',pfig);
+hshowTxRx = uicontrol('Style','checkbox',...
+    'String','Show Tx & Rx',...
+    'FontSize',fs,...
+    'Units','normalized',...
+    'Position',[0.54 vSpace 0.12 vSize],...
+    'Callback',@doColorbar,...
+    'Parent',pfig);
+hhideUnvisited = uicontrol('Style','checkbox',...
+    'String','Hide Unvisited Cells',...
+    'FontSize',fs,...
+    'Units','normalized',...
+    'Position',[0.66 vSpace 0.15 vSize],...
+    'Callback',@doColorbar,...
+    'Parent',pfig);
 hsliderText = uicontrol('Style','text',...
     'String','Y Plane',...
     'FontSize',fs,...
     'Units','normalized',...
-    'Position',[0.54 vSpace 0.07 vSize],...
+    'Position',[0.82 vSpace 0.07 vSize],...
     'Visible','off',...
     'Parent',pfig);
 
@@ -1045,6 +1059,8 @@ f.Visible = 'on';
         gridViewer = GridViewer(model.grid);
         if strcmp(model.grid.type, '3D')
             hsliderText.Visible = 'on';
+            hshowTxRx.Visible = 'off';
+            hhideUnvisited.Visible = 'off';
             gridViewer.createSliders('Parent',pfig,...
                 'Units','normalized','Visible','off');
             nLines=1;
@@ -1406,6 +1422,10 @@ f.Visible = 'on';
             gv.slider2.Visible = 'off';
             gv.plotTomo(t,model.inv_res(no).name,'Distance [m]','Elevation [m]',ax)
         else
+            if hhideUnvisited.Value == 1
+                rd = full(sum(model.inv_res(no).tomo.L));
+                t(rd == 0) = nan;                
+            end
             gridViewer.plotTomo(t,model.inv_res(no).name,'Distance [m]','Elevation [m]',ax)
         end
         colorbar('peer',ax)
@@ -1586,7 +1606,7 @@ f.Visible = 'on';
                 haxes1.Position = [hBorder+hSize+axBorder axBorder hSize3 vSize2];
                 haxes2.Position = [hBorder+hSize+axBorder+hSize3+rBorder axBorder hSize3 vSize2];
                 haxes3.Position = [hBorder+hSize+axBorder+2*hSize3+2*rBorder axBorder hSize3 vSize2];
-                gh = {clim; cmap; haxes1; haxes2; haxes3};
+                gh = {clim; cmap; haxes1; haxes2; haxes3; hhideUnvisited.Value; hshowTxRx.Value};
             elseif hdoSim.Value==1 || helliptical.Value==1
                 % we need two axes
                 haxes2.Visible = 'on';
@@ -1594,12 +1614,12 @@ f.Visible = 'on';
                 hSize3 = (hSize2-rBorder)/2;
                 haxes1.Position = [hBorder+hSize+axBorder axBorder hSize3 vSize2];
                 haxes2.Position = [hBorder+hSize+axBorder+hSize3+rBorder axBorder hSize3 vSize2];
-                gh = {clim; cmap; haxes1; haxes2; ''};
+                gh = {clim; cmap; haxes1; haxes2; ''; hhideUnvisited.Value; hshowTxRx.Value};
             else
                 haxes1.Position = [hBorder+hSize+axBorder axBorder hSize2 vSize2];
                 haxes2.Visible = 'off';
                 haxes3.Visible = 'off';
-                gh = {clim; cmap; haxes1; ''; ''};
+                gh = {clim; cmap; haxes1; ''; ''; hhideUnvisited.Value; hshowTxRx.Value};
             end
             param.cm = copy(cm);
             if cm.use_tilt==1
@@ -1623,7 +1643,7 @@ f.Visible = 'on';
             haxes1.Position = [hBorder+hSize+axBorder axBorder hSize2 vSize2];
             haxes2.Visible = 'off';
             haxes3.Visible = 'off';
-            gh = {clim; cmap; haxes1; ''; ''};
+            gh = {clim; cmap; haxes1; ''; ''; hhideUnvisited.Value; hshowTxRx.Value};
             
             tomo = invLSQR(param,data,idata,model.grid,L,hmessage,gh,gridViewer);
         end
@@ -1643,6 +1663,7 @@ f.Visible = 'on';
                 tomo.date = d;
             end
         end
+        
         saved = false;
     end
 
@@ -1940,6 +1961,7 @@ f.Visible = 'on';
         figure
         subplot(2,2,1)
         plot(1:nIt, rms,'o')
+        set(gca, 'XLim', [0 nIt+1])
         ylabel('||res||')
         xlabel('Iteration')
         

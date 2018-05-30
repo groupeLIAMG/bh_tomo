@@ -313,7 +313,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         vector<vector<siv<double> > > L_data(nTx);
         vector<vector<vector<siv<double> > > > l_data( vTx.size() );
 
-        if ( grid_instance->getNthreads() == 1 ) {
+        if ( grid_instance->getNthreads() == 1 || vTx.size()<=grid_instance->getNthreads()  ) {
             for ( size_t nv=0; nv<vTx.size(); ++nv ) {
 
                 vRx.resize( 0 );

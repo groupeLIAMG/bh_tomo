@@ -71,6 +71,9 @@
 
 
 classdef Grid3D < Grid
+    properties
+        rotation
+    end
     properties (Access = private, Hidden = true)
         mexObj   % Handle to the underlying C++ class instance
     end
@@ -483,7 +486,7 @@ classdef Grid3D < Grid
             oy=obj.gry(1)+obj.dy/2;
             oz=obj.grz(1)+obj.dz/2;
 
-            fid = fopen(filename,'wt');
+            fid = fopen([filename,'.xmf'],'wt');
             fprintf(fid,'<?xml version="1.0" ?>\n');
             fprintf(fid,'<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>\n');
             fprintf(fid,'<Xdmf xmlns:xi="http://www.w3.org/2003/XInclude" Version="2.2">\n');
@@ -524,6 +527,9 @@ classdef Grid3D < Grid
             s.cont = obj.cont;
             s.Tx = obj.Tx;
             s.Rx = obj.Rx;
+            s.x0 = obj.x0;
+            s.borehole_x0 = obj.borehole_x0;
+            s.rotation = obj.rotation;
             s.TxCosDir = obj.TxCosDir;
             s.RxCosDir = obj.RxCosDir;
             s.bord = obj.bord;
@@ -545,6 +551,21 @@ classdef Grid3D < Grid
                 obj.TxCosDir = s.TxCosDir;
                 obj.RxCosDir = s.RxCosDir;
                 obj.bord = s.bord;
+                if isfield(s, 'x0')
+                    obj.x0 = s.x0;
+                else
+                    obj.x0 = [0 0 0];
+                end
+                if isfield(s, 'borehole_x0')
+                    obj.borehole_x0 = s.borehole_x0;
+                else
+                    obj.borehole_x0 = 0;
+                end
+                if isfield(s, 'rotation')
+                    obj.rotation = s.rotation;
+                else
+                    obj.rotation = 0;
+                end
                 obj.Tx_Z_water = s.Tx_Z_water;
                 obj.Rx_Z_water = s.Rx_Z_water;
                 obj.in = s.in;

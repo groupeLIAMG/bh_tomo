@@ -4,8 +4,6 @@ classdef Grid2D < Grid
     % indices are incremented for Z first: ind = (ix-1)*nz + iz
     properties
         flip
-        borehole_x0
-        x0
     end
     properties (Access = private, Hidden = true)
         mexObj   % Handle to the underlying C++ class instance

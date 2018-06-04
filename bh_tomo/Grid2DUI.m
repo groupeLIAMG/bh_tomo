@@ -330,6 +330,10 @@ classdef Grid2DUI < handle
             obj.handles.x0y.String = num2str(obj.grid.x0(2));
             obj.handles.x0z.String = num2str(obj.grid.x0(3));
             obj.grid.nthreads = obj.handles.ncoreList.Value;
+            
+            obj.handles.x0x.String = num2str(obj.grid.x0(1));
+            obj.handles.x0y.String = num2str(obj.grid.x0(2));
+            obj.handles.x0z.String = num2str(obj.grid.x0(3));
 
             obj.updateProj();
 

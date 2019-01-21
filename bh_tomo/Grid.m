@@ -15,8 +15,6 @@ classdef Grid < matlab.mixin.Copyable
         Rx_Z_water
         in
         type
-        borehole_x0
-        x0
         nthreads
     end
     methods

@@ -34,21 +34,6 @@ air = AirShots.empty(0, numel(info.Groups));
 for n=1:numel(info.Groups)
     name = char(h5readatt(filename, info.Groups(n).Name, 'name'));
     air(n) = AirShots(name);
-    air(n).fac_dt = h5readatt(filename, info.Groups(n).Name, 'fac_dt');
-    air(n).method = char(h5readatt(filename, info.Groups(n).Name, 'method'));
-    air(n).d_TxRx = h5read(filename, [info.Groups(n).Name, '/d_TxRx'])';
-    air(n).tt = h5read(filename, [info.Groups(n).Name, '/tt'])';
-    air(n).et = h5read(filename, [info.Groups(n).Name, '/et'])';
-    air(n).tt_done = h5read(filename, [info.Groups(n).Name, '/tt_done'])';
-    
-    tmp = h5read(filename, [info.Groups(n).Name, '/in_vect'])';
-    air(n).in = false(1, numel(tmp));
-    for nn=1:numel(tmp)
-        if strcmp(tmp{nn}, 'TRUE')
-            air(n).in(nn) = 1;
-        end
-    end
-
     % mog data
     air(n).data = MogData();
     air(n).data.RxOffset = h5readatt(filename, [info.Groups(n).Name, '/data'], 'RxOffset');
@@ -59,7 +44,7 @@ for n=1:numel(info.Groups)
     air(n).data.cunits = char(h5readatt(filename, [info.Groups(n).Name, '/data'], 'cunits'));
     air(n).data.date = char(h5readatt(filename, [info.Groups(n).Name, '/data'], 'date'));
     air(n).data.nptsptrc = h5readatt(filename, [info.Groups(n).Name, '/data'], 'nptsptrc');
-    air(n).data.ntrace = h5readatt(filename, [info.Groups(n).Name, '/data'], 'ntrace');
+    air(n).data.ntrace = double(h5readatt(filename, [info.Groups(n).Name, '/data'], 'ntrace'));
     air(n).data.rnomfreq = h5readatt(filename, [info.Groups(n).Name, '/data'], 'rnomfreq');
     air(n).data.rstepsz = h5readatt(filename, [info.Groups(n).Name, '/data'], 'rstepsz');
     air(n).data.synthetique = h5readatt(filename, [info.Groups(n).Name, '/data'], 'synthetique');
@@ -73,6 +58,15 @@ for n=1:numel(info.Groups)
     air(n).data.Tx_x = h5read(filename, [info.Groups(n).Name, '/data/Tx_x'])';
     air(n).data.Tx_y = h5read(filename, [info.Groups(n).Name, '/data/Tx_y'])';
     air(n).data.Tx_z = h5read(filename, [info.Groups(n).Name, '/data/Tx_z'])';
+
+    air(n).fac_dt = h5readatt(filename, info.Groups(n).Name, 'fac_dt');
+    air(n).method = char(h5readatt(filename, info.Groups(n).Name, 'method'));
+    air(n).d_TxRx = h5read(filename, [info.Groups(n).Name, '/d_TxRx'])';
+    air(n).tt = h5read(filename, [info.Groups(n).Name, '/tt'])';
+    air(n).et = h5read(filename, [info.Groups(n).Name, '/et'])';
+    air(n).tt_done = h5read(filename, [info.Groups(n).Name, '/tt_done'])' == 1;
+    
+    air(n).in = h5read(filename, [info.Groups(n).Name, '/in_vect'])' == 1;
 end
 
 % Mogs
@@ -111,34 +105,10 @@ for n=1:numel(info.Groups)
     mogs(n).tau_params = h5read(filename, [info.Groups(n).Name, '/tau_params'])';
     mogs(n).ttTx = h5read(filename, [info.Groups(n).Name, '/ttTx'])';
     
-    tmp = h5read(filename, [info.Groups(n).Name, '/tt_done'])';
-    mogs(n).tt_done =  false(1, numel(tmp));
-    for nn=1:numel(tmp)
-        if strcmp(tmp{nn}, 'TRUE')
-            mogs(n).tt_done(nn) = 1;
-        end
-    end
-    tmp = h5read(filename, [info.Groups(n).Name, '/in_vect'])';
-    mogs(n).in =  false(1, numel(tmp));
-    for nn=1:numel(tmp)
-        if strcmp(tmp{nn}, 'TRUE')
-            mogs(n).in(nn) = 1;
-        end
-    end
-    tmp = h5read(filename, [info.Groups(n).Name, '/ttTx_done'])';
-    mogs(n).ttTx_done =  false(1, numel(tmp));
-    for nn=1:numel(tmp)
-        if strcmp(tmp{nn}, 'TRUE')
-            mogs(n).ttTx_done(nn) = 1;
-        end
-    end
-    tmp = h5read(filename, [info.Groups(n).Name, '/amp_done'])';
-    mogs(n).amp_done =  false(1, numel(tmp));
-    for nn=1:numel(tmp)
-        if strcmp(tmp{nn}, 'TRUE')
-            mogs(n).amp_done(nn) = 1;
-        end
-    end
+    mogs(n).tt_done = h5read(filename, [info.Groups(n).Name, '/tt_done'])' == 1;
+    mogs(n).in = h5read(filename, [info.Groups(n).Name, '/in_vect'])' == 1;
+    mogs(n).ttTx_done = h5read(filename, [info.Groups(n).Name, '/ttTx_done'])' == 1;
+    mogs(n).amp_done = h5read(filename, [info.Groups(n).Name, '/amp_done'])' == 1;
 
     % mog data
     mogs(n).data = MogData();
@@ -150,7 +120,7 @@ for n=1:numel(info.Groups)
     mogs(n).data.cunits = char(h5readatt(filename, [info.Groups(n).Name, '/data'], 'cunits'));
     mogs(n).data.date = char(h5readatt(filename, [info.Groups(n).Name, '/data'], 'date'));
     mogs(n).data.nptsptrc = h5readatt(filename, [info.Groups(n).Name, '/data'], 'nptsptrc');
-    mogs(n).data.ntrace = h5readatt(filename, [info.Groups(n).Name, '/data'], 'ntrace');
+    mogs(n).data.ntrace = double(h5readatt(filename, [info.Groups(n).Name, '/data'], 'ntrace'));
     mogs(n).data.rnomfreq = h5readatt(filename, [info.Groups(n).Name, '/data'], 'rnomfreq');
     mogs(n).data.rstepsz = h5readatt(filename, [info.Groups(n).Name, '/data'], 'rstepsz');
     mogs(n).data.synthetique = h5readatt(filename, [info.Groups(n).Name, '/data'], 'synthetique');
@@ -191,7 +161,7 @@ for n=1:numel(info.Groups)
     end
 end
 
-mogs(1).no_traces = 1:mogs(1).data.ntrace;
+mogs(1).no_traces = 1:double(mogs(1).data.ntrace);
 for n=2:numel(mogs)
     mogs(n).no_traces = mogs(n-1).no_traces(end) + (1:mogs(n).data.ntrace);
 end

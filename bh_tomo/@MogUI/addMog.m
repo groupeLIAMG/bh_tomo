@@ -50,7 +50,7 @@ switch filterindex
         newMog.data = MogData();
         newMog.data.readMSIS([rep,name]);
     case 6
-        name = file(1:end-4);
+        name = file(1:end-3);
         newMog = Mog(name);
         newMog.data = MogData();
         newMog.data.readSU([rep,name]);

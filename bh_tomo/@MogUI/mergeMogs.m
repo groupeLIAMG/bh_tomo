@@ -304,10 +304,16 @@ uiwait(f)
             trNoMax = max([trNoMax obj.mogs(no).no_traces]);
         end
         newMog.no_traces = trNoMax + (1:newMog.data.ntrace);
-        
+                
         % append new MOG
         obj.mogs(end+1) = newMog;
-            
+        
+        if strcmp(newMog.data.comment, 'true positions')
+            % update coords for cases where CosDir were not estimated
+            % (i.e. unique Tx on mog files)
+            obj.updateCoords(length(obj.mogs))
+        end
+
         obj.notify('mogAdded')
         closeWindow()
         

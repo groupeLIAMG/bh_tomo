@@ -26,35 +26,54 @@ for no=nos
         Tx = [mog.data.Tx_x(:) mog.data.Tx_y(:) mog.data.Tx_z(:)];
         mog.TxCosDir = zeros(size(Tx));
         tmp = unique(Tx,'rows');
-        tmp = sort(tmp,1,'descend');
-        v = -diff(tmp);
-        d = sqrt(sum(v.^2,2));
-        l = v./kron(d,[1 1 1]);
-        l = [l; l(end,:)]; %#ok<AGROW>
-        
-        for n=1:size(tmp,1)
-            ind = Tx(:,1)==tmp(n,1) & Tx(:,2)==tmp(n,2) & Tx(:,3)==tmp(n,3);
-            mog.TxCosDir(ind,1) = l(n,1);
-            mog.TxCosDir(ind,2) = l(n,2);
-            mog.TxCosDir(ind,3) = l(n,3);
+        if size(tmp, 1) == 1
+            % we have only one source point, cannot estimate CosDir
+            for n=1:size(tmp,1)
+                ind = Tx(:,1)==tmp(n,1) & Tx(:,2)==tmp(n,2) & Tx(:,3)==tmp(n,3);
+                mog.TxCosDir(ind,1) = 0;
+                mog.TxCosDir(ind,2) = 0;
+                mog.TxCosDir(ind,3) = 0;
+            end
+        else
+            tmp = sort(tmp,1,'descend');
+            v = -diff(tmp);
+            d = sqrt(sum(v.^2,2));
+            l = v./kron(d,[1 1 1]);
+            l = [l; l(end,:)]; %#ok<AGROW>
+
+            for n=1:size(tmp,1)
+                ind = Tx(:,1)==tmp(n,1) & Tx(:,2)==tmp(n,2) & Tx(:,3)==tmp(n,3);
+                mog.TxCosDir(ind,1) = l(n,1);
+                mog.TxCosDir(ind,2) = l(n,2);
+                mog.TxCosDir(ind,3) = l(n,3);
+            end
         end
         
         Rx = [mog.data.Rx_x(:) mog.data.Rx_y(:) mog.data.Rx_z(:)];
         mog.RxCosDir = zeros(size(Rx));
         tmp = unique(Rx,'rows');
-        tmp = sort(tmp,1,'descend');
-        v = -diff(tmp);
-        d = sqrt(sum(v.^2,2));
-        l = v./kron(d,[1 1 1]);
-        l = [l; l(end,:)]; %#ok<AGROW>
-        
-        for n=1:size(tmp,1)
-            ind = Tx(:,1)==tmp(n,1) & Tx(:,2)==tmp(n,2) & Tx(:,3)==tmp(n,3);
-            mog.RxCosDir(ind,1) = l(n,1);
-            mog.RxCosDir(ind,2) = l(n,2);
-            mog.RxCosDir(ind,3) = l(n,3);
-        end
-        
+        if size(tmp, 1) == 1
+            % we have only one source point, cannot estimate CosDir
+            for n=1:size(tmp,1)
+                ind = Tx(:,1)==tmp(n,1) & Tx(:,2)==tmp(n,2) & Tx(:,3)==tmp(n,3);
+                mog.RxCosDir(ind,1) = 0;
+                mog.RxCosDir(ind,2) = 0;
+                mog.RxCosDir(ind,3) = 0;
+            end
+        else
+            tmp = sort(tmp,1,'descend');
+            v = -diff(tmp);
+            d = sqrt(sum(v.^2,2));
+            l = v./kron(d,[1 1 1]);
+            l = [l; l(end,:)]; %#ok<AGROW>
+
+            for n=1:size(tmp,1)
+                ind = Tx(:,1)==tmp(n,1) & Tx(:,2)==tmp(n,2) & Tx(:,3)==tmp(n,3);
+                mog.RxCosDir(ind,1) = l(n,1);
+                mog.RxCosDir(ind,2) = l(n,2);
+                mog.RxCosDir(ind,3) = l(n,3);
+            end
+        end        
 		continue
 	end
 	if isempty( mog.Tx ) || isempty( mog.Rx )

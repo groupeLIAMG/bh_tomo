@@ -275,7 +275,7 @@ classdef MogData < handle
             if exist('ReadSu','file')==0
                 error('You need to install SegyMAT to read SU files')
             end
-            [obj.rdata, tr_header, header] = ReadSu(basename);
+            [obj.rdata, tr_header, header] = ReadSu([basename,'.su']);
             obj.ntrace = length(tr_header);
             obj.nptsptrc = header.ns;
             obj.cunits = 'm';

@@ -1,4 +1,61 @@
 function tomo = invGeostat(param,data,idata,grid,cm,L,t_handle,g_handles,gv)
+% tomo = invGeostat(param, data, idata, grid, cm, L, t_handle, g_handles)
+%
+% input
+%   param : struct variable with the following members
+%       use_cont:  use constraints (1) ot not (0)
+%       tomo_amp:  invert traveltimes (0) or amplitudes (1)
+%       nbreitrd:  number of straight ray iterations to perform
+%       nbreitrc:  number of curved ray iterations to perform
+%       nbreitra:  number of iterations with antenna correction
+%       alpha:     Lagrangian of second derivative smoothing
+%       saveInvData: save intermediate inversion results (not yet
+%                     implemented, set to 0)
+%       dv_max:    max velocity variation per iteration (0<dv_max<1)
+%       radar:     1 if we invert gpr data, 0 for seismic/acoustic data
+%       nbreiter:  LSQR -> max number of iterations
+%       tol:       LSQR -> tolerance on objective function
+%       gradmin:   LSQR -> min gradient on objective function
+%       correlmin: LSQR -> min correlation from one iteration to the next
+%
+%   data: matrix nDataPts x 9, with the following columns
+%       Tx_x Tx_y Tx_z Rx_x Rx_y Rx_z travel_time trav_time_variance ray_number
+%         *** Important ***
+%         Tx and Rx should be in the (x,z) plane.  If not, swap one pair
+%         of coordinate axes.
+%
+%   grid: grid object, with the following members
+%       grx:     X coordinates of grid cell edges
+%       grz:     Z coordinates of grid cell edges
+%       cont: struct variable for the constraints, with the following  members
+%           slowness:    matrix nConstrPts x 4 with the following columns
+%                        z_coord x_coord slowness variance_of_slowness
+%           attenuation: matrix nConstrPts x 4 with the following columns
+%                        z_coord x_coord attenuation variance_of_attenuation
+%
+%   cm: Covariance object with following members
+%
+%
+%   L: precomputed ray matrix (set to [] if not readily available)
+%
+%   t_handle: text handle used in GUI, set to [] if using command line
+%   g_handle: graphics handle used in GUI, set to [] if using command line
+%
+%
+% output
+%   tomo : struct variable with the following members
+%       s:    slowness vector
+%       x:    x coord of slowness pts
+%       z:    z coord of slowness pts
+%       res : residuals
+%       L:    ray matrix
+%       rais: array of cells containing ray paths
+%
+%  to view the results
+%     imagesc(tomo.x, tomo.z, reshape(tomo.s,length(tomo.z),length(tomo.x)))
+%
+%
+%
 
 if ~isempty(t_handle)
     t_handle.String = 'Geostatistical Inversion - Starting ...';
@@ -10,7 +67,7 @@ end
 if ~isempty(g_handles)
     hideUnvisited = g_handles{6};
     showTxRx = g_handles{7};
-end    
+end
 
 tomo.rays = {};
 tomo.L = [];
@@ -119,7 +176,7 @@ for noIter=1:param.numItStraight + param.numItCurved
             else
                 mask = zeros(size(tomo.s));
             end
-            
+
             if param.tomoAtt==0
                 gv.plotTomo(mask+1./tomo.s,'Cokriging','Distance [m]','Elevation [m]',g_handles{3})
             else
@@ -189,7 +246,7 @@ for noIter=1:param.numItStraight + param.numItCurved
             else
                 mask = zeros(size(tomo.s));
             end
-            
+
             if param.tomoAtt==0
                 gv.plotTomo(mask+1./tomo.s,'Cokriging','Distance [m]','Elevation [m]',g_handles{3})
             else

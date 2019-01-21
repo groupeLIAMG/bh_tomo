@@ -1,4 +1,57 @@
 function tomo = invLSQR(param,data,idata,grid,L,t_handle,g_handles,gv)
+% tomo = invLSQR(param,data,idata,grid,L,t_handle,g_handles,gv)
+%
+% input
+%   param : struct variable with the following members
+%       use_cont:  use constraints (1) or not (0)
+%       tomo_amp:  invert traveltimes (0) or amplitudes (1)
+%       nbreitrd:  number of straight ray iterations to perform
+%       nbreitrc:  number of curved ray iterations to perform
+%       alpha:     Lagrangian of second derivative smoothing
+%       saveInvData: save intermediate inversion results (1) or not (0)
+%       dv_max:    max velocity variation per iteration (0<dv_max<1)
+%       radar:     1 if we invert gpr data, 0 for seismic/acoustic data
+%       nbreiter:  LSQR -> max number of iterations
+%       tol:       LSQR -> tolerance on objective function
+%       gradmin:   LSQR -> min gradient on objective function
+%       correlmin: LSQR -> min correlation from one iteration to the next
+%
+%   data: matrix nDataPts x 9, with the following columns
+%       Tx_x Tx_y Tx_z Rx_x Rx_y Rx_z travel_time trav_time_variance ray_number
+%         *** Important ***
+%         Tx and Rx should be in the (x,z) plane.  If not, swap one pair
+%         of coordinate axes.
+%
+%   idata: 
+%
+%   grid: grid object, with the following members
+%       grx:     X coordinates of grid cell edges
+%       grz:     Z coordinates of grid cell edges
+%       cont: struct variable for the constraints, with the following  members
+%           slowness:    matrix nConstrPts x 4 with the following columns
+%                        z_coord x_coord slowness variance_of_slowness
+%           attenuation: matrix nConstrPts x 4 with the following columns
+%                        z_coord x_coord attenuation variance_of_attenuation
+%
+%   L: precomputed ray matrix (set to [] if not readily available)
+%
+%   t_handle: text handle used in GUI, set to [] if using command line
+%   g_handle: graphics handle used in GUI, set to [] if using command line
+%
+%
+% output
+%   tomo : struct variable with the following members
+%       s:    slowness vector
+%       x:    x coord of slowness pts
+%       z:    z coord of slowness pts
+%       res : residuals
+%       L:    ray matrix
+%       rays: array of cells containing ray paths
+%
+%  to view the results
+%     imagesc(tomo.x, tomo.z, reshape(tomo.s,length(tomo.z),length(tomo.x)))
+%
+%
 
 if ~isempty(t_handle)
     t_handle.String = 'LSQR Inversion - Starting ...';

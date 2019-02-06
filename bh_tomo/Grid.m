@@ -16,6 +16,8 @@ classdef Grid < matlab.mixin.Copyable
         in
         type
         nthreads
+        borehole_x0
+	    x0
     end
     methods
         function obj = Grid()

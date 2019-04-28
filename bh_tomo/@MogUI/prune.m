@@ -143,6 +143,14 @@ hzmaxEdit = uicontrol('Style','edit',...
     'Callback',@update,...
     'Parent',f);
 
+hzeros = uicontrol('Style','checkbox',...
+    'Units','points',...
+    'String','Ignore traces filled with 0',...
+    'Value',mog.pruneParams.skip_zeros,...
+    'Fontsize',fs,...
+    'Callback',@update,...
+    'Parent',f);
+
 hinfo = uicontrol('Style','text',...
     'Units','points',...
     'String','Infos',...
@@ -227,6 +235,8 @@ uiwait(f)
         hzmax.Position = [width-hBorderRight-hSize-hSize2/2 height-vBorderTop-15*vSize-7*vSpace hSize2 vSize];
         hzmaxEdit.Position = [width-hBorderRight-3/2*hSize height-vBorderTop-16*vSize-7*vSpace hSize vSize];
         
+        hzeros.Position(3) = 3*hSize;
+        
         hinfo.Position = [width-hBorderRight-2*hSize vBorder+2*vSize+5*vSpace 2*hSize 7*vSize];
         
         f.Visible = 'on';
@@ -294,13 +304,20 @@ uiwait(f)
         end
         
         use_SB = hsnr.Value;
+        skip_zeros = hzeros.Value;
         
         if isempty(SNR)
             SNR = computeSNR();
         end
         seuil_SB = str2double(hsnrEdit.String);
         
-        mog.in = inTx & inRx & SNR>seuil_SB & inTheta;
+        if skip_zeros == 1
+            in_zeros = sum(mog.data.rdata == 0, 1)~=mog.data.nptsptrc;
+        else
+            in_zeros = true(1,mog.data.ntrace);
+        end
+        mog.in = inTx & inRx & SNR>seuil_SB & inTheta & in_zeros;
+        
         
         [~, a]=Grid.lsplane([uTx;uRx]);
         el = (pi-a(3))*180/pi;
@@ -314,7 +331,8 @@ uiwait(f)
         texte{5} = [num2str(round(100*sum(~(inTx & inRx))/length(mog.in)),'%d'), '% removed - Tx & Rx'];
         texte{6} = [num2str(round(100*sum(SNR<=seuil_SB)/length(mog.in)),'%d'), '% removed - S/M ratio'];
         texte{7} = [num2str(round(100*sum(~inTheta)/length(mog.in)),'%d'), '% removed - ray angle'];
-        texte{8} = [num2str(round(100*sum(mog.in)/length(mog.in)),'%d'), '% of traces kept'];
+        texte{8} = [num2str(round(100*sum(~(in_zeros))/length(mog.in)),'%d'), '% removed - zeros'];
+        texte{9} = [num2str(round(100*sum(mog.in)/length(mog.in)),'%d'), '% of traces kept'];
         hinfo.String = texte;
         
         plot3(haxes,uTx(:,1), uTx(:,2), uTx(:,3),'b*')
@@ -338,6 +356,7 @@ uiwait(f)
         mog.pruneParams.zmax = zmax;
         mog.pruneParams.thetaMin = thetaMin*180/pi;
         mog.pruneParams.thetaMax = thetaMax*180/pi;
+        mog.pruneParams.skip_zeros = skip_zeros;
 
     end
     function zoom(varargin)
@@ -373,6 +392,9 @@ uiwait(f)
         i2(i2>mog.data.nptsptrc) = mog.data.nptsptrc;
         for n=1:mog.data.ntrace
             SNR(n) = std(mog.data.rdata(i1(n):i2(n), n))/std(mog.data.rdata(1:largeur, n));
+            if isnan(SNR(n))
+                SNR(n) = 1e-9;
+            end
         end
     end
 

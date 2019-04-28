@@ -93,6 +93,7 @@ classdef Mog < handle
                 obj.pruneParams.zmax = 1e99;
                 obj.pruneParams.thetaMin = -90;
                 obj.pruneParams.thetaMax = 90;
+                obj.pruneParams.skip_zeros = 1;
                 obj.useAirShots = 0;
             elseif isstruct(n)
                 if isfield(n, 'name')
@@ -174,6 +175,7 @@ classdef Mog < handle
                     obj.pruneParams.zmax = 1e99;
                     obj.pruneParams.thetaMin = -90;
                     obj.pruneParams.thetaMax = 90;
+                    obj.pruneParams.skip_zeros = 1;
                 end
                 if isfield(n, 'useAirShots')
                     obj.useAirShots = n.useAirShots;

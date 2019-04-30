@@ -307,7 +307,7 @@ uiwait(f)
         skip_zeros = hzeros.Value;
         
         if isempty(SNR)
-            SNR = computeSNR();
+            SNR = computeSNR(mog.traces);
         end
         seuil_SB = str2double(hsnrEdit.String);
         
@@ -316,7 +316,12 @@ uiwait(f)
         else
             in_zeros = true(1,mog.data.ntrace);
         end
-        mog.in = inTx & inRx & SNR>seuil_SB & inTheta & in_zeros;
+        if use_SB
+            inSNR = SNR>seuil_SB;
+        else
+            inSNR = true(1,mog.data.ntrace);
+        end
+        mog.in = inTx & inRx & inSNR & inTheta & in_zeros;
         
         
         [~, a]=Grid.lsplane([uTx;uRx]);
@@ -329,9 +334,9 @@ uiwait(f)
         texte{3} = [num2str(size(uTx,1)), ' Tx'];
         texte{4} = [num2str(size(uRx,1)), ' Rx'];
         texte{5} = [num2str(round(100*sum(~(inTx & inRx))/length(mog.in)),'%d'), '% removed - Tx & Rx'];
-        texte{6} = [num2str(round(100*sum(SNR<=seuil_SB)/length(mog.in)),'%d'), '% removed - S/M ratio'];
+        texte{6} = [num2str(round(100*sum(~inSNR)/length(mog.in)),'%d'), '% removed - S/N ratio'];
         texte{7} = [num2str(round(100*sum(~inTheta)/length(mog.in)),'%d'), '% removed - ray angle'];
-        texte{8} = [num2str(round(100*sum(~(in_zeros))/length(mog.in)),'%d'), '% removed - zeros'];
+        texte{8} = [num2str(round(100*sum(~in_zeros)/length(mog.in)),'%d'), '% removed - zeros'];
         texte{9} = [num2str(round(100*sum(mog.in)/length(mog.in)),'%d'), '% of traces kept'];
         hinfo.String = texte;
         
@@ -377,24 +382,6 @@ uiwait(f)
         elseif button_state == hrotate3d.Min
             % toggle button is not pressed
             rotate3d(haxes,'off')
-        end
-    end
-
-    function SNR = computeSNR()
-        SNR = ones(size(1,mog.data.ntrace));
-        [~,i] = max(abs(detrend_rad(mog.data.rdata)));
-        
-        largeur = 60;
-        
-        i1 = i-largeur/2;
-        i2 = i+largeur/2;
-        i1(i1<1) = 1;
-        i2(i2>mog.data.nptsptrc) = mog.data.nptsptrc;
-        for n=1:mog.data.ntrace
-            SNR(n) = std(mog.data.rdata(i1(n):i2(n), n))/std(mog.data.rdata(1:largeur, n));
-            if isnan(SNR(n))
-                SNR(n) = 1e-9;
-            end
         end
     end
 

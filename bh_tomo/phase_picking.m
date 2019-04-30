@@ -105,8 +105,7 @@ dt = mog.data.timec * fac_t;
 %[M,N]=size(mog.data.rdata);
 %[data]=detrend_poly(1:M,mog.data.rdata,1);
 
-% linear detrend
-data = detrend_rad(mog.data.rdata(:,mog.in));
+data = mog.traces(:,mog.in);
 
 no_traces = 1:mog.data.ntrace;
 no_traces = no_traces(mog.in);

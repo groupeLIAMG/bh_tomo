@@ -151,9 +151,9 @@ if ~h_set
 
     h.useDetrend = get(handles.UseDetrendMenuItem,'Checked');
     if strcmp(h.useDetrend,'on')==1
-        h.proc_data = detrend_rad(mog.data.rdata);
+        h.proc_data = detrend_rad(mog.traces);
     else
-        h.proc_data = mog.data.rdata;
+        h.proc_data = mog.traces;
     end
     
 	absmax = repmat(max(abs(h.proc_data)), size(h.proc_data,1),1);
@@ -179,7 +179,7 @@ if ~h_set || isempty(h.snr)
     fac_f = 1.0;
     fac_t = 1.0;
     if strcmp(mog.data.tunits,'ns')
-        % radar: freq nominale donnée en MHz
+        % radar: freq nominale donnï¿½e en MHz
         fac_f = 10^6;
         fac_t = 10^-9;
     elseif strcmp(mog.data.tunits,'ms')
@@ -611,7 +611,7 @@ if isfield(h, 'snr')==false || isempty(h.snr)
 	fac_f = 1.0;
 	fac_t = 1.0;
 	if strcmp(mog.data.tunits,'ns')
-		% radar: freq nominale donnée en MHz
+		% radar: freq nominale donnï¿½e en MHz
 		fac_f = 10^6;
 		fac_t = 10^-9;
 	elseif strcmp(mog.data.tunits,'ms')
@@ -647,16 +647,16 @@ if isempty(h.fdom)
 	[b,a] = cheby1(n,0.5,Wn);
 
 	if strcmp(h.useDetrend,'on')==1
-		traces = detrend_rad(mog.data.rdata);
+		traces = detrend_rad(mog.traces);
 	else
-		traces = mog.data.rdata;
+		traces = mog.traces;
 	end
 	absmax = repmat(max(abs(traces)), size(traces,1),1);
 	traces = traces ./ absmax;
 
 	nt = size(traces,2);
 	h.fdom = zeros(1,nt)-1;
-    hwb = waitbar(0,'Calcul des fréquences dominantes');
+    hwb = waitbar(0,'Calcul des frï¿½quences dominantes');
 	inc_wb = 100;
     for n=1:nt
         trace = traces(:,n);
@@ -679,7 +679,7 @@ for nb = 1:numel(h.bins)
     traces = (h.proc_data2(:, h.bins{nb}.no_trace))';
 	fdom = h.fdom(h.bins{nb}.no_trace);
 	snr = h.snr(h.bins{nb}.no_trace);
-	To4 = 1e3 * 0.25./fdom;  % période / 4
+	To4 = 1e3 * 0.25./fdom;  % pï¿½riode / 4
 	To4(fdom==-1) = 0.5/(1e-3*mog.data.rnomfreq);
     
     if h.bins{nb}.work1cycle
@@ -717,7 +717,7 @@ for nb = 1:numel(h.bins)
     mog.tt(h.bins{nb}.no_trace) = pick;
     mog.et(h.bins{nb}.no_trace) = pick_et;
     if h.scale_fdom==1
-        % on remet à l'échelle initiale
+        % on remet ï¿½ l'ï¿½chelle initiale
         fac = h.fdom(h.bins{nb}.no_trace);
         ind1 = fac==-1;
         ind2 = h.snr(h.bins{nb}.no_trace) <= seuil_fdom;
@@ -950,7 +950,7 @@ win_snr = round(win_snr/mog.data.timec);
 fac_f = 1.0;
 fac_t = 1.0;
 if strcmp(mog.data.tunits,'ns')
-    % radar: freq nominale donnée en MHz
+    % radar: freq nominale donnï¿½e en MHz
     fac_f = 10^6;
     fac_t = 10^-9;
 elseif strcmp(mog.data.tunits,'ms')
@@ -1156,9 +1156,9 @@ Rp = 3; Rs = 40;
 [b,a] = cheby1(n,0.5,Wn);
 
 if strcmp(h.useDetrend,'on')==1
-    h.proc_data = detrend_rad(mog.data.rdata);
+    h.proc_data = detrend_rad(mog.traces);
 else
-    h.proc_data = mog.data.rdata;
+    h.proc_data = mog.traces;
 end
 absmax = repmat(max(abs(h.proc_data)), size(h.proc_data,1),1);
 h.proc_data = h.proc_data ./ absmax;
@@ -1290,7 +1290,7 @@ function [indmin, indmax, indzer] = extr(x)
 %           - indmax = indices of maxima
 %           - indzer = indices of zero-crossings
 %
-% Adapté de:
+% Adaptï¿½ de:
 % G. Rilling, last modification: July 2002
 % gabriel.rilling@ens-lyon.fr
 
@@ -1547,9 +1547,9 @@ load(h.db_file,'mogs')
 mog = mogs(h.no_mog);
 
 if strcmp(h.useDetrend,'on')==1
-    h.proc_data = detrend_rad(mog.data.rdata);
+    h.proc_data = detrend_rad(mog.traces);
 else
-    h.proc_data = mog.data.rdata;
+    h.proc_data = mog.traces;
 end
 absmax = repmat(max(abs(h.proc_data)), size(h.proc_data,1),1);
 h.proc_data = h.proc_data ./ absmax;
@@ -1603,9 +1603,9 @@ if get(handles.checkbox_1cycle,'Value')==1 || get(handles.checkbox_scale_fdom,'V
     prepare_1cycle(handles)
 else
     if strcmp(h.useDetrend,'on')==1
-        h.proc_data = detrend_rad(mog.data.rdata);
+        h.proc_data = detrend_rad(mog.traces);
     else
-        h.proc_data = mog.data.rdata;
+        h.proc_data = mog.traces;
     end
     absmax = repmat(max(abs(h.proc_data)), size(h.proc_data,1),1);
     h.proc_data = h.proc_data ./ absmax;

@@ -73,6 +73,8 @@ classdef MogUI < handle
             obj.handles.importMog.FontSize = s;
             obj.handles.mergeMogs.FontSize = s;
             obj.handles.spectra.FontSize = s;
+            obj.handles.createDt.FontSize = s;
+            obj.handles.filter.FontSize = s;
             obj.handles.rawData.FontSize = s;
             obj.handles.zop.FontSize = s;
             obj.handles.statsTt.FontSize = s;
@@ -133,6 +135,7 @@ classdef MogUI < handle
         zop(obj,varargin)
         mergeMogs(obj,varargin)
         createDt(obj,varargin)
+        filter_rad(obj,varargin)
         
         function removeMog(obj,varargin)
             no = obj.handles.listMogs.Value;

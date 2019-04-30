@@ -278,6 +278,7 @@ uiwait(f)
             warndlg({'Could not merge MOGs',ME.message})
             return
         end
+        newMog.traces = newMog.data.rdata;
         
         if erase==true
             keep = true(size(obj.mogs));

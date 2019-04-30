@@ -63,7 +63,7 @@ for n=1:length(Tx_z)
         no = nos(iTx);
         no = no(i);
         if abs(mog.data.Rx_z(no)-Tx_z(n))<offsetMax && mog.in(no)
-            traces(n,:) = lrai(no)*mog.data.rdata(:,no)';
+            traces(n,:) = lrai(no)*mog.traces(:,no)';
             timestp(n,:) = mog.data.timestp-t0(no);
             ind(no) = true;
         end

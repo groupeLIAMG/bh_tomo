@@ -399,8 +399,8 @@ f.Visible = 'on';
         for n=1:length(tmax), imax(n) = findnear(tmax(n), mog.data.timestp); end
         for n=1:length(tmin)
             if imax(n)>imin(n)
-                App(n) = lrai(n)*(max(mog.data.rdata(imin:imax,indZop(n))) - ...
-                    min(mog.data.rdata(imin:imax,indZop(n))));
+                App(n) = lrai(n)*(max(mog.traces(imin:imax,indZop(n))) - ...
+                    min(mog.traces(imin:imax,indZop(n))));
             end
         end
         Tx_z = mog.data.Tx_z(indZop);
@@ -439,8 +439,8 @@ f.Visible = 'on';
         for n=1:length(tmax), imax(n) = findnear(tmax(n), mog.data.timestp); end
         for n=1:length(tmin)
             if imax(n)>imin(n)
-                App(n) = lrai(n)*(max(mog.data.rdata(imin(n):imax(n),indZop(n))) - ...
-                    min(mog.data.rdata(imin(n):imax(n),indZop(n))));
+                App(n) = lrai(n)*(max(mog.traces(imin(n):imax(n),indZop(n))) - ...
+                    min(mog.traces(imin(n):imax(n),indZop(n))));
             end
         end
         

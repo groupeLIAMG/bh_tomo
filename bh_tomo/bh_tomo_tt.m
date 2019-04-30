@@ -320,14 +320,13 @@ update_positions_info(hObject, eventdata, handles)
 function update_trace_simple(hObject, eventdata, handles)
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
-dc = median(h.proc_data(1:50,h.no_trace));
 if get(handles.checkbox_pickTx,'Value')==0
     if get(handles.filtre_ondelette,'Value')==1
-        plot(handles.trace_simple, mog.data.timestp, detrend_rad(mog.data.rdata(:,h.no_trace))-dc, 'color',[0.8 0.8 0.8])
+        plot(handles.trace_simple, mog.data.timestp, mog.traces(:,h.no_trace), 'color',[0.8 0.8 0.8])
         hold(handles.trace_simple, 'on')
-        plot(handles.trace_simple, h.timestp, h.proc_data(:,h.no_trace)-dc)
+        plot(handles.trace_simple, h.timestp, h.proc_data(:,h.no_trace))
     else
-        plot(handles.trace_simple, h.timestp, h.proc_data(:,h.no_trace)-dc)
+        plot(handles.trace_simple, h.timestp, h.proc_data(:,h.no_trace))
         hold(handles.trace_simple, 'on')
     end
     if ~isempty(mog.data.tdata)
@@ -371,11 +370,11 @@ if get(handles.checkbox_pickTx,'Value')==0
     end
 else
     if get(handles.filtre_ondelette,'Value')==1
-        plot(handles.trace_simple, mog.data.timestp, detrend_rad(mog.data.rdata(:,h.no_trace))-dc, 'color',[0.8 0.8 0.8],'LineStyle','-.')
+        plot(handles.trace_simple, mog.data.timestp, mog.traces(:,h.no_trace), 'color',[0.8 0.8 0.8],'LineStyle','-.')
         hold(handles.trace_simple, 'on')
-        plot(handles.trace_simple, h.timestp, h.proc_data(:,h.no_trace)-dc,'-.')
+        plot(handles.trace_simple, h.timestp, h.proc_data(:,h.no_trace),'-.')
     else
-        plot(handles.trace_simple, h.timestp, h.proc_data(:,h.no_trace)-dc,'-.')
+        plot(handles.trace_simple, h.timestp, h.proc_data(:,h.no_trace),'-.')
         hold(handles.trace_simple, 'on')
     end
     m1 = max(abs(h.proc_data(:,h.no_trace)-dc));
@@ -1301,12 +1300,12 @@ if ~h.init_data
 end
 if get(hObject,'Value')==0
 	if get(handles.radiobutton_data,'Value')==1
-		h.proc_data = detrend_rad(mog.data.rdata);
+		h.proc_data = mog.traces;
         h.timestp = mog.data.timestp;
 	end
 else
   if isempty( mog.fw )
-    mog.fw = filtrage_wavelet2(mog.data.rdata);
+    mog.fw = filtrage_wavelet2(mog.traces);
   end
   h.proc_data = detrend_rad(mog.fw);
   h.timestp = mog.data.timestp;
@@ -1360,7 +1359,7 @@ set(handles.trace_traite,'String',num2str(h.no_trace))
 
 off = [handles.radiobutton_data,handles.radiobutton_ap];
 mutual_exclude(off)
-h.proc_data = detrend_rad(av.data.rdata);
+h.proc_data = detrend_rad(av.traces);
 h.timestp = av.data.timestp;
 cmin= -max(max(abs(h.proc_data)));
 cmax= -cmin;
@@ -1405,7 +1404,7 @@ set(handles.trace_traite,'String',num2str(h.no_trace))
 
 off = [handles.radiobutton_data,handles.radiobutton_av];
 mutual_exclude(off)
-h.proc_data = detrend_rad(ap.data.rdata);
+h.proc_data = detrend_rad(ap.traces);
 h.timestp = ap.data.timestp;
 cmin=-max(max(abs(h.proc_data)));
 cmax= -cmin;
@@ -1453,7 +1452,7 @@ set(handles.trace_traite,'String',num2str(h.no_trace))
 off = [handles.radiobutton_av,handles.radiobutton_ap];
 mutual_exclude(off)
 
-h.proc_data = detrend_rad(mog.data.rdata);
+h.proc_data = mog.traces;
 h.timestp = mog.data.timestp;
 cmin=-max(max(abs(h.proc_data)));
 cmax= -cmin;

@@ -47,6 +47,7 @@ if no>0 && no<=length(obj.mogs)
         
         obj.air(n) = AirShots(char(name));
         obj.air(n).data = data;
+        obj.air(n).traces = data.rdata;
         obj.air(n).tt = -1*ones(1,data.ntrace);        % temps d'arrivee
         obj.air(n).et = -1*ones(1,data.ntrace);        % ecart-type du temps d'arrivee
         obj.air(n).tt_done = false(1,data.ntrace);     % temps d'arrivee determine (booleen)

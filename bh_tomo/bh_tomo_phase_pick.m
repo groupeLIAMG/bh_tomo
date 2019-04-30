@@ -137,7 +137,7 @@ mog = mogs(h.no_mog);
 
 h.Tx = [mog.data.Tx_x; mog.data.Tx_y; mog.data.Tx_z]';
 h.uTx = unique(h.Tx, 'rows');
-cmax=max(max(abs(mog.data.rdata)));
+cmax=max(max(abs(mog.traces)));
 cmin= -cmax;
 h.cminmax = [cmin cmax];
 
@@ -235,7 +235,7 @@ ind = all(h.Tx==repmat(h.uTx(h.noTx,:),mog.data.ntrace,1),2)';
 
 colormap ramac_cmap(16)
 no_traces = 1:mog.data.ntrace;
-imagesc(no_traces(ind), mog.data.timestp, mog.data.rdata(:,ind),'Parent',handles.traces_contigues)
+imagesc(no_traces(ind), mog.data.timestp, mog.traces(:,ind),'Parent',handles.traces_contigues)
 caxis(handles.traces_contigues, h.cminmax)
 update_t_lim(handles)
 hold(handles.traces_contigues, 'on')
@@ -259,7 +259,7 @@ else
 	no = varargin{1};
 end
 pick = getappdata(handles.fig_bh_tomo_phase_pick, 'pick');
-plot(handles.trace_simple, mog.data.timestp, mog.data.rdata(:,no),'Color',[0.75 0.75 0.75])
+plot(handles.trace_simple, mog.data.timestp, mog.traces(:,no),'Color',[0.75 0.75 0.75])
 hold(handles.trace_simple,'on')
 ind = find(pick.no_traces==no);
 if ~isempty(ind)

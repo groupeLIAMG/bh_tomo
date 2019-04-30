@@ -39,7 +39,7 @@ function varargout = bh_tomo_amp(varargin)
 
 % Edit the above text to modify the response to help bh_tomo_amp
 
-% Last Modified by GUIDE v2.5 11-Mar-2013 16:36:03
+% Last Modified by GUIDE v2.5 30-Apr-2019 14:49:38
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -229,7 +229,7 @@ end
 load(h.db_file,'mogs','boreholes')
 mog = mogs(h.no_mog);
 
-h.proc_data = detrend(mog.data.rdata);
+h.proc_data = mog.traces;
 h.Fs = 1e9/mog.data.timec; % Hz
 if strcmp(mog.data.tunits,'ms')
 	h.Fs = 1e3/mog.data.timec; % Hz
@@ -305,14 +305,13 @@ function update_trace_simple(hObject, eventdata, handles)
 h = getappdata(handles.fig_bh_amp, 'h');
 mog = getappdata(handles.fig_bh_amp, 'mog');
 axes(handles.trace)
-dc = median(h.proc_data(1:50,h.no_trace));
 
 if get(handles.filtre_ondelette,'Value')==1
-  plot(mog.data.timestp, detrend(mog.data.rdata(:,h.no_trace))-dc, 'color',[0.8 0.8 0.8])
+  plot(mog.data.timestp, mog.traces(:,h.no_trace), 'color',[0.8 0.8 0.8])
   hold on
-  plot(mog.data.timestp, h.proc_data(:,h.no_trace)-dc)
+  plot(mog.data.timestp, h.proc_data(:,h.no_trace))
 else
-  plot(mog.data.timestp, h.proc_data(:,h.no_trace)-dc)
+  plot(mog.data.timestp, h.proc_data(:,h.no_trace))
   hold on
 end
   
@@ -415,7 +414,7 @@ update_t_lim(hObject, eventdata, handles)
 %
 function sauve_mat(handles, msg)
 hh=0;
-if msg, hh=msgbox('intermediate saving'); end
+if msg, hh=msgbox('Saving Data'); end
 h = getappdata(handles.fig_bh_amp, 'h');
 mog = getappdata(handles.fig_bh_amp, 'mog');
 load(h.db_file,'mogs','air')
@@ -1086,7 +1085,7 @@ end
 freq = mog.data.rnomfreq * fac_f;
 dt = mog.data.timec * fac_t;
 
-traces = detrend(mog.data.rdata(:, no));
+traces = mog.traces(:, no);
 % bruit pris sur derni�re 20 ns
 win_snr = round(20/mog.data.timec);
 SB = data_select(traces, freq, dt, win_snr);
@@ -1361,12 +1360,10 @@ if ~h.init_data
     return
 end
 if get(hObject,'Value')==0
-%	if get(handles.radiobutton_data,'Value')==1
-		h.proc_data = detrend_rad(mog.data.rdata);
-%	end
+    h.proc_data = mog.traces;
 else
   if isempty( mog.fw )
-    mog.fw = filtrage_wavelet2(mog.data.rdata);
+    mog.fw = filtrage_wavelet2(mog.traces);
   end
   h.proc_data = detrend_rad(mog.fw);
 end

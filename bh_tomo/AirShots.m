@@ -12,6 +12,7 @@ classdef AirShots < handle
         fac_dt
         in
         method
+        traces
     end
     
     methods
@@ -28,6 +29,7 @@ classdef AirShots < handle
                     error('Invalid input')
                 end
                 obj.data = MogData(n.data);
+                obj.traces = n.data.rdata;
                 obj.tt = n.tt;
                 obj.et = n.et;
                 obj.tt_done = n.tt_done;
@@ -39,6 +41,18 @@ classdef AirShots < handle
                 else
                     obj.method = 'fixed_antenna';
                 end
+                obj.traces = [];
+            elseif isa(n, 'AirShots')
+                obj.name = n.name;
+                obj.data = MogData(n.data);
+                obj.traces = n.traces;
+                obj.tt = n.tt;
+                obj.et = n.et;
+                obj.tt_done = n.tt_done;
+                obj.d_TxRx = n.d_TxRx;
+                obj.fac_dt = n.fac_dt;
+                obj.in = n.in;
+                obj.method = n.method;
             else
                 error('Invalid input')
             end

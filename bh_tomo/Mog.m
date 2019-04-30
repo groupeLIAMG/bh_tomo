@@ -4,7 +4,7 @@ classdef Mog < handle
     properties
         name
         date
-        data        % raw data
+        data        % raw data (MogData object)
         av          % index of air shot before survey
         ap          % index of air shot after survey
         Tx          % index of source borehole
@@ -41,7 +41,9 @@ classdef Mog < handle
         TxCosDir
         RxCosDir
         pruneParams
+        processParams
         useAirShots
+        traces
     end
     properties (SetAccess=private)
         ID
@@ -94,7 +96,12 @@ classdef Mog < handle
                 obj.pruneParams.thetaMin = -90;
                 obj.pruneParams.thetaMax = 90;
                 obj.pruneParams.skip_zeros = 1;
+                obj.processParams.detrend = 0;
+                obj.processParams.bandpass = 0;
+                obj.processParams.lowcut = 10;
+                obj.processParams.highcut = 200;
                 obj.useAirShots = 0;
+                obj.traces = [];
             elseif isstruct(n)
                 if isfield(n, 'name')
                     obj.name = n.name;
@@ -104,11 +111,12 @@ classdef Mog < handle
                     error('Invalid input')
                 end
                 obj.data = MogData(n.data);
+                obj.traces = n.data.rdata;
                 if ~isempty(n.av)
-                    obj.av = AirShot(n.av);
+                    obj.av = AirShots(n.av);
                 end
                 if ~isempty(n.ap)
-                    obj.ap = AirShot(n.ap);
+                    obj.ap = AirShots(n.ap);
                 end
                 obj.Tx = n.Tx;
                 obj.Rx = n.Rx;
@@ -177,11 +185,83 @@ classdef Mog < handle
                     obj.pruneParams.thetaMax = 90;
                     obj.pruneParams.skip_zeros = 1;
                 end
+                if isfield(n, 'processParams')
+                    obj.processParams = n.processParams;
+                else
+                    obj.processParams.detrend = 0;
+                    obj.processParams.bandpass = 0;
+                    obj.processParams.lowcut = 10;
+                    obj.processParams.highcut = 200;
+                end
+
                 if isfield(n, 'useAirShots')
                     obj.useAirShots = n.useAirShots;
                 else
                     obj.useAirShots = 0;
                 end
+            elseif isa(n, 'Mog')
+                obj.name = n.name;
+                obj.data = MogData(n.data);
+                obj.traces = n.traces;
+                obj.av = n.av;
+                obj.ap = n.ap;
+                obj.Tx = n.Tx;
+                obj.Rx = n.Rx;
+                obj.tt = n.tt;
+                obj.et = n.et;
+                obj.tt_done = n.tt_done;
+                obj.ttTx = n.ttTx;
+                obj.ttTx_done = n.ttTx_done;
+                obj.amp_tmin = n.amp_tmin;
+                obj.amp_tmax = n.amp_tmax;
+                obj.amp_done = n.amp_done;
+                obj.App = n.App;
+                obj.fcentroid = n.fcentroid;
+                obj.scentroid = n.scentroid;
+                obj.tauApp = n.tauApp;
+                obj.tauApp_et = n.tauApp_et;
+                obj.tauFce = n.tauFce;
+                obj.tauFce_et = n.tauFce_et;
+                obj.tauHyb = n.tauHyb;
+                obj.tauHyb_et = n.tauHyb_et;
+                obj.tau_params = n.tau_params;
+                obj.fw = n.fw;
+                obj.f_et = n.f_et;
+                obj.amp_name_Ldc = n.amp_name_Ldc;
+                obj.type = n.type;
+                obj.Tx_z_orig = n.Tx_z_orig;
+                obj.Rx_z_orig = n.Rx_z_orig;
+                obj.fac_dt = n.fac_dt;
+                obj.user_fac_dt = n.user_fac_dt;
+                obj.in = n.in;
+                obj.no_traces = n.no_traces;
+                obj.sorted = n.sorted;
+                obj.TxCosDir = n.TxCosDir;
+                obj.RxCosDir = n.RxCosDir;
+                if ~isempty(n.pruneParams)
+                    obj.pruneParams = n.pruneParams;
+                else
+                    obj.pruneParams.sautTx = 0;
+                    obj.pruneParams.sautRx = 0;
+                    obj.pruneParams.arrondi = 0;
+                    obj.pruneParams.use_SB = 0;
+                    obj.pruneParams.seuil_SB = 0;
+                    obj.pruneParams.zmin = -1e99;
+                    obj.pruneParams.zmax = 1e99;
+                    obj.pruneParams.thetaMin = -90;
+                    obj.pruneParams.thetaMax = 90;
+                    obj.pruneParams.skip_zeros = 1;
+                end
+                if ~isempty(n.processParams)
+                    obj.processParams = n.processParams;
+                else
+                    obj.processParams.detrend = 0;
+                    obj.processParams.bandpass = 0;
+                    obj.processParams.lowcut = 10;
+                    obj.processParams.highcut = 200;
+                end
+
+                obj.useAirShots = n.useAirShots;
             else
                 error('Invalid input')
             end
@@ -197,6 +277,9 @@ classdef Mog < handle
         function set.data(obj, d)
             if isa(d, 'MogData')
                 obj.data = d;
+                if ~isempty(d)
+                    obj.traces = d.rdata;
+                end
             else
                 error('Data must be a MogData object')
             end
@@ -264,6 +347,7 @@ classdef Mog < handle
             obj.in = true(1,obj.data.ntrace);
             obj.pruneParams.zmin = min([obj.data.Tx_z obj.data.Rx_z]);
             obj.pruneParams.zmax = max([obj.data.Tx_z obj.data.Rx_z]);
+            obj.traces = obj.data.rdata;
         end
         function sort_by_Tx(obj)
             uTx_z = sort(unique(obj.Tx_z_orig));
@@ -299,6 +383,7 @@ classdef Mog < handle
             obj.TxCosDir = obj.TxCosDir(ind, :);
             obj.RxCosDir = obj.RxCosDir(ind, :);
             obj.data.rdata = obj.data.rdata(:, ind);
+            obj.traces = obj.traces(:, ind);
             obj.data.Tx_x = obj.data.Tx_x(ind);
             obj.data.Tx_y = obj.data.Tx_y(ind);
             obj.data.Tx_z = obj.data.Tx_z(ind);
@@ -368,7 +453,7 @@ classdef Mog < handle
             obj = a;
             Mog.getID(obj.ID);  % we must update counter
         end
-       function t0 = get_t0_fixed(tir, v)
+        function t0 = get_t0_fixed(tir, v)
             times = tir.tt(tir.tt_done);
             std_times = tir.et(tir.tt_done);
             ind = times~=-1;

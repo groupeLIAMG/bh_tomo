@@ -47,7 +47,7 @@ haxes3 = axes('Units','points','Parent',f);
 
 
 Tx = unique(mog.data.Tx_z);
-rdata = detrend_rad(mog.data.rdata);
+rdata = mog.traces;
 Amax = kron(max(abs(rdata)), ones(size(rdata,1),1));
 rdata = rdata./Amax;
 
@@ -235,7 +235,7 @@ f.Visible = 'on';
         fac_f = 1.0;
         fac_t = 1.0;
         if strcmp(mog.data.tunits,'ns')
-            % radar: freq nominale donnée en MHz
+            % radar: freq nominale donnï¿½e en MHz
             fac_f = 10^6;
             fac_t = 10^-9;
         elseif strcmp(mog.data.tunits,'ms')
@@ -251,7 +251,7 @@ f.Visible = 'on';
         dt = dt * fac_t;
         Fs = 1/dt;
         
-        % bruit pris sur dernière 20 ns
+        % bruit pris sur derniï¿½re 20 ns
         win_snr = round(20/mog.data.timec);
         snr = data_select(traces, f0, dt, win_snr);
         

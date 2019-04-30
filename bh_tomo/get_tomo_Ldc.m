@@ -121,7 +121,7 @@ if ~isempty(db_file)
         for n=1:nb_models
             noms_models{n} = char(models(n).name );
         end
-        if isfield(models(1), 'inv_res')        
+        if isfield(models(1), 'inv_res') || isprop(models(1), 'inv_res')
             for n=1:length(models(1).inv_res)
                 noms_inv_res{n} = char(models(1).inv_res(n).name );
             end

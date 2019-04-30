@@ -1330,7 +1330,7 @@ f.Visible = 'on';
         end
         if htypeData.Value ~= previousTypeData
             % type was really changed
-            if previousTypeData == 1
+            if previousTypeData == 1 && htypeInv.Value == 1
                 
                 if isempty(model.amp_covar.covar)
                     warndlg({'Covariance model parameters not defined for Attenuation',...
@@ -1362,7 +1362,9 @@ f.Visible = 'on';
                 hcmax.String = num2str(cmaxTT);
             end
             previousTypeData = htypeData.Value;
-            fillCovarUI()
+            if htypeInv.Value == 1
+                fillCovarUI()
+            end
         end
     end
 
@@ -1569,13 +1571,15 @@ f.Visible = 'on';
             L = model.inv_res(noL).tomo.L(ind,:);
             %rays = rays{ind};
             
-            if model.inv_res(noL).param.cm.use_xi==1 && cm.use_xi==0
-                % we need to transform matrix L
-                % we are in 2D
-                np = size(L,2)/2;
-                Lx = L(:,1:np);
-                Lz = L(:,(np+1):end);
-                L = sqrt(Lx.^2 + Lz.^2);
+            if htypeInv.Value == 1
+                if model.inv_res(noL).param.cm.use_xi==1 && cm.use_xi==0
+                    % we need to transform matrix L
+                    % we are in 2D
+                    np = size(L,2)/2;
+                    Lx = L(:,1:np);
+                    Lz = L(:,(np+1):end);
+                    L = sqrt(Lx.^2 + Lz.^2);
+                end
             end
         end
         

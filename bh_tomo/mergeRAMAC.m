@@ -41,7 +41,7 @@ format = '%d';
 if nargin>=5
     format=varargin{2};
 end
-doDort = false;
+doSort = false;
 if nargin>=6
     doSort = varargin{3};
 end

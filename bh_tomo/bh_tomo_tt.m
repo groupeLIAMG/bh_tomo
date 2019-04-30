@@ -1831,3 +1831,58 @@ function checkbox_jump_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox_jump
+
+
+% --- Executes on button press in pushbutton_reinit_traces.
+function pushbutton_reinit_traces_Callback(hObject, eventdata, handles)
+h = getappdata(handles.fig_bh_tomo_tt, 'h');
+mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
+av = getappdata(handles.fig_bh_tomo_tt, 'av');
+ap = getappdata(handles.fig_bh_tomo_tt, 'ap');
+if (get(handles.radiobutton_data,'Value')==1)
+  %    ind = (mog.data.Tx_z(h.no_trace) == mog.data.Tx_z);
+  if ~h.data_vrp
+    ind = false(size(mog.data.Tx_z));
+	ind(h.no_trace)=true;
+	nn=h.no_trace+1;
+	while nn<=mog.data.ntrace && ...
+			  mog.data.Tx_z(nn) == mog.data.Tx_z(h.no_trace)
+	  ind(nn)=true;
+	  nn=nn+1;
+	end
+	nn=h.no_trace-1;
+	while nn>0 && mog.data.Tx_z(nn) == mog.data.Tx_z(h.no_trace)
+	  ind(nn)=true;
+	  nn=nn-1;
+	end
+  else
+	ind = false(size(mog.data.Tx_z));
+	ind(h.no_trace)=true;
+	nn=h.no_trace+1;
+	while nn<=mog.data.ntrace && ...
+			   mog.data.Tx_x(nn) == mog.data.Tx_x(h.no_trace)
+	  ind(nn)=true;
+	  nn=nn+1;
+	end
+	nn=h.no_trace-1;
+	while nn>0 && mog.data.Tx_x(nn) == mog.data.Tx_x(h.no_trace)
+	  ind(nn)=true;
+	  nn=nn-1;
+	end
+  end
+  ind = ind & mog.in;
+  no_traces = 1:mog.data.ntrace;
+elseif (get(handles.radiobutton_av,'Value')==1)
+  ind = 1:av.data.ntrace;
+  no_traces = ind;
+elseif (get(handles.radiobutton_ap,'Value')==1)
+  ind = 1:ap.data.ntrace;
+  no_traces = ind;
+end
+
+trace_no = no_traces(ind);
+h.pick(trace_no) = -1;
+h.pick_et(trace_no) = -1;
+h.done(trace_no) = 0;
+setappdata(handles.fig_bh_tomo_tt,'h',h)
+update_tout(hObject, eventdata, handles)

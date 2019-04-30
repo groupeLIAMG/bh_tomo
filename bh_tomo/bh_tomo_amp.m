@@ -579,7 +579,7 @@ update_tout(hObject, eventdata, handles)
 %
 % --------------------------------------------------------------------
 %
-function active_pointe_Callback(hObject, eventdata, handles)
+function pushbutton_manual_pick_Callback(hObject, eventdata, handles)
 pointe(hObject, eventdata, handles)
 
 %
@@ -1050,21 +1050,6 @@ mog = getappdata(handles.fig_bh_amp, 'mog');
 ind = getInd(handles);
 no = 1:mog.data.ntrace;
 no=no(ind);
-% SB = zeros(size(no));
-% 
-% for n=1:length(no)
-%     imin = findnear(mog.amp_tmin(no(n)), mog.data.timestp);
-%     imax = findnear(mog.amp_tmax(no(n)), mog.data.timestp);
-%     if numel(imin)>1, imin=imin(1); end
-%     if numel(imax)>1, imax=imax(1); end
-%     bruit = rmsv(detrend(mog.data.rdata(1:imin, no(n))));
-%     if bruit > 0 && isempty(bruit)==0
-%         SB(n) = max(abs(mog.data.rdata(imin:imax, no(n)))) / bruit;
-%     else
-%         disp(['bruit infini, trace no ',num2str(no(n))])
-%         SB(n) = Inf;
-%     end
-% end
 
 fac_f = 1.0;
 fac_t = 1.0;
@@ -1126,12 +1111,15 @@ no=no(ind);
 
 for n=1:length(no)
     data = h.proc_data(:,no(n));
-    imin = findnear(h.data_pick_min(no(n)), mog.data.timestp);
-    if numel(imin)>1, imin=imin(1); end
+    
 	if mog.amp_tmax(no(n)) ~= -1
+      % tmin must be picked
+      imin = findnear(mog.amp_tmin(no(n)), mog.data.timestp);
 	  imax = findnear(mog.amp_tmax(no(n)), mog.data.timestp);
 	  if numel(imax)>1, imax=imax(1); end
-	else
+    else
+      imin = findnear(h.data_pick_min(no(n)), mog.data.timestp);
+      if numel(imin)>1, imin=imin(1); end
 	  imax = imin + round(h.fen_App/mog.data.timec);
 	end
     mog.App(no(n)) = max(data(imin:imax)) - min(data(imin:imax));
@@ -1635,7 +1623,7 @@ function set_String_locale(handles, str)
 
 h = getappdata(handles.fig_bh_amp, 'h');
 set(handles.type_analyse,          'String', str.s63)
-set(handles.active_pointe,         'String', str.s67)
+set(handles.pushbutton_manual_pick,'String', str.s67)
 set(handles.no_trace_label,        'String', str.s24)
 set(handles.trace_suivante,        'String', str.s16)
 set(handles.trace_precedente,      'String', str.s15)
@@ -2105,3 +2093,37 @@ h.ffac = 1;
 setappdata(handles.fig_bh_amp, 'h', h)
 set(handles.omega_label,           'String', [h.str.s70,' [',h.fUnits,']'])
 update_tout(hObject, eventdata, handles)
+
+
+function pushbutton_autopick_Callback(hObject, eventdata, handles)
+
+if get(handles.type_analyse,'Value') ~= 3
+    warndlg('Autopicker working only for peak-to-peak amplitude')
+    return
+end
+mog = getappdata(handles.fig_bh_amp, 'mog');
+
+dt = mog.data.timestp(2) - mog.data.timestp(1);
+for n=1:mog.data.ntrace
+    if mog.tt_done(n)
+        [Ama, tma] = findpeaks(mog.traces(:,n), mog.data.timestp);
+        [Ami, tmi] = findpeaks(-mog.traces(:,n), mog.data.timestp);
+        [~, i] = min(abs(tma-mog.tt(n)));
+        tmax = tma(i);
+        Amax = Ama(i);
+        ind = tmi>tmax;  % we search for Amax then Amin which comes _after_
+        tmi = tmi(ind);
+        [~, i] = min(abs(tmi-mog.tt(n)));
+        tmin = tmi(i);
+        Amin = -Ami(i);
+        
+        mog.amp_tmin(n) = tmax-dt; % start of window is just before Amax
+		mog.amp_tmax(n) = tmin+dt; % end of window is just after Amin
+        mog.App(n) = Amax - Amin;
+        mog.amp_done(n) = 1;
+    end
+end
+setappdata(handles.fig_bh_amp, 'mog', mog)
+update_tout(hObject, eventdata, handles)
+  
+  

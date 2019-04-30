@@ -179,7 +179,7 @@ if ~h_set || isempty(h.snr)
     fac_f = 1.0;
     fac_t = 1.0;
     if strcmp(mog.data.tunits,'ns')
-        % radar: freq nominale donnï¿½e en MHz
+        % radar: freq nominale donnée en MHz
         fac_f = 10^6;
         fac_t = 10^-9;
     elseif strcmp(mog.data.tunits,'ms')
@@ -611,7 +611,7 @@ if isfield(h, 'snr')==false || isempty(h.snr)
 	fac_f = 1.0;
 	fac_t = 1.0;
 	if strcmp(mog.data.tunits,'ns')
-		% radar: freq nominale donnï¿½e en MHz
+		% radar: freq nominale donnée en MHz
 		fac_f = 10^6;
 		fac_t = 10^-9;
 	elseif strcmp(mog.data.tunits,'ms')
@@ -656,7 +656,7 @@ if isempty(h.fdom)
 
 	nt = size(traces,2);
 	h.fdom = zeros(1,nt)-1;
-    hwb = waitbar(0,'Calcul des frï¿½quences dominantes');
+    hwb = waitbar(0,'Calcul des fréquences dominantes');
 	inc_wb = 100;
     for n=1:nt
         trace = traces(:,n);
@@ -672,6 +672,9 @@ end
 
 show = get(handles.checkbox_show_fit,'Value');
 if ~show, hwb = waitbar(0,h.str.s276); end
+if show
+    hshow = figure();
+end
 for nb = 1:numel(h.bins)
     if h.fait(nb) == false
         continue
@@ -679,7 +682,7 @@ for nb = 1:numel(h.bins)
     traces = (h.proc_data2(:, h.bins{nb}.no_trace))';
 	fdom = h.fdom(h.bins{nb}.no_trace);
 	snr = h.snr(h.bins{nb}.no_trace);
-	To4 = 1e3 * 0.25./fdom;  % pï¿½riode / 4
+	To4 = 1e3 * 0.25./fdom;  % période / 4
 	To4(fdom==-1) = 0.5/(1e-3*mog.data.rnomfreq);
     
     if h.bins{nb}.work1cycle
@@ -702,7 +705,7 @@ for nb = 1:numel(h.bins)
     for nt=1:size(traces,1)
         %    [c,lags] = xcorr(trace, traces(nt,:));
         c = xcorr(trace, traces(nt,:),'coeff');
-        [xcm, ixcm] = max(c);
+        [~, ixcm] = max(c);
         shift_lag(nt) = ixcm-ne;
 		lsnr = log10(snr(nt));
 		if lsnr>=3
@@ -717,7 +720,7 @@ for nb = 1:numel(h.bins)
     mog.tt(h.bins{nb}.no_trace) = pick;
     mog.et(h.bins{nb}.no_trace) = pick_et;
     if h.scale_fdom==1
-        % on remet ï¿½ l'ï¿½chelle initiale
+        % on remet à l'échelle initiale
         fac = h.fdom(h.bins{nb}.no_trace);
         ind1 = fac==-1;
         ind2 = h.snr(h.bins{nb}.no_trace) <= seuil_fdom;
@@ -729,7 +732,7 @@ for nb = 1:numel(h.bins)
     mog.tt_done(h.bins{nb}.no_trace) = true;
     
     if show
-        figure(1)
+        figure(hshow)
         yt = 1:size(traces,1);
         imagesc(mog.data.timestp, yt, traces)
         colormap(gray)
@@ -950,7 +953,7 @@ win_snr = round(win_snr/mog.data.timec);
 fac_f = 1.0;
 fac_t = 1.0;
 if strcmp(mog.data.tunits,'ns')
-    % radar: freq nominale donnï¿½e en MHz
+    % radar: freq nominale donnée en MHz
     fac_f = 10^6;
     fac_t = 10^-9;
 elseif strcmp(mog.data.tunits,'ms')
@@ -1290,7 +1293,7 @@ function [indmin, indmax, indzer] = extr(x)
 %           - indmax = indices of maxima
 %           - indzer = indices of zero-crossings
 %
-% Adaptï¿½ de:
+% Adapté de:
 % G. Rilling, last modification: July 2002
 % gabriel.rilling@ens-lyon.fr
 

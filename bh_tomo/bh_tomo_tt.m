@@ -39,7 +39,7 @@ function varargout = bh_tomo_tt(varargin)
 
 % Edit the above text to modify the response to help bh_tomo_tt
 
-% Last Modified by GUIDE v2.5 16-Mar-2016 11:31:29
+% Last Modified by GUIDE v2.5 30-Apr-2019 09:55:30
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -151,11 +151,6 @@ end
 
 set(handles.radiobutton_data,'String',[h.str.s23,': ',mog.name])
 
-%h.proc_data = detrend_rad(mog.data.rdata);
-%cmin=-max(max(abs(h.proc_data)));
-%cmax= -cmin;
-%h.cminmax = [cmin cmax];
-
 h.data_vrp = false;
 if ~isempty(findstr(mog.data.csurvmod, 'VRP'))
   h.data_vrp = true;
@@ -178,6 +173,8 @@ end
 
 set(handles.filtre_ondelette,'Value',0)
 set(handles.radiobutton_data,'Value',1)
+set(handles.radiobutton_av,'Value',0)
+set(handles.radiobutton_ap,'Value',0)
 radiobutton_data_Callback(hObject, eventdata, handles)
 
 

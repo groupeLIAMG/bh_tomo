@@ -53,10 +53,7 @@ classdef MogData < handle
                 obj.comment = '';
                 obj.date = '';
                 obj.tdata = [];
-            else
-                if ~isstruct(varargin{1})
-                    error('Invalid input')
-                end
+            elseif isstruct(varargin{1})
                 s = varargin{1};
                 obj.ntrace = s.ntrace;
                 obj.nptsptrc = s.nptsptrc;
@@ -89,6 +86,33 @@ classdef MogData < handle
                 else
                     obj.tdata = [];
                 end
+            elseif isa(varargin{1}, 'MogData')
+                s = varargin{1};
+                obj.ntrace = s.ntrace;
+                obj.nptsptrc = s.nptsptrc;
+                obj.rstepsz = s.rstepsz;
+                obj.cunits = s.cunits;
+                obj.rnomfreq = s.rnomfreq;
+                obj.csurvmod = s.csurvmod;
+                obj.timec = s.timec;
+                obj.rdata = s.rdata;
+                obj.timestp = s.timestp;
+                obj.Tx_x = s.Tx_x;
+                obj.Tx_y = s.Tx_y;
+                obj.Tx_z = s.Tx_z;
+                obj.Rx_x = s.Rx_x;
+                obj.Rx_y = s.Rx_y;
+                obj.Rx_z = s.Rx_z;
+                obj.antennas = s.antennas;
+                obj.synthetique = s.synthetique;
+                obj.tunits = s.tunits;
+                obj.TxOffset = s.TxOffset;
+                obj.RxOffset = s.RxOffset;
+                obj.comment = s.comment;
+                obj.date = s.date;
+                obj.tdata = s.tdata;
+            else
+                error('Invalid input')
             end
         end
         

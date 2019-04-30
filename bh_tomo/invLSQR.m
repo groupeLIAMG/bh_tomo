@@ -1,5 +1,5 @@
-function tomo = invLSQR(param,data,idata,grid,L,t_handle,g_handles,gv)
-% tomo = invLSQR(param,data,idata,grid,L,t_handle,g_handles,gv)
+function tomo = invLSQR(param,data,idata,grid,L,th,gh,gv)
+% tomo = invLSQR(param,data,idata,grid,L,th,gh,gv)
 %
 % input
 %   param : struct variable with the following members
@@ -35,8 +35,9 @@ function tomo = invLSQR(param,data,idata,grid,L,t_handle,g_handles,gv)
 %
 %   L: precomputed ray matrix (set to [] if not readily available)
 %
-%   t_handle: text handle used in GUI, set to [] if using command line
-%   g_handle: graphics handle used in GUI, set to [] if using command line
+%   th: text handle used in GUI, set to [] if using command line
+%   gh: graphics handle used in GUI, set to [] if using command line
+%   gv: GridViewer
 %
 %
 % output
@@ -53,15 +54,15 @@ function tomo = invLSQR(param,data,idata,grid,L,t_handle,g_handles,gv)
 %
 %
 
-if ~isempty(t_handle)
-    t_handle.String = 'LSQR Inversion - Starting ...';
+if ~isempty(th)
+    th.String = 'LSQR Inversion - Starting ...';
 else
     disp('LSQR Inversion - Starting ...');
 end
 
-if ~isempty(g_handles)
-    hideUnvisited = g_handles{6};
-    showTxRx = g_handles{7};
+if ~isempty(gh)
+    hideUnvisited = gh{6};
+    showTxRx = gh{7};
 end    
 
 tomo.rays = {};
@@ -77,8 +78,8 @@ if any(sum(data(:,1:3)==data(:,4:6),2)==3)
 end
 
 if isempty(L)
-    if ~isempty(t_handle)
-        t_handle.String = 'LSQR Inversion - Straight rays ...';
+    if ~isempty(th)
+        th.String = 'LSQR Inversion - Straight rays ...';
         drawnow
     else
         disp('LSQR Inversion - Straight rays ...');
@@ -107,8 +108,8 @@ end
 [Dx,Dy,Dz] = grid.derivative(param.order);
 for noIter=1:param.numItStraight + param.numItCurved
     
-    if ~isempty(t_handle)
-        t_handle.String = ['LSQR Inversion - Solving System, Iteration ',num2str(noIter)];
+    if ~isempty(th)
+        th.String = ['LSQR Inversion - Solving System, Iteration ',num2str(noIter)];
         drawnow
     else
         disp(['LSQR Inversion - Solving System, Iteration ',num2str(noIter)])
@@ -149,7 +150,7 @@ for noIter=1:param.numItStraight + param.numItCurved
     tomo.res = resvec;
     tomo.var_res = lsvec;
     
-    if ~isempty(g_handles)
+    if ~isempty(gh)
         if hideUnvisited == 1
             rd = full(sum(L));
             mask = zeros(size(tomo.s));
@@ -159,18 +160,18 @@ for noIter=1:param.numItStraight + param.numItCurved
         end
         
         if param.tomoAtt==0
-            gv.plotTomo(mask+1./tomo.s,'LSQR','Distance [m]','Elevation [m]',g_handles{3})
+            gv.plotTomo(mask+1./tomo.s,'LSQR','Distance [m]','Elevation [m]',gh{3})
         else
-            gv.plotTomo(mask+tomo.s,'LSQR','Distance [m]','Elevation [m]',g_handles{3})
+            gv.plotTomo(mask+tomo.s,'LSQR','Distance [m]','Elevation [m]',gh{3})
         end
-        if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
-        colorbar('peer', g_handles{3})
-        eval(['colormap(',g_handles{2},')'])
+        if ~isempty(gh{1}), caxis(gh{3},gh{1}), end
+        colorbar('peer', gh{3})
+        colormap( gh{3}, gh{2})
         if showTxRx == 1 && ~isa(grid, 'Grid3D')
-            hold(g_handles{3}, 'on')
-            plot(g_handles{3}, data(:,1), data(:,3), 'r+')
-            plot(g_handles{3}, data(:,4), data(:,6), 'ro')
-            hold(g_handles{3}, 'off')
+            hold(gh{3}, 'on')
+            plot(gh{3}, data(:,1), data(:,3), 'r+')
+            plot(gh{3}, data(:,4), data(:,6), 'ro')
+            hold(gh{3}, 'off')
         end
         drawnow
     end
@@ -182,8 +183,8 @@ for noIter=1:param.numItStraight + param.numItCurved
             tomo = [];
         end
         % update Rays
-        if ~isempty(t_handle)
-            t_handle.String = ['LSQR Inversion - Raytracing, Iteration ',num2str(noIter)];
+        if ~isempty(th)
+            th.String = ['LSQR Inversion - Raytracing, Iteration ',num2str(noIter)];
             drawnow
         else
             disp(['LSQR Inversion - Raytracing, Iteration ',num2str(noIter)])
@@ -202,8 +203,8 @@ tomo.L = L;
 if param.saveInvData == 1
     tomo.invData(end).date = datestr(now);
 end
-if ~isempty(t_handle)
-    t_handle.String = '';
+if ~isempty(th)
+    th.String = '';
 end
 
 end

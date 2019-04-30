@@ -1,14 +1,14 @@
-function tomo = invGeostatTiltEllipt(param,data,idata,grid,cm,L,t_handle,g_handles,gv )
+function tomo = invGeostatTiltEllipt(param,data,idata,grid,cm,L,th,gh,gv )
 
-if ~isempty(t_handle)
-    t_handle.String = 'Geostatistical Inversion - Starting ...';
+if ~isempty(th)
+    th.String = 'Geostatistical Inversion - Starting ...';
 else
     disp('Geostatistical Inversion - Starting ...');
 end
 
-if ~isempty(g_handles)
-    hideUnvisited = g_handles{6};
-    showTxRx = g_handles{7};
+if ~isempty(gh)
+    hideUnvisited = gh{6};
+    showTxRx = gh{7};
 end    
 
 tomo.rays = {};
@@ -74,8 +74,8 @@ s0 = mean(data(:,7)./rayLength);
 t0 = s0*rayLength;
 s0 = s0 + zeros(size(Lx,2),1);
 xi0 = ones(size(Lz,2),1)+0.001;     % add 1/1000 so that J_th ~= 0
-th0 = zeros(size(Lz,2),1)+0.0044;   % add a quarter of a degree so that J_th ~= 0
-e0 = [s0; xi0; th0];
+te0 = zeros(size(Lz,2),1)+0.0044;   % add a quarter of a degree so that J_th ~= 0
+e0 = [s0; xi0; te0];
 
 nbreitJ = 3;
 normOrder = 2;
@@ -84,8 +84,8 @@ modeJ = 1;
 
 for noIter=1:param.numItStraight + param.numItCurved
 
-    if ~isempty(t_handle)
-        t_handle.String = ['Geostatistical Inversion - Solving System, Iteration ',num2str(noIter)];
+    if ~isempty(th)
+        th.String = ['Geostatistical Inversion - Solving System, Iteration ',num2str(noIter)];
         drawnow
     else
         disp(['Geostatistical Inversion -  Solving System, Iteration ',num2str(noIter)])
@@ -145,9 +145,9 @@ for noIter=1:param.numItStraight + param.numItCurved
 
             s = s0 + de(1:nCells);
             xi = xi0 + de((nCells+1):(2*nCells));
-            th = th0 + de((2*nCells+1):end);
-            co = kron(ones(nt,1),cos(th)');
-            si = kron(ones(nt,1),sin(th)');
+            te = te0 + de((2*nCells+1):end);
+            co = kron(ones(nt,1),cos(te)');
+            si = kron(ones(nt,1),sin(te)');
             t = (Lx.*co + Lz.*si).^2 + (Lz.*co - Lx.*si).^2.*kron(ones(nt,1),xi'.^2);
             t = kron(ones(nt,1),s') .* sqrt(t);
             t = sum(t,2);
@@ -156,8 +156,8 @@ for noIter=1:param.numItStraight + param.numItCurved
             t0 = t;
             s0 = s;
             xi0 = xi;
-            th0 = th;
-            e0 = [s0; xi0; th0];
+            te0 = te;
+            e0 = [s0; xi0; te0];
             resJ(itJ) = res;
             if res < error
                 break
@@ -166,7 +166,7 @@ for noIter=1:param.numItStraight + param.numItCurved
 
         tomo.s  = s0;
         tomo.xi = xi0;
-        tomo.th = th0;
+        tomo.th = te0;
 
     else
 
@@ -215,9 +215,9 @@ for noIter=1:param.numItStraight + param.numItCurved
 
             s = s0 + de(1:nCells);
             xi = xi0 + de((nCells+1):(2*nCells));
-            th = th0 + de((2*nCells+1):end);
-            co = kron(ones(nt,1),cos(th)');
-            si = kron(ones(nt,1),sin(th)');
+            te = te0 + de((2*nCells+1):end);
+            co = kron(ones(nt,1),cos(te)');
+            si = kron(ones(nt,1),sin(te)');
             t = (Lx.*co + Lz.*si).^2 + (Lz.*co - Lx.*si).^2.*kron(ones(nt,1),xi'.^2);
             t = kron(ones(nt,1),s') .* sqrt(t);
             t = sum(t,2);
@@ -226,8 +226,8 @@ for noIter=1:param.numItStraight + param.numItCurved
             t0 = t;
             s0 = s;
             xi0 = xi;
-            th0 = th;
-            e0 = [s0; xi0; th0];
+            te0 = te;
+            e0 = [s0; xi0; te0];
             resJ(itJ) = res;
             if res < error
                 break
@@ -269,7 +269,7 @@ for noIter=1:param.numItStraight + param.numItCurved
 
                 e_sim = [e_sim(1:nCells,:)+kron(ones(1,param.nSim),s0);
                     e_sim((nCells+1):2*nCells,:)+kron(ones(1,param.nSim),xi0);
-                    e_sim((2*nCells+1):end,:)+kron(ones(1,param.nSim),th0);];
+                    e_sim((2*nCells+1):end,:)+kron(ones(1,param.nSim),te0);];
             end
 
         end
@@ -278,18 +278,18 @@ for noIter=1:param.numItStraight + param.numItCurved
         if ~isempty(cont) && param.useCont==1
             sgr = e_sim(:,diff1_min);
         else
-            sgr = deformationGraduelle(e_sim,L,c0,dt,t_handle);
+            sgr = deformationGraduelle(e_sim,L,c0,dt,th);
         end
 
         tomo.s  = s0;
         tomo.xi = xi0;
-        tomo.th = th0;
+        tomo.th = te0;
         tomo.simu = e_sim;
         tomo.sgr  = sgr;
         tomo.diff1_min = diff1_min;
     end
 
-    if ~isempty(g_handles)
+    if ~isempty(gh)
         if hideUnvisited == 1
             rd = full(sum(sqrt(Lx.^2+Lz.^2)));
             mask = zeros(size(tomo.s));
@@ -298,30 +298,30 @@ for noIter=1:param.numItStraight + param.numItCurved
             mask = zeros(size(tomo.s));
         end
 
-        gv.plotTomo(mask+1./(s0.*xi0),'V_z','Distance [m]','Elevation [m]',g_handles{3})
-        if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
-        colorbar('peer', g_handles{3})
+        gv.plotTomo(mask+1./(s0.*xi0),'V_z','Distance [m]','Elevation [m]',gh{3})
+        if ~isempty(gh{1}), caxis(gh{3},gh{1}), end
+        colorbar('peer', gh{3})
 
-        gv.plotTomo(mask+xi0,'\xi','Distance [m]','',g_handles{4})
-        colorbar('peer', g_handles{4})
+        gv.plotTomo(mask+xi0,'\xi','Distance [m]','',gh{4})
+        colorbar('peer', gh{4})
 
-        gv.plotTomo(mask+th0*180/pi,'\theta','Distance [m]','',g_handles{5})
-        colorbar('peer', g_handles{5})
+        gv.plotTomo(mask+te0*180/pi,'\theta','Distance [m]','',gh{5})
+        colorbar('peer', gh{5})
 
-        eval(['colormap(',g_handles{2},')'])
+        colormap( gh{3}, gh{2})
         if showTxRx == 1 && ~isa(grid, 'Grid3D')
-            hold(g_handles{3}, 'on')
-            hold(g_handles{4}, 'on')
-            hold(g_handles{5}, 'on')
-            plot(g_handles{3}, data(:,1), data(:,3), 'r+')
-            plot(g_handles{3}, data(:,4), data(:,6), 'ro')
-            plot(g_handles{4}, data(:,1), data(:,3), 'r+')
-            plot(g_handles{4}, data(:,4), data(:,6), 'ro')
-            plot(g_handles{5}, data(:,1), data(:,3), 'r+')
-            plot(g_handles{5}, data(:,4), data(:,6), 'ro')
-            hold(g_handles{3}, 'off')
-            hold(g_handles{4}, 'off')
-            hold(g_handles{5}, 'off')
+            hold(gh{3}, 'on')
+            hold(gh{4}, 'on')
+            hold(gh{5}, 'on')
+            plot(gh{3}, data(:,1), data(:,3), 'r+')
+            plot(gh{3}, data(:,4), data(:,6), 'ro')
+            plot(gh{4}, data(:,1), data(:,3), 'r+')
+            plot(gh{4}, data(:,4), data(:,6), 'ro')
+            plot(gh{5}, data(:,1), data(:,3), 'r+')
+            plot(gh{5}, data(:,4), data(:,6), 'ro')
+            hold(gh{3}, 'off')
+            hold(gh{4}, 'off')
+            hold(gh{5}, 'off')
         end
         drawnow
     end
@@ -333,8 +333,8 @@ for noIter=1:param.numItStraight + param.numItCurved
             tomo = [];
         end
         % update Rays
-        if ~isempty(t_handle)
-            t_handle.String = ['Geostatistical Inversion - Raytracing, Iteration ',num2str(noIter)];
+        if ~isempty(th)
+            th.String = ['Geostatistical Inversion - Raytracing, Iteration ',num2str(noIter)];
             drawnow
         else
             disp(['Geostatistical Inversion -  Raytracing, Iteration ',num2str(noIter)])
@@ -363,8 +363,8 @@ if param.saveInvData == 1
     tomo.invData(end).date = datestr(now);
 end
 
-if ~isempty(t_handle)
-    t_handle.String = '';
+if ~isempty(th)
+    th.String = '';
 end
 
 end

@@ -1,14 +1,14 @@
-function tomo = invGeostatEllipt(param,data,idata,grid,cm,L,t_handle,g_handles,gv )
+function tomo = invGeostatEllipt(param,data,idata,grid,cm,L,th,gh,gv )
 
-if ~isempty(t_handle)
-    t_handle.String = 'Geostatistical Inversion - Starting ...';
+if ~isempty(th)
+    th.String = 'Geostatistical Inversion - Starting ...';
 else
     disp('Geostatistical Inversion - Starting ...');
 end
 
-if ~isempty(g_handles)
-    hideUnvisited = g_handles{6};
-    showTxRx = g_handles{7};
+if ~isempty(gh)
+    hideUnvisited = gh{6};
+    showTxRx = gh{7};
 end    
 
 tomo.rays = {};
@@ -90,8 +90,8 @@ modeJ = 1;
 
 for noIter=1:param.numItStraight + param.numItCurved
 
-    if ~isempty(t_handle)
-        t_handle.String = ['Geostatistical Inversion - Solving System, Iteration ',num2str(noIter)];
+    if ~isempty(th)
+        th.String = ['Geostatistical Inversion - Solving System, Iteration ',num2str(noIter)];
         drawnow
     else
         disp(['Geostatistical Inversion -  Solving System, Iteration ',num2str(noIter)])
@@ -246,7 +246,7 @@ for noIter=1:param.numItStraight + param.numItCurved
         if ~isempty(cont) && param.useCont==1
             sgr = e_sim(:,diff1_min);
         else
-            sgr = deformationGraduelle(e_sim,L,c0,dt,t_handle);
+            sgr = deformationGraduelle(e_sim,L,c0,dt,th);
         end
 
         tomo.s    = s0;
@@ -256,7 +256,7 @@ for noIter=1:param.numItStraight + param.numItCurved
         tomo.diff1_min = diff1_min;
     end
 
-    if ~isempty(g_handles)
+    if ~isempty(gh)
         if hideUnvisited == 1
             rd = full(sum(sqrt(Lx.^2+Lz.^2)));
             mask = zeros(size(tomo.s));
@@ -266,25 +266,25 @@ for noIter=1:param.numItStraight + param.numItCurved
         end
             
         if param.tomoAtt==0
-            gv.plotTomo(mask+1./(s0.*xi0),'V_z','Distance [m]','Elevation [m]',g_handles{3})
+            gv.plotTomo(mask+1./(s0.*xi0),'V_z','Distance [m]','Elevation [m]',gh{3})
         else
-            gv.plotTomo(mask+(s0.*xi0),'\alpha_z','Distance [m]','Elevation [m]',g_handles{3})
+            gv.plotTomo(mask+(s0.*xi0),'\alpha_z','Distance [m]','Elevation [m]',gh{3})
         end
-        if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
-        colorbar('peer', g_handles{3})
+        if ~isempty(gh{1}), caxis(gh{3},gh{1}), end
+        colorbar('peer', gh{3})
 
-        gv.plotTomo(mask+xi0,'\xi','Distance [m]','',g_handles{4})
-        colorbar('peer', g_handles{4})
-        eval(['colormap(',g_handles{2},')'])
+        gv.plotTomo(mask+xi0,'\xi','Distance [m]','',gh{4})
+        colorbar('peer', gh{4})
+        colormap( gh{3}, gh{2})
         if showTxRx == 1 && ~isa(grid, 'Grid3D')
-            hold(g_handles{3}, 'on')
-            hold(g_handles{4}, 'on')
-            plot(g_handles{3}, data(:,1), data(:,3), 'r+')
-            plot(g_handles{3}, data(:,4), data(:,6), 'ro')
-            plot(g_handles{4}, data(:,1), data(:,3), 'r+')
-            plot(g_handles{4}, data(:,4), data(:,6), 'ro')
-            hold(g_handles{3}, 'off')
-            hold(g_handles{4}, 'off')
+            hold(gh{3}, 'on')
+            hold(gh{4}, 'on')
+            plot(gh{3}, data(:,1), data(:,3), 'r+')
+            plot(gh{3}, data(:,4), data(:,6), 'ro')
+            plot(gh{4}, data(:,1), data(:,3), 'r+')
+            plot(gh{4}, data(:,4), data(:,6), 'ro')
+            hold(gh{3}, 'off')
+            hold(gh{4}, 'off')
         end
         drawnow
     end
@@ -296,8 +296,8 @@ for noIter=1:param.numItStraight + param.numItCurved
             tomo = [];
         end
         % update Rays
-        if ~isempty(t_handle)
-            t_handle.String = ['Geostatistical Inversion - Raytracing, Iteration ',num2str(noIter)];
+        if ~isempty(th)
+            th.String = ['Geostatistical Inversion - Raytracing, Iteration ',num2str(noIter)];
             drawnow
         else
             disp(['Geostatistical Inversion -  Raytracing, Iteration ',num2str(noIter)])
@@ -323,8 +323,8 @@ if param.saveInvData == 1
     tomo.invData(end).date = datestr(now);
 end
 
-if ~isempty(t_handle)
-    t_handle.String = '';
+if ~isempty(th)
+    th.String = '';
 end
 
 end

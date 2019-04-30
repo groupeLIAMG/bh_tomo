@@ -119,7 +119,7 @@ for noIter=1:p.max_it
             if ~isempty(gh{1}), caxis(gh{4},gh{1}), end
             colorbar('peer', gh{4})
             
-            eval(['colormap(',gh{2},')'])
+            colormap( gh{3}, gh{2})
             drawnow
         end
 
@@ -143,7 +143,7 @@ for noIter=1:p.max_it
             if ~isempty(gh{1}), caxis(gh{4},gh{1}), end
             colorbar('peer', gh{4})
             
-            eval(['colormap(',gh{2},')'])
+            colormap( gh{3}, gh{2})
             drawnow
         end
         

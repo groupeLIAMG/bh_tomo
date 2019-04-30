@@ -1,5 +1,5 @@
-function tomo = invGeostat(param,data,idata,grid,cm,L,t_handle,g_handles,gv)
-% tomo = invGeostat(param, data, idata, grid, cm, L, t_handle, g_handles)
+function tomo = invGeostat(param,data,idata,grid,cm,L,th,gh,gv)
+% tomo = invGeostat(param, data, idata, grid, cm, L, th, gh)
 %
 % input
 %   param : struct variable with the following members
@@ -38,8 +38,9 @@ function tomo = invGeostat(param,data,idata,grid,cm,L,t_handle,g_handles,gv)
 %
 %   L: precomputed ray matrix (set to [] if not readily available)
 %
-%   t_handle: text handle used in GUI, set to [] if using command line
-%   g_handle: graphics handle used in GUI, set to [] if using command line
+%   th: text handle used in GUI, set to [] if using command line
+%   gh: graphics handle used in GUI, set to [] if using command line
+%   gv: GridViewer
 %
 %
 % output
@@ -57,16 +58,16 @@ function tomo = invGeostat(param,data,idata,grid,cm,L,t_handle,g_handles,gv)
 %
 %
 
-if ~isempty(t_handle)
-    t_handle.String = 'Geostatistical Inversion - Starting ...';
+if ~isempty(th)
+    th.String = 'Geostatistical Inversion - Starting ...';
     drawnow
 else
     disp('Geostatistical Inversion - Starting ...');
 end
 
-if ~isempty(g_handles)
-    hideUnvisited = g_handles{6};
-    showTxRx = g_handles{7};
+if ~isempty(gh)
+    hideUnvisited = gh{6};
+    showTxRx = gh{7};
 end
 
 tomo.rays = {};
@@ -123,8 +124,8 @@ end
 
 for noIter=1:param.numItStraight + param.numItCurved
 
-    if ~isempty(t_handle)
-        t_handle.String = ['Geostatistical Inversion - Solving System, Iteration ',num2str(noIter)];
+    if ~isempty(th)
+        th.String = ['Geostatistical Inversion - Solving System, Iteration ',num2str(noIter)];
         drawnow
     else
         disp(['Geostatistical Inversion -  Solving System, Iteration ',num2str(noIter)])
@@ -168,7 +169,7 @@ for noIter=1:param.numItStraight + param.numItCurved
         end
         tomo.s = m+l_moy;
 
-        if ~isempty(g_handles)
+        if ~isempty(gh)
             if hideUnvisited == 1
                 rd = full(sum(L));
                 mask = zeros(size(tomo.s));
@@ -178,18 +179,18 @@ for noIter=1:param.numItStraight + param.numItCurved
             end
 
             if param.tomoAtt==0
-                gv.plotTomo(mask+1./tomo.s,'Cokriging','Distance [m]','Elevation [m]',g_handles{3})
+                gv.plotTomo(mask+1./tomo.s,'Cokriging','Distance [m]','Elevation [m]',gh{3})
             else
-                gv.plotTomo(mask+tomo.s,'Cokriging','Distance [m]','Elevation [m]',g_handles{3})
+                gv.plotTomo(mask+tomo.s,'Cokriging','Distance [m]','Elevation [m]',gh{3})
             end
-            if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
-            colorbar('peer', g_handles{3})
-            eval(['colormap(',g_handles{2},')'])
+            if ~isempty(gh{1}), caxis(gh{3},gh{1}), end
+            colorbar('peer', gh{3})
+            colormap( gh{3}, gh{2})
             if showTxRx == 1 && ~isa(grid, 'Grid3D')
-                hold(g_handles{3}, 'on')
-                plot(g_handles{3}, data(:,1), data(:,3), 'r+')
-                plot(g_handles{3}, data(:,4), data(:,6), 'ro')
-                hold(g_handles{3}, 'off')
+                hold(gh{3}, 'on')
+                plot(gh{3}, data(:,1), data(:,3), 'r+')
+                plot(gh{3}, data(:,4), data(:,6), 'ro')
+                hold(gh{3}, 'off')
             end
             drawnow
         end
@@ -229,7 +230,7 @@ for noIter=1:param.numItStraight + param.numItCurved
         if ~isempty(cont) && param.useCont==1
             ms = mSim(:,diff1_min);
         else
-            ms = deformationGraduelle(mSim,L,c0,dt,t_handle);
+            ms = deformationGraduelle(mSim,L,c0,dt,th);
         end
 
         tomo.s = m+l_moy;
@@ -238,7 +239,7 @@ for noIter=1:param.numItStraight + param.numItCurved
         tomo.lmoy=l_moy;
         tomo.diff1_min=diff1_min;
 
-        if ~isempty(g_handles)
+        if ~isempty(gh)
             if hideUnvisited == 1
                 rd = full(sum(L));
                 mask = zeros(size(tomo.s));
@@ -248,30 +249,30 @@ for noIter=1:param.numItStraight + param.numItCurved
             end
 
             if param.tomoAtt==0
-                gv.plotTomo(mask+1./tomo.s,'Cokriging','Distance [m]','Elevation [m]',g_handles{3})
+                gv.plotTomo(mask+1./tomo.s,'Cokriging','Distance [m]','Elevation [m]',gh{3})
             else
-                gv.plotTomo(mask+tomo.s,'Cokriging','Distance [m]','Elevation [m]',g_handles{3})
+                gv.plotTomo(mask+tomo.s,'Cokriging','Distance [m]','Elevation [m]',gh{3})
             end
-            if ~isempty(g_handles{1}), caxis(g_handles{3},g_handles{1}), end
-            colorbar('peer', g_handles{3})
-            eval(['colormap(',g_handles{2},')'])
+            if ~isempty(gh{1}), caxis(gh{3},gh{1}), end
+            colorbar('peer', gh{3})
+            colormap( gh{3}, gh{2})
 
             if param.tomoAtt==0
-                gv.plotTomo(mask+1./(tomo.sgr),'Simulation','Distance [m]',[],g_handles{4},2)
+                gv.plotTomo(mask+1./(tomo.sgr),'Simulation','Distance [m]',[],gh{4},2)
             else
-                gv.plotTomo(mask+tomo.sgr,'Simulation','Distance [m]',[],g_handles{4},2)
+                gv.plotTomo(mask+tomo.sgr,'Simulation','Distance [m]',[],gh{4},2)
             end
-            if ~isempty(g_handles{1}), caxis(g_handles{4},g_handles{1}), end
-            colorbar('peer', g_handles{4})
+            if ~isempty(gh{1}), caxis(gh{4},gh{1}), end
+            colorbar('peer', gh{4})
             if showTxRx == 1 && ~isa(grid, 'Grid3D')
-                hold(g_handles{3}, 'on')
-                hold(g_handles{4}, 'on')
-                plot(g_handles{3}, data(:,1), data(:,3), 'r+')
-                plot(g_handles{3}, data(:,4), data(:,6), 'ro')
-                plot(g_handles{4}, data(:,1), data(:,3), 'r+')
-                plot(g_handles{4}, data(:,4), data(:,6), 'ro')
-                hold(g_handles{3}, 'off')
-                hold(g_handles{4}, 'off')
+                hold(gh{3}, 'on')
+                hold(gh{4}, 'on')
+                plot(gh{3}, data(:,1), data(:,3), 'r+')
+                plot(gh{3}, data(:,4), data(:,6), 'ro')
+                plot(gh{4}, data(:,1), data(:,3), 'r+')
+                plot(gh{4}, data(:,4), data(:,6), 'ro')
+                hold(gh{3}, 'off')
+                hold(gh{4}, 'off')
             end
             drawnow
         end
@@ -284,8 +285,8 @@ for noIter=1:param.numItStraight + param.numItCurved
             tomo = [];
         end
         % update Rays
-        if ~isempty(t_handle)
-            t_handle.String = ['Geostatistical Inversion - Raytracing, Iteration ',num2str(noIter)];
+        if ~isempty(th)
+            th.String = ['Geostatistical Inversion - Raytracing, Iteration ',num2str(noIter)];
             drawnow
         else
             disp(['Geostatistical Inversion -  Raytracing, Iteration ',num2str(noIter)])
@@ -304,8 +305,8 @@ tomo.L = L;
 if param.saveInvData == 1
     tomo.invData(end).date = datestr(now);
 end
-if ~isempty(t_handle)
-    t_handle.String = '';
+if ~isempty(th)
+    th.String = '';
 end
 
 end

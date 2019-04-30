@@ -55,8 +55,8 @@ rdata = rdata./Amax;
 % find number of Tx positions
 uTx = unique([mog.data.Tx_x' mog.data.Tx_y' mog.data.Tx_z'],'rows');
 text = cell(size(uTx,1),1);
-for n=1:length(text)
-    text{n} = num2str(n);
+for nn=1:length(text)
+    text{nn} = num2str(nn);
 end
 htxNumber = uicontrol('Style','text',...
     'String','Tx Number',...
@@ -235,7 +235,7 @@ f.Visible = 'on';
         fac_f = 1.0;
         fac_t = 1.0;
         if strcmp(mog.data.tunits,'ns')
-            % radar: freq nominale donnï¿½e en MHz
+            % radar: freq nominale donnée en MHz
             fac_f = 10^6;
             fac_t = 10^-9;
         elseif strcmp(mog.data.tunits,'ms')
@@ -251,7 +251,7 @@ f.Visible = 'on';
         dt = dt * fac_t;
         Fs = 1/dt;
         
-        % bruit pris sur derniï¿½re 20 ns
+        % bruit pris sur dernière 20 ns
         win_snr = round(20/mog.data.timec);
         snr = data_select(traces, f0, dt, win_snr);
         
@@ -309,6 +309,8 @@ f.Visible = 'on';
         xlabel(haxes1,['Time [',mog.data.tunits,']'],'FontSize',fs)
         ylabel(haxes1,['Rx elevation [',mog.data.cunits,']'],'FontSize',fs)
         title(haxes1,'Normalized amplitudes','FontSize',fs+1)
+        
+        Pxx(isnan(Pxx)) = 0;
         
         imagesc(freq/fac_f, z, log10(Pxx'),'Parent',haxes2)
         xlabel(haxes2,'Frequency [MHz]','FontSize',fs)

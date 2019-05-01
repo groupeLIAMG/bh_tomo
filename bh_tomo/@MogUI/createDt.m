@@ -16,8 +16,8 @@ if ispc
     vScale = 0.81;
 end
 
-width = 450;
-height = 225*vScale;
+width = 475;
+height = 300*vScale;
 
 % get screen size
 su = get(groot,'Units');
@@ -119,8 +119,8 @@ uiwait(f)
         width = f.Position(3);
         height = f.Position(4);
         
-        hSize = width/3;
-        hSpace = hSize/5;
+        hSize = width/2.5;
+        hSpace = width/25;
         
         vFac = 0.8*height/500;
         if vFac<1

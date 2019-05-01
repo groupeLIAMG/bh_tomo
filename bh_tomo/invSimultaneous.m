@@ -144,6 +144,7 @@ for noIter=1:p.max_it
             colorbar('peer', gh{4})
             
             colormap( gh{3}, gh{2})
+            colormap( gh{4}, gh{2})
             drawnow
         end
     
@@ -175,6 +176,7 @@ for noIter=1:p.max_it
             colorbar('peer', gh{4})
             
             colormap( gh{3}, gh{2})
+            colormap( gh{4}, gh{2})
             drawnow
         end
         

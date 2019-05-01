@@ -391,9 +391,7 @@ classdef Mog < handle
             obj.data.Rx_y = obj.data.Rx_y(ind);
             obj.data.Rx_z = obj.data.Rx_z(ind);
         end
-    end
-    
-    methods (Access=private)
+        
         function [t0,fac_dt_av,fac_dt_ap] = corr_t0(obj,ndata,before,after,varargin)
             if nargin>=5
                 show = varargin{1};

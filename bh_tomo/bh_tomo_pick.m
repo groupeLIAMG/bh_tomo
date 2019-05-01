@@ -728,8 +728,16 @@ for nb = 1:numel(h.bins)
         fac = h.fmoy./fac;
         mog.tt(h.bins{nb}.no_trace) = mog.tt(h.bins{nb}.no_trace) .* fac;
         mog.et(h.bins{nb}.no_trace) = mog.et(h.bins{nb}.no_trace) .* fac;
+    else
+        fac = 1;
     end
     mog.tt_done(h.bins{nb}.no_trace) = true;
+    
+    % look for values outside possible range
+    ind = mog.tt < 0 && mog.tt > fac*mog.data.timestp(end);
+    mog.tt(ind) = -1;
+    mog.et(ind) = -1;
+    mog.tt_done(ind) = false;
     
     if show
         figure(hshow)

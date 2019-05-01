@@ -34,8 +34,6 @@ ind_max= zeros(ntrace,1);
 h=waitbar(0,'Data denoising ...');
 inc_wb = round(ntrace/100);
 for n=1:ntrace
-	%  trace = detrend_rad(rdata(1:npts,n));
-	%trace2 = debruite(rdata, ondelette, N);
 	trace2 = debruite(rdata(:,n), ondelette, N);
 	trace2 = medfilt1(trace2,5);
 	data(:,n) = trace2(1:nptsptrc);
@@ -58,4 +56,4 @@ th = wthrmngr('sw1ddenoLVL','sqtwolog',swc,'mln');
 for n=1:N
 	swc(n,:) = wthresh(swc(n,:), 'h', th(n));
 end
-trace_filtree=iswt(swc,ondelette);
+trace_filtree = iswt(swc,ondelette);

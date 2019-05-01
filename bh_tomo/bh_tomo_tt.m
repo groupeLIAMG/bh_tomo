@@ -276,13 +276,14 @@ if isnan(no_trace)
 	set(hObject,'string',num2str(h.no_trace))
 	return
 end
-nos = 1:mog.data.ntrace;
-nos = nos(mog.in);
-if isempty( find(no_trace==nos,1) )
-	errordlg('Trace was excluded after pruning',h.str.s45,'modal')
-	set(hObject,'string',num2str(h.no_trace))
-	return
-elseif (get(handles.radiobutton_data,'Value')==1) && no_trace>mog.data.ntrace
+% nos = 1:mog.data.ntrace;
+% nos = nos(mog.in);
+% if isempty( find(no_trace==nos,1) )
+% 	errordlg('Trace was excluded after pruning',h.str.s45,'modal')
+% 	set(hObject,'string',num2str(h.no_trace))
+% 	return
+% end
+if (get(handles.radiobutton_data,'Value')==1) && no_trace>mog.data.ntrace
     errordlg([h.str.s55,num2str(mog.data.ntrace)],h.str.s45,'modal')
 	set(hObject,'string',num2str(h.no_trace))
 	return
@@ -306,7 +307,7 @@ function update_tout(hObject, eventdata, handles)
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 set(handles.trace_traite,'String',num2str(h.no_trace))
 if h.pick_et(h.no_trace) ~= -1
-    set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace)),' ï¿½ ',num2str(h.pick_et(h.no_trace))])
+    set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace)),' ± ',num2str(h.pick_et(h.no_trace))])
 else
     set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace))])
 end

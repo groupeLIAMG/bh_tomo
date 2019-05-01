@@ -2103,6 +2103,12 @@ if get(handles.type_analyse,'Value') ~= 3
 end
 mog = getappdata(handles.fig_bh_amp, 'mog');
 
+% reset variables
+mog.amp_tmin(:) = -1;
+mog.amp_tmax(:) = -1;
+mog.App(:) = 0;
+mog.amp_done(:) = false;
+
 dt = mog.data.timestp(2) - mog.data.timestp(1);
 for n=1:mog.data.ntrace
     if mog.tt_done(n)

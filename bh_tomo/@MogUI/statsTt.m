@@ -74,8 +74,8 @@ if no>0 && no<=length(obj.mogs)
     Tx = [mog.data.Tx_x(ind)' mog.data.Tx_y(ind)' mog.data.Tx_z(ind)'];
     Rx = [mog.data.Rx_x(ind)' mog.data.Rx_y(ind)' mog.data.Rx_z(ind)'];
     
-    vmin = min(vapp);
-    vmax = max(vapp);
+    vmin = min(vapp)-0.00001;
+    vmax = max(vapp)+0.00001;
     c=cmr;
     
     [~, a]=Grid.lsplane([Tx; Rx]);

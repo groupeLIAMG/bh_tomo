@@ -1446,11 +1446,15 @@ f.Visible = 'on';
         model.inv_res = model.inv_res(ind);
         
         if isempty(model.inv_res)
+            hpreviousInv.Value = 1;
             hpreviousInv.String = {'-'};
         else
             names = cell(numel(model.inv_res),1);
             for n=1:numel(model.inv_res)
                 names{n} = model.inv_res(n).name;
+            end
+            if no > numel(names)
+                hpreviousInv.Value = numel(names);
             end
             hpreviousInv.String = names;
         end

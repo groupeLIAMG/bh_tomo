@@ -54,20 +54,29 @@ if ~isempty(ap)
 	end
 end
 
-
-if isnan(t0av) || isnan(t0ap)
+if isempty(t0av) && isempty(t0ap)
+	t0 = zeros(1,ndata);
+elseif isempty(t0av)
+    if isnan(t0ap)
+        str = get_str_locale();
+        uiwait(warndlg(str.s59))
+        t0 = zeros(1,ndata);
+        return
+    end
+	t0 = t0ap*ones(1,ndata);
+elseif isempty(t0ap)
+    if isnan(t0av)
+        str = get_str_locale();
+        uiwait(warndlg(str.s59))
+        t0 = zeros(1,ndata);
+        return
+    end
+	t0 = t0av*ones(1,ndata);
+elseif isnan(t0av) || isnan(t0ap)
 	str = get_str_locale();
 	uiwait(warndlg(str.s59))
 	t0 = zeros(1,ndata);
 	return
-end
-
-if isempty(t0av) && isempty(t0ap)
-	t0 = zeros(1,ndata);
-elseif isempty(t0av)
-	t0 = t0ap*ones(1,ndata);
-elseif isempty(t0ap)
-	t0 = t0av*ones(1,ndata);
 else
 	dt0 = t0ap-t0av;
 	ddt0 = dt0/(ndata-1);

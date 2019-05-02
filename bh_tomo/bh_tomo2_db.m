@@ -204,6 +204,7 @@ f.Visible = 'on';
             end
             htextinfo.String{3} = ['Database: ',file];
         end
+        hw = warndlg(['Saving ',file]);
         db_file = [rep,file];
         names_mog = cell(1,length(hmog.mogs));
         for n=1:length(hmog.mogs)
@@ -215,12 +216,14 @@ f.Visible = 'on';
         air = hmog.air; %#ok<NASGU>
         save(db_file,'names_mog','mogs','air','boreholes','models','auto_pick')
         saved = true;
+        delete(hw)
     end
     function saveFileAs(varargin)
         [file, rep] = uiputfile('*.mat','Save Database');
         if isequal(file,0)
             return
         end
+        hw = warndlg(['Saving ',file]);
         db_file = [rep,file];
         htextinfo.String{3} = ['Database: ',file];
         names_mog = cell(1,length(hmog.mogs));
@@ -233,6 +236,7 @@ f.Visible = 'on';
         air = hmog.air; %#ok<NASGU>
         save(db_file,'names_mog','mogs','air','boreholes','models','auto_pick')
         saved = true;
+        delete(hw)
     end
     function closeWindow(varargin)
         if saved == false

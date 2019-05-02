@@ -656,7 +656,7 @@ update_tout(hObject, eventdata, handles)
 set(handles.pushbutton_active_pointe,'Value',0)
 
 if get(handles.checkbox_interm_save,'Value')==1
-	sauve_mat(handles,true)
+	sauve_mat(handles)
 end
 
 %
@@ -678,7 +678,7 @@ end
 update_tout(hObject, eventdata, handles)
 set(handles.pushbutton_active_pointe,'Value',0)
 
-if get(handles.checkbox_interm_save,'Value')==1, sauve_mat(handles,true), end
+if get(handles.checkbox_interm_save,'Value')==1, sauve_mat(handles), end
 
 %
 % -------------------------------------------------------------------------
@@ -713,7 +713,7 @@ while pointe_actif
 			update_images(hObject, eventdata, handles, tt, et)
         end
         if et ~= -1
-            set(handles.text_tt_info,'String',['Picked Time: ',num2str(tt),' ï¿½ ',num2str(et)])
+            set(handles.text_tt_info,'String',['Picked Time: ',num2str(tt),' ± ',num2str(et)])
         else
             set(handles.text_tt_info,'String',['Picked Time: ',num2str(tt)])
         end
@@ -730,7 +730,7 @@ while pointe_actif
 	
 	n_trace_traite = n_trace_traite+1;
 	if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
-		sauve_mat(handles,true)
+		sauve_mat(handles)
 	end
 	
     if get(handles.checkbox_jump,'Value')==1
@@ -813,7 +813,7 @@ while pointe_actif
 	
 	n_trace_traite = n_trace_traite+1;
 	if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
-		sauve_mat(handles,true)
+		sauve_mat(handles)
     end
 	
     if get(handles.checkbox_jump,'Value')==1
@@ -875,9 +875,8 @@ end
 %
 % -------------------------------------------------------------------------
 %
-function sauve_mat(handles, msg)
-hh=0;
-if msg, hh=msgbox('Sauvegarde intermediaire'); end
+function sauve_mat(handles)
+hw = warndlg('Saving Data');
 replace_data(handles)
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
@@ -912,9 +911,7 @@ mogs(h.no_mog) = mog; %#ok<NASGU>
 if ~isempty(av), air(mog.av) = av; end
 if ~isempty(ap), air(mog.ap) = ap; end %#ok<NASGU>
 save(h.db_file,'mogs','air','-append')
-if msg && ishandle(hh)==1
-	delete(hh)
-end
+delete(hw)
 h.saved = true;
 setappdata(handles.fig_bh_tomo_tt, 'h', h)
 
@@ -1037,7 +1034,7 @@ end
 % -------------------------------------------------------------------------
 %
 function SaveMenuItem_Callback(hObject, eventdata, handles)
-sauve_mat(handles,false)
+sauve_mat(handles)
 
 
 %
@@ -1501,7 +1498,7 @@ while pointe_actif
         set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace))])
 		n_trace_traite = n_trace_traite+1;
 		if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
-			sauve_mat(handles,true)
+			sauve_mat(handles)
 		end
 		[nt,tt,button] = ginput(1);
 	end
@@ -1567,14 +1564,14 @@ while pointe_actif==1
 	setappdata(handles.fig_bh_tomo_tt, 'h', h)
 	update_tout(hObject, eventdata, handles)
     if h.pick_et(h.no_trace) ~= -1
-        set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace)),' ï¿½ ',num2str(h.pick_et(h.no_trace))])
+        set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace)),' ± ',num2str(h.pick_et(h.no_trace))])
     else
         set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace))])
     end
 
 	n_trace_traite = n_trace_traite+1;
 	if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
-	  sauve_mat(handles,true)
+	  sauve_mat(handles)
 	end
 	[nt,tt,button] = ginput(1);
   end

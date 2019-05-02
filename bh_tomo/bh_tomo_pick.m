@@ -229,7 +229,7 @@ update_figs(handles)
 % -------------------------------------------------------------------------
 %
 function SaveMenuItem_Callback(hObject, eventdata, handles)
-sauve_mat(handles, false)
+sauve_mat(handles)
 
 
 
@@ -734,7 +734,7 @@ for nb = 1:numel(h.bins)
     mog.tt_done(h.bins{nb}.no_trace) = true;
     
     % look for values outside possible range
-    ind = mog.tt < 0 && mog.tt > fac*mog.data.timestp(end);
+    ind = mog.tt < 0 & mog.tt > fac*mog.data.timestp(end);
     mog.tt(ind) = -1;
     mog.et(ind) = -1;
     mog.tt_done(ind) = false;
@@ -766,15 +766,11 @@ setappdata(handles.fig_bh_tomo_pick, 'h', h)
 %
 % -------------------------------------------------------------------------
 %
-function sauve_mat(handles, msg)
-if msg
-	hh=msgbox('Sauvegarde intermediaire');
-else
-	hh=msgbox('Sauvegarde en cours');
-end
+function sauve_mat(handles)
 h = getappdata(handles.fig_bh_tomo_pick, 'h');
 mog = getappdata(handles.fig_bh_tomo_pick, 'mog');
 
+hw = warndlg('Saving Data');
 load(h.db_file,'mogs','air','auto_pick')
 mogs(h.no_mog) = mog; %#ok<NASGU>
 
@@ -785,8 +781,8 @@ end
 auto_pick(h.no_mog) = h; %#ok<NASGU>
 
 save(h.db_file,'mogs','air','auto_pick','-append')
-if ishandle(hh)==1
-	delete(hh)
+if ishandle(hw)==1
+	delete(hw)
 end
 h.saved = true;
 setappdata(handles.fig_bh_tomo_pick, 'h', h)

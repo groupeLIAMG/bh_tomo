@@ -973,10 +973,12 @@ f.Visible = 'on';
         model.inv_res(no_inv_res).tomo = tomo;
         model.inv_res(no_inv_res).param = param;
         
+        hw = warndlg(['Saving ',file]);
         load([rep,file],'models')
         models(modelNo) = model; %#ok<NASGU>
         save([rep,file],'models','-append')
         saved = true;
+        delete(hw)
         
         names = cell(numel(model.inv_res),1);
         for n=1:numel(model.inv_res)
@@ -1686,7 +1688,9 @@ f.Visible = 'on';
         for n=2:length(param.selectedMogs)
             [~, mdate] = strtok(hlistMog.String{param.selectedMogs(n)},' - ');
             d = mdate(4:end);
-            if datenum(d) < datenum(tomo.date)
+            if isempty(tomo.date)
+                tomo.date = d;
+            elseif datenum(d) < datenum(tomo.date)
                 tomo.date = d;
             end
         end

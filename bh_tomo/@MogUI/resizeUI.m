@@ -82,6 +82,7 @@ obj.handles.editFreq.Position    = [width-hBorder-0.7*hSize                    v
 vBorder = vBorder+vSpaceSep;
 obj.handles.filter.Position      = [width-hBorder-3*hSize-2*hSpace             vBorder+6*(vSpace+vSize) hSize vSize];
 obj.handles.createDt.Position    = [width-hBorder-2*hSize-hSpace               vBorder+6*(vSpace+vSize) hSize vSize];
+obj.handles.createDa.Position    = [width-hBorder-hSize                        vBorder+6*(vSpace+vSize) hSize vSize];
 
 obj.handles.exportTt.Position    = [width-hBorder-3*hSize-2*hSpace             vBorder+7*(vSpace+vSize) hSize vSize];
 obj.handles.exportTau.Position   = [width-hBorder-2*hSize-hSpace               vBorder+7*(vSpace+vSize) hSize vSize];

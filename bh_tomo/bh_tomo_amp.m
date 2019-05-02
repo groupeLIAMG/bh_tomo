@@ -412,15 +412,14 @@ update_t_lim(hObject, eventdata, handles)
 %
 % --------------------------------------------------------------------
 %
-function sauve_mat(handles, msg)
-hh=0;
-if msg, hh=msgbox('Saving Data'); end
+function sauve_mat(handles)
+hh=msgbox('Saving Data');
 h = getappdata(handles.fig_bh_amp, 'h');
 mog = getappdata(handles.fig_bh_amp, 'mog');
 load(h.db_file,'mogs','air')
 mogs(h.no_mog) = mog; %#ok<NASGU>
 save(h.db_file,'mogs','-append')
-if msg && ishandle(hh)==1
+if ishandle(hh)==1
 	delete(hh)
 end
 
@@ -432,7 +431,6 @@ end
 function pointe(hObject, eventdata, handles)
 get_tmin_tmax(hObject, eventdata, handles)
 update_tout(hObject, eventdata, handles)
-%sauve_mat(handles, true)
 
 
 %
@@ -515,9 +513,6 @@ while pointe_actif
 		mog.amp_tmax(h.no_trace) = -1;
   end
   n_trace_traite = n_trace_traite+1;
-  if rem(n_trace_traite,50)==0
-		sauve_mat(handles,true)
-  end
   h.no_trace = h.no_trace+1;
   if h.no_trace<size(h.proc_data,2)
 		
@@ -772,7 +767,7 @@ if get(handles.checkbox_hybride,'Value')==0
 else
 	ajusteHybride(hObject, eventdata, handles)
 end
-sauve_mat(handles,false)
+sauve_mat(handles)
 
 %
 % --------------------------------------------------------------------

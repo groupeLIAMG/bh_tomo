@@ -168,9 +168,9 @@ if findstr(locale, 'fr')==1
   str.s98 = 'Portée z';
   str.s977 = 'Portée y';
   str.s97 = 'Portée x';   
-  str.s99 = 'Theta anisotropie x';
-  str.s991 = 'Theta anisotropie y';
-  str.s992 = 'Theta anisotropie z';
+  str.s99 = [char(952),' anisotropie x'];
+  str.s991 = [char(952),' anisotropie y'];
+  str.s992 = [char(952),' anisotropie z'];
   str.s100 = 'Variance';
   str.s101 = 'temps';
   str.s102 = 'Longueur des classes';
@@ -356,7 +356,7 @@ if findstr(locale, 'fr')==1
   str.s260 = 'Renommer';
   str.s261 = 'Axe long horizontal';
   str.s262 = 'Tracer';
-  str.s263 = 'Exporter tau';
+  str.s263 = ['Exporter ',char(964)];
   str.s264 = 'Ajuster le spectre';
   str.s265 = 'Fichier EKKO *.hd';
   str.s266 = 'Importer un forage';
@@ -377,14 +377,14 @@ if findstr(locale, 'fr')==1
   str.s281 = 'Correction - t parcours';
   str.s282 = 'Pointé automatique (AIC-CWT)';
   str.s283 = 'lenteur';
-  str.s284 = 'xi';
+  str.s284 = char(958);
   str.s285 = 'v_x';
   str.s285b = 'v_z';
   str.s286 = 'Limite supérieure - vitesse apparente';
   str.s287 = 'Anisotropie elliptique de vitesse';
   str.s288 = 'Anisotropie vit. - rotation';
-  str.s289 = 'Effet pepite - xi ';
-  str.s290 = 'theta ';
+  str.s289 = ['Effet pepite - ',char(958),' '];
+  str.s290 = [char(952),' '];
   str.s291 = 'Calcul automatique';
   str.s292 = 'Calculer';
   str.s293 = 'Fichier SEG Y';
@@ -400,8 +400,8 @@ if findstr(locale, 'fr')==1
   str.s303 = 'Valeur';  %YH
   str.s304 = 'Anisotr.ellipti. - vitesse';  %YH
   str.s305 = 'Importer Sx...';  %YH
-  str.s306 = 'Importer xi...';  %YH
-  str.s307 = 'Montrer xi';  %YH
+  str.s306 = ['Importer ',char(958),'...'];  %YH
+  str.s307 = ['Montrer ',char(958)];  %YH
   str.s308 = 'Saturation';
   
 else
@@ -535,9 +535,9 @@ else
   str.s98 = 'Range z';
   str.s977 = 'Range y';
   str.s97 = 'Range x';
-  str.s99 = 'Theta anisotropy x';
-  str.s991 = 'Theta anisotropy y';
-  str.s992 = 'Theta anisotropy z';
+  str.s99 = [char(952),' anisotropy x'];
+  str.s991 = [char(952),' anisotropy y'];
+  str.s992 = [char(952),' anisotropy z'];
   str.s100 = 'Variance';
   str.s101 = 'traveltime';
   str.s102 = 'Bin length';
@@ -722,7 +722,7 @@ else
   str.s260 = 'Rename';
   str.s261 = 'Split horizontally';
   str.s262 = 'Plot';
-  str.s263 = 'Export tau';
+  str.s263 = ['Export ',char(964)];
   str.s264 = 'Fit spectra';
   str.s265 = 'EKKO file *.hd';
   str.s266 = 'Import borehole';
@@ -743,14 +743,14 @@ else
   str.s281 = 'Time correction';
   str.s282 = 'Automatic traveltimes picking (AIC-CWT)';
   str.s283 = 'slowness';
-  str.s284 = 'xi';
+  str.s284 = char(958);
   str.s285 = 'v_x';
   str.s285b = 'v_z';
   str.s286 = 'Upper limit - apparent velocity';
   str.s287 = 'Velocity - elliptic anisotropy';
   str.s288 = 'Vel. anisotropy - rotation';
-  str.s289 = 'Nugget effect - xi ';
-  str.s290 = 'theta ';
+  str.s289 = ['Nugget effect - ',char(958),' '];
+  str.s290 = [char(952),' '];
   str.s291 = 'Auto update';
   str.s292 = 'Compute';
   str.s293 = 'SEG Y file';
@@ -766,7 +766,7 @@ else
   str.s303 = 'Value';  %YH
   str.s304 = 'Anisotr.ellipti. - velocity';  %YH
   str.s305 = 'Import Sx...';  %YH
-  str.s306 = 'Import xi...';  %YH
-  str.s307 = 'Show xi';  %YH
+  str.s306 = ['Import ',char(958),'...'];  %YH
+  str.s307 = ['Show ',char(958)];  %YH
   str.s308 = 'Saturation';
 end

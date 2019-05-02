@@ -30,7 +30,7 @@ f = figure('Visible','off',...
     'Units','points',...
     'Position',pos,...
     'Tag','fig_bh_tomo2_createDt',...
-    'Name',['Create ',char(916),' MOG'],...
+    'Name',['Create ',char(916),'t MOG'],...
     'NumberTitle','off',...
     'ToolBar','none',...,
     'MenuBar','None',...
@@ -251,6 +251,14 @@ uiwait(f)
         newMog.RxCosDir = refMog.RxCosDir(ind,:);
         newMog.in = refMog.in(ind);
         
+%         debut = obj.mogs(end).no_traces(end);
+%         newMog.no_traces = debut + (1:newMog.data.ntrace);
+%         newMog.sorted = false;
+
+        newMog.no_traces = refMog.no_traces(ind);
+        newMog.sorted = refMog.sorted;
+        newMog.delta = true;
+        
         id = ids(hcompatList.Value);
         for mog=obj.mogs
             if id == mog.ID
@@ -270,8 +278,8 @@ uiwait(f)
         setappdata(h,'canceling',0)
         
         if bgmethod.SelectedObject == bpicks
-            oldTT = refMog.getCorrectedTravelTimes(obj.air);
-            oldTT = oldTT(ind);
+            refTT = refMog.getCorrectedTravelTimes(obj.air);
+            refTT = refTT(ind);
             mogTT = mog.getCorrectedTravelTimes(obj.air);
 
             for n1=1:newMog.data.ntrace
@@ -288,7 +296,7 @@ uiwait(f)
                             (mog.data.Rx_y(n2)-newMog.data.Rx_y(n1))^2 + ...
                             (mog.data.Rx_z(n2)-newMog.data.Rx_z(n1))^2) < maxOffset && ...
                             mog.tt_done(n2)
-                        newMog.tt(n1) = oldTT(n1)-mogTT(n2);
+                        newMog.tt(n1) = mogTT(n2)-refTT(n1);
                         newMog.tt_done(n1) = true;
                         nFound = nFound+1;
                         break
@@ -334,7 +342,7 @@ uiwait(f)
                         hold on
                         plot(mog.data.timestp, trc2)
                         hold off
-                        legend(newMog.name,mog.name, 'Interpreter','none')
+                        legend({newMog.name,mog.name}, 'Interpreter','none')
                         title(['t_0: tcr2 shifted by ',num2str(dns),' sample(s)'])
                         
                         [c, lags] = xcorr(trc1, trc2, maxlag);
@@ -348,7 +356,7 @@ uiwait(f)
                     end
                 end
             end
-
+            close(hf)
                         
         else
             warndlg('Select Method')
@@ -363,9 +371,6 @@ uiwait(f)
             return
         end
         
-        debut = obj.mogs(end).no_traces(end);
-        newMog.no_traces = debut + (1:newMog.data.ntrace);
-        newMog.sorted = false;
         % append new MOG
         obj.mogs(end+1) = newMog;
             
@@ -378,7 +383,7 @@ uiwait(f)
 
         ids = [];
         nc = 1;
-        compat{nc} = obj.mogs(no).name; %#ok<AGROW>
+        compat{nc} = obj.mogs(no).name; 
         ids(nc) = obj.mogs(no).ID;
         for nm=1:numel(obj.mogs)
             if nm==no
@@ -393,7 +398,7 @@ uiwait(f)
             
             if test1 && test2 && test3
                 nc = nc+1;
-                compat{nc} = obj.mogs(nm).name; %#ok<AGROW>
+                compat{nc} = obj.mogs(nm).name; 
                 ids(nc) = obj.mogs(nm).ID;
             end
         end

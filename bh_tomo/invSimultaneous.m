@@ -11,8 +11,8 @@ tomo.rays = {};
 tomo.L = [];
 tomo.invData = [];
 
-[t0_obs,ind0] = Model.getModelData(model,p.db_file,p.typeData,p.mog_no0);
-[t1_obs,ind1] = Model.getModelData(model,p.db_file,p.typeData,p.mog_no1);
+[t0_obs,ind0,delta] = Model.getModelData(model,p.db_file,p.typeData,p.mog_no0);
+[t1_obs,ind1,delta] = Model.getModelData(model,p.db_file,p.typeData,p.mog_no1);
 Tx0=model.grid.Tx(ind0,:);
 Rx0=model.grid.Rx(ind0,:);
 Tx1=model.grid.Tx(ind1,:);

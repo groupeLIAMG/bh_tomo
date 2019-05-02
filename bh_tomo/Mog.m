@@ -44,6 +44,7 @@ classdef Mog < handle
         processParams
         useAirShots
         traces
+        delta
     end
     properties (SetAccess=private)
         ID
@@ -102,6 +103,7 @@ classdef Mog < handle
                 obj.processParams.highcut = 200;
                 obj.useAirShots = 0;
                 obj.traces = [];
+                obj.delta = false;
             elseif isstruct(n)
                 if isfield(n, 'name')
                     obj.name = n.name;
@@ -199,6 +201,7 @@ classdef Mog < handle
                 else
                     obj.useAirShots = 0;
                 end
+                obj.delta = false;
             elseif isa(n, 'Mog')
                 obj.name = n.name;
                 obj.data = MogData(n.data);
@@ -262,6 +265,7 @@ classdef Mog < handle
                 end
 
                 obj.useAirShots = n.useAirShots;
+                obj.delta = n.delta;
             else
                 error('Invalid input')
             end

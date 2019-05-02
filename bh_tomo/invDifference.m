@@ -12,8 +12,8 @@ tomo.invData = [];
 
 ref_mog_no = model.inv_res(p.ref_inv_no).param.selectedMogs;
 
-[t0_obs,ind0] = Model.getModelData(model,p.db_file,p.typeData,ref_mog_no);
-[t1_obs,ind1] = Model.getModelData(model,p.db_file,p.typeData,p.mog_no);
+[t0_obs,ind0,delta] = Model.getModelData(model,p.db_file,p.typeData,ref_mog_no);
+[t1_obs,ind1,delta] = Model.getModelData(model,p.db_file,p.typeData,p.mog_no);
 
 TxRx0 = [model.grid.Tx(ind0,:) model.grid.Rx(ind0,:)];
 TxRx1 = [model.grid.Tx(ind1,:) model.grid.Rx(ind1,:)];

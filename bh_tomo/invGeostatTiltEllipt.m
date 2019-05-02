@@ -328,7 +328,7 @@ for noIter=1:param.numItStraight + param.numItCurved
 
     if param.tomoAtt==0 && noIter>=param.numItStraight && ...
             param.numItCurved > 0
-        if any(tomo.s<0)
+        if any(tomo.s<0) && param.delta==false
             warndlg('Negative Slownesses: Change Inversion Parameters')
             tomo = [];
         end

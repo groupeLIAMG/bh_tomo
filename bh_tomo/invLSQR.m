@@ -95,6 +95,7 @@ else
 end
 
 cont = [];
+
 if param.tomoAtt==0
     if ~isempty( grid.cont.slowness )
         cont = grid.cont.slowness.data;
@@ -106,6 +107,9 @@ else
 end
 
 [Dx,Dy,Dz] = grid.derivative(param.order);
+if param.delta == true
+    dt = data(:,7);
+end
 for noIter=1:param.numItStraight + param.numItCurved
     
     if ~isempty(th)
@@ -115,14 +119,17 @@ for noIter=1:param.numItStraight + param.numItCurved
         disp(['LSQR Inversion - Solving System, Iteration ',num2str(noIter)])
     end
 
-    if noIter == 1
+    if param.delta == true && noIter == 1
+        l_moy = 0;  % mean slowness is initially zero for delta data
+    elseif noIter == 1
         l_moy = mean(data(:,7)./sum(L,2));
     else
         l_moy = mean(tomo.s);
     end
-    mta = sum(L*l_moy,2);
-    dt = data(:,7) - mta;
-
+    if param.delta == false
+        mta = sum(L*l_moy,2);
+        dt = data(:,7) - mta;
+    end
     if noIter==1
         s_o = l_moy * ones(size(L,2),1);
     end
@@ -141,10 +148,17 @@ for noIter=1:param.numItStraight + param.numItCurved
     end
     [x,~,~,~,resvec,lsvec] = lsqr(A,b,param.tol,param.nbreiter);
     
-    if max(abs(s_o./(x+l_moy) - 1))>param.dv_max
-        fac = min(abs( (s_o/(param.dv_max+1)-l_moy)./x ));
-        x = fac*x;
-        s_o = x+l_moy;
+    if param.delta == false
+        if max(abs(s_o./(x+l_moy) - 1))>param.dv_max
+            fac = min(abs( (s_o/(param.dv_max+1)-l_moy)./x ));
+            x = fac*x;
+            s_o = x+l_moy;
+        end
+    else
+        if max(abs(x))>param.dv_max
+            x = x * param.dv_max/max(abs(x));
+            s_o = x;
+        end
     end
     tomo.s = x+l_moy;
     tomo.res = resvec;
@@ -159,13 +173,27 @@ for noIter=1:param.numItStraight + param.numItCurved
             mask = zeros(size(tomo.s));
         end
         
-        if param.tomoAtt==0
+        if  param.tomoAtt==0 && param.delta==true
+            % we want to see change in percent
+            ch = 100*tomo.s ./ param.delta_prev_m;
+            gv.plotTomo(mask+ch,'LSQR','Distance [m]','Elevation [m]',gh{3})
+            cb_title = '% change in slowness';
+        elseif param.tomoAtt==0 && param.delta == false
             gv.plotTomo(mask+1./tomo.s,'LSQR','Distance [m]','Elevation [m]',gh{3})
+            cb_title = 'Velocity';
+        elseif param.delta==true
+            % we want to see change in percent
+            ch = 100*tomo.s ./ param.delta_prev_m;
+            gv.plotTomo(mask+ch,'LSQR','Distance [m]','Elevation [m]',gh{3})
+            cb_title = '% change in attenuation';
         else
             gv.plotTomo(mask+tomo.s,'LSQR','Distance [m]','Elevation [m]',gh{3})
+            cb_title = 'Attenuation';
         end
         if ~isempty(gh{1}), caxis(gh{3},gh{1}), end
-        colorbar('peer', gh{3})
+        hcb = colorbar('peer', gh{3});
+        hcb.Label.String = cb_title;
+        hcb.Label.FontSize = 12;
         colormap( gh{3}, gh{2})
         if showTxRx == 1 && ~isa(grid, 'Grid3D')
             hold(gh{3}, 'on')
@@ -178,7 +206,7 @@ for noIter=1:param.numItStraight + param.numItCurved
     
     if param.tomoAtt==0 && noIter>=param.numItStraight && ...
             param.numItCurved > 0
-        if any(tomo.s<0)
+        if any(tomo.s<0) && param.delta==false
             warndlg('Negative Slownesses: Change Inversion Parameters')
             tomo = [];
         end

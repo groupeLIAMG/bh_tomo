@@ -1697,7 +1697,7 @@ f.Visible = 'on';
             case 3
                 type = 'fce';
         end
-        [data,idata] = Model.getModelData(model,[rep,file],type,selectedMogs,vlim);
+        [data,idata,~] = Model.getModelData(model,[rep,file],type,selectedMogs,vlim);
         hNdata.String = [num2str(size(data,1)),' Rays'];
         loadRays()
         computeCd()

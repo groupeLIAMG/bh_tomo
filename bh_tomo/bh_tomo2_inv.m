@@ -773,7 +773,7 @@ uicontrol('Style','text',...
     'Position',[0.02 7*vSpace+6*vSize 0.75 vSize],...
     'Parent',plsqr);
 uicontrol('Style','text',...
-    'String','Max Velocity Variation per Iteration [%] ',...
+    'String','Max Model Parameter Variation per Iteration [%] ',...
     'HorizontalAlignment','right',...
     'FontSize',fs,...
     'Units','normalized',...
@@ -1501,13 +1501,16 @@ f.Visible = 'on';
             colorbar(cbh(i),'off')
         end
 
+        hmessage.String = 'Initializing process ...';
+        
         param = [];
         param.selectedMogs = hlistMog.Value;
         cmap = hcmap.String{hcmap.Value};
         clim = [];
+        
         if htypeData.Value==1
             param.tomoAtt = 0;
-            [data,idata] = Model.getModelData(model,[rep,file],'tt',param.selectedMogs);
+            [data,idata,delta] = Model.getModelData(model,[rep,file],'tt',param.selectedMogs);
             data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data ...
                 model.grid.TxCosDir(idata,:) model.grid.RxCosDir(idata,:)];
             if hcolorbar.Value==1
@@ -1517,11 +1520,11 @@ f.Visible = 'on';
             param.tomoAtt = 1;
             switch htypeData.Value
                 case 2
-                    [data,idata] = Model.getModelData(model,[rep,file],'amp',param.selectedMogs);
+                    [data,idata,delta] = Model.getModelData(model,[rep,file],'amp',param.selectedMogs);
                 case 3
-                    [data,idata] = Model.getModelData(model,[rep,file],'fce',param.selectedMogs);
+                    [data,idata,delta] = Model.getModelData(model,[rep,file],'fce',param.selectedMogs);
                 case 4
-                    [data,idata] = Model.getModelData(model,[rep,file],'hyb',param.selectedMogs);
+                    [data,idata,delta] = Model.getModelData(model,[rep,file],'hyb',param.selectedMogs);
             end
             data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
             if hcolorbar.Value==1
@@ -1533,19 +1536,35 @@ f.Visible = 'on';
             return
         end
         
+        param.delta = delta;
         param.numItStraight = str2double(hnStraight.String);
         param.numItCurved = str2double(hnCurved.String);
+        
+        if huseRays.Value == 0 && delta==true
+           warndlg('Inversion of ? data requires using rays of reference model')
+           return
+        end
+        
+        if delta && param.numItCurved>0
+            warndlg('Number of curved rays iterations set to 0 for ? data')
+            param.numItCurved = 0;
+            hnCurved.String = '0';
+        end
         
         if param.tomoAtt == 1 && param.numItCurved > 0
             warndlg('Number of curved rays iterations set to 0 for attenuation tomography')
             param.numItCurved = 0;
+            hnCurved.String = '0';
         end
         
         param.saveInvData = 1;
         param.useCont = huseCont.Value;
         L = [];
         rays = {};
-        noL = hpreviousInv.Value;
+        no_previous = hpreviousInv.Value;
+        if ~isempty(model.inv_res)
+            param.delta_prev_m = model.inv_res(no_previous).tomo.s;
+        end
         if huseRays.Value == 1
             % check if grids are compatible
             gx = 0.5*(model.grid.grx(1:end-1)+model.grid.grx(2:end));
@@ -1555,16 +1574,16 @@ f.Visible = 'on';
             else
                 gy = [];
             end
-            if any(abs(model.inv_res(noL).tomo.x-gx)>100*eps) || ...
-                    any(abs(model.inv_res(noL).tomo.y-gy)>100*eps) || ...
-                    any(abs(model.inv_res(noL).tomo.z-gz)>100*eps)
+            if any(abs(model.inv_res(no_previous).tomo.x-gx)>100*eps) || ...
+                    any(abs(model.inv_res(no_previous).tomo.y-gy)>100*eps) || ...
+                    any(abs(model.inv_res(no_previous).tomo.z-gz)>100*eps)
                 errordlg('Rays of previous inversion not compatible with current grid')
                 return
             end
             
             ind = [];
             for n=1:size(data,1)
-                ii = find( model.inv_res(noL).tomo.no_trace==data(n,9) );
+                ii = find( model.inv_res(no_previous).tomo.no_trace==data(n,9) );
                 if isempty(ii)
                     warndlg(['Ray no ',num2str(data(n,9)),' not in Matrix of Rays'])
                     return
@@ -1572,11 +1591,11 @@ f.Visible = 'on';
                     ind = [ind ii]; %#ok<AGROW>
                 end
             end
-            L = model.inv_res(noL).tomo.L(ind,:);
+            L = model.inv_res(no_previous).tomo.L(ind,:);
             %rays = rays{ind};
             
             if htypeInv.Value == 1
-                if model.inv_res(noL).param.cm.use_xi==1 && cm.use_xi==0
+                if model.inv_res(no_previous).param.cm.use_xi==1 && cm.use_xi==0
                     % we need to transform matrix L
                     % we are in 2D
                     np = size(L,2)/2;
@@ -1938,20 +1957,20 @@ f.Visible = 'on';
             return
         end
         if param.tomoAtt == 0
-            [data,idata] = Model.getModelData(model,[rep,file],'tt',param.selectedMogs);
-            [depth,~] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'tt');
+            [data,idata,delta] = Model.getModelData(model,[rep,file],'tt',param.selectedMogs);
+            [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'tt');
             data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
         else
             switch htypeData.Value
                 case 2
-                    [data,idata] = Model.getModelData(model,[rep,file],'amp',param.selectedMogs);
-                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'tt');
+                    [data,idata,delta] = Model.getModelData(model,[rep,file],'amp',param.selectedMogs);
+                    [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'tt');
                 case 3
-                    [data,idata] = Model.getModelData(model,[rep,file],'fce',param.selectedMogs);
-                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'fce');
+                    [data,idata,delta] = Model.getModelData(model,[rep,file],'fce',param.selectedMogs);
+                    [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'fce');
                 case 4
-                    [data,idata] = Model.getModelData(model,[rep,file],'hyb',param.selectedMogs);
-                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'hyb');
+                    [data,idata,delta] = Model.getModelData(model,[rep,file],'hyb',param.selectedMogs);
+                    [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'hyb');
             end
             data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
         end

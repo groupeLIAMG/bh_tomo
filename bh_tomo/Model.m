@@ -83,7 +83,7 @@ classdef Model < handle
         end
     end
     methods (Static=true)
-        function [data,ind] = getModelData(model,db_file,type,selected_mogs,varargin)
+        function [data,ind,delta] = getModelData(model,db_file,type,selected_mogs,varargin)
             data = [];
             type2 = '';
             if nargin>=5   %4
@@ -101,6 +101,19 @@ classdef Model < handle
             et = [];
             in = [];
             ind = [];
+            delta = false;
+            
+            check = false(1, numel(selected_mogs));
+            for n=1:numel(selected_mogs)
+                check(n) = mogs(model.mogs(selected_mogs(n))).delta;
+            end
+            if all(check)
+                delta = true;
+            elseif any(check)
+                errordlg('Parameter delta of selected mogs are not consistent')
+                return
+            end
+            
             switch lower(type)
                 %
                 case 'tt'
@@ -161,7 +174,7 @@ classdef Model < handle
                     if strcmp(type2,'')
                         return
                     end
-                    [~, ind] = Model.getModelData(model,db_file,type2,selected_mogs);
+                    [~, ind, ~] = Model.getModelData(model,db_file,type2,selected_mogs);
                     for n=1:length(model.mogs)
                         tt = [tt mogs(model.mogs(n)).Tx_z_orig];
                         et = [et mogs(model.mogs(n)).Rx_z_orig];

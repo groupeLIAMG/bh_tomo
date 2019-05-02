@@ -1298,20 +1298,20 @@ f.Visible = 'on';
         
         
         if param.tomoAtt == 0
-            [data,idata] = Model.getModelData(model,[rep,file],'tt',param.mog_no0);
-            [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no0,[],'tt');
+            [data,idata,delta] = Model.getModelData(model,[rep,file],'tt',param.mog_no0);
+            [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.mog_no0,[],'tt');
             data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
         else
             switch htypeData.Value
                 case 2
-                    [data,idata] = Model.getModelData(model,[rep,file],'amp',param.mog_no0);
-                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no0,[],'tt');
+                    [data,idata,delta] = Model.getModelData(model,[rep,file],'amp',param.mog_no0);
+                    [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.mog_no0,[],'tt');
                 case 3
-                    [data,idata] = Model.getModelData(model,[rep,file],'fce',param.mog_no0);
-                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no0,[],'fce');
+                    [data,idata,delta] = Model.getModelData(model,[rep,file],'fce',param.mog_no0);
+                    [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.mog_no0,[],'fce');
                 case 4
-                    [data,idata] = Model.getModelData(model,[rep,file],'hyb',param.mog_no0);
-                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no0,[],'hyb');
+                    [data,idata,delta] = Model.getModelData(model,[rep,file],'hyb',param.mog_no0);
+                    [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.mog_no0,[],'hyb');
             end
             data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
         end
@@ -1383,20 +1383,20 @@ f.Visible = 'on';
         
         
         if param.tomoAtt == 0
-            [data,idata] = Model.getModelData(model,[rep,file],'tt',param.mog_no1);
-            [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no1,[],'tt');
+            [data,idata,delta] = Model.getModelData(model,[rep,file],'tt',param.mog_no1);
+            [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.mog_no1,[],'tt');
             data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
         else
             switch htypeData.Value
                 case 2
-                    [data,idata] = Model.getModelData(model,[rep,file],'amp',param.mog_no1);
-                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no1,[],'tt');
+                    [data,idata,delta] = Model.getModelData(model,[rep,file],'amp',param.mog_no1);
+                    [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.mog_no1,[],'tt');
                 case 3
-                    [data,idata] = Model.getModelData(model,[rep,file],'fce',param.mog_no1);
-                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no1,[],'fce');
+                    [data,idata,delta] = Model.getModelData(model,[rep,file],'fce',param.mog_no1);
+                    [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.mog_no1,[],'fce');
                 case 4
-                    [data,idata] = Model.getModelData(model,[rep,file],'hyb',param.mog_no1);
-                    [depth,~] = Model.getModelData(model,[rep,file],'depth',param.mog_no1,[],'hyb');
+                    [data,idata,delta] = Model.getModelData(model,[rep,file],'hyb',param.mog_no1);
+                    [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.mog_no1,[],'hyb');
             end
             data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
         end
@@ -1518,39 +1518,39 @@ f.Visible = 'on';
         mog_no1 = hlistRepeat.Value;
             
         if tomoAtt == 0
-            [data0,idata] = Model.getModelData(model,[rep,file],'tt',mog_no0);
-            [depth0,~] = Model.getModelData(model,[rep,file],'depth',mog_no0,[],'tt');
+            [data0,idata,delta] = Model.getModelData(model,[rep,file],'tt',mog_no0);
+            [depth0,~,delta] = Model.getModelData(model,[rep,file],'depth',mog_no0,[],'tt');
             data0 = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data0];
         else
             switch htypeData.Value
                 case 2
-                    [data0,idata] = Model.getModelData(model,[rep,file],'amp',mog_no0);
-                    [depth0,~] = Model.getModelData(model,[rep,file],'depth',mog_no0,[],'tt');
+                    [data0,idata,delta] = Model.getModelData(model,[rep,file],'amp',mog_no0);
+                    [depth0,~,delta] = Model.getModelData(model,[rep,file],'depth',mog_no0,[],'tt');
                 case 3
-                    [data0,idata] = Model.getModelData(model,[rep,file],'fce',mog_no0);
-                    [depth0,~] = Model.getModelData(model,[rep,file],'depth',mog_no0,[],'fce');
+                    [data0,idata,delta] = Model.getModelData(model,[rep,file],'fce',mog_no0);
+                    [depth0,~,delta] = Model.getModelData(model,[rep,file],'depth',mog_no0,[],'fce');
                 case 4
-                    [data0,idata] = Model.getModelData(model,[rep,file],'hyb',mog_no0);
-                    [depth0,~] = Model.getModelData(model,[rep,file],'depth',mog_no0,[],'hyb');
+                    [data0,idata,delta] = Model.getModelData(model,[rep,file],'hyb',mog_no0);
+                    [depth0,~,delta] = Model.getModelData(model,[rep,file],'depth',mog_no0,[],'hyb');
             end
             data0 = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data0];
         end
 
         if tomoAtt == 0
-            [data1,idata] = Model.getModelData(model,[rep,file],'tt',mog_no1);
-%            [depth1,~] = Model.getModelData(model,[rep,file],'depth',mog_no1,[],'tt');
+            [data1,idata,delta] = Model.getModelData(model,[rep,file],'tt',mog_no1);
+%            [depth1,~,delta] = Model.getModelData(model,[rep,file],'depth',mog_no1,[],'tt');
             data1 = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data1];
         else
             switch htypeData.Value
                 case 2
-                    [data1,idata] = Model.getModelData(model,[rep,file],'amp',mog_no1);
-%                    [depth1,~] = Model.getModelData(model,[rep,file],'depth',mog_no1,[],'tt');
+                    [data1,idata,delta] = Model.getModelData(model,[rep,file],'amp',mog_no1);
+%                    [depth1,~,delta] = Model.getModelData(model,[rep,file],'depth',mog_no1,[],'tt');
                 case 3
-                    [data1,idata] = Model.getModelData(model,[rep,file],'fce',mog_no1);
-%                    [depth1,~] = Model.getModelData(model,[rep,file],'depth',mog_no1,[],'fce');
+                    [data1,idata,delta] = Model.getModelData(model,[rep,file],'fce',mog_no1);
+%                    [depth1,~,delta] = Model.getModelData(model,[rep,file],'depth',mog_no1,[],'fce');
                 case 4
-                    [data1,idata] = Model.getModelData(model,[rep,file],'hyb',mog_no1);
-%                    [depth1,~] = Model.getModelData(model,[rep,file],'depth',mog_no1,[],'hyb');
+                    [data1,idata,delta] = Model.getModelData(model,[rep,file],'hyb',mog_no1);
+%                    [depth1,~,delta] = Model.getModelData(model,[rep,file],'depth',mog_no1,[],'hyb');
             end
             data1 = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data1];
         end

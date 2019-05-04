@@ -80,25 +80,27 @@ obj.handles.textFreq.Position    = [width-hBorder-2.7*hSize-hSpace             v
 obj.handles.editFreq.Position    = [width-hBorder-0.7*hSize                    vBorder+5*(vSpace+vSize) 0.7*hSize vSize];
 
 vBorder = vBorder+vSpaceSep;
-obj.handles.filter.Position      = [width-hBorder-3*hSize-2*hSpace             vBorder+6*(vSpace+vSize) hSize vSize];
-obj.handles.createDt.Position    = [width-hBorder-2*hSize-hSpace               vBorder+6*(vSpace+vSize) hSize vSize];
-obj.handles.createDa.Position    = [width-hBorder-hSize                        vBorder+6*(vSpace+vSize) hSize vSize];
+obj.handles.showInfo.Position    = [width-hBorder-2*hSize-hSpace               vBorder+6*(vSpace+vSize) hSize vSize];
 
-obj.handles.exportTt.Position    = [width-hBorder-3*hSize-2*hSpace             vBorder+7*(vSpace+vSize) hSize vSize];
-obj.handles.exportTau.Position   = [width-hBorder-2*hSize-hSpace               vBorder+7*(vSpace+vSize) hSize vSize];
-obj.handles.prune.Position       = [width-hBorder-hSize                        vBorder+7*(vSpace+vSize) hSize vSize];
+obj.handles.filter.Position      = [width-hBorder-3*hSize-2*hSpace             vBorder+7*(vSpace+vSize) hSize vSize];
+obj.handles.createDt.Position    = [width-hBorder-2*hSize-hSpace               vBorder+7*(vSpace+vSize) hSize vSize];
+obj.handles.createDa.Position    = [width-hBorder-hSize                        vBorder+7*(vSpace+vSize) hSize vSize];
 
-obj.handles.statsTt.Position     = [width-hBorder-3*hSize-2*hSpace             vBorder+8*(vSpace+vSize) hSize vSize];
-obj.handles.statsAmp.Position    = [width-hBorder-2*hSize-hSpace               vBorder+8*(vSpace+vSize) hSize vSize];
-obj.handles.rays.Position        = [width-hBorder-hSize                        vBorder+8*(vSpace+vSize) hSize vSize];
+obj.handles.exportTt.Position    = [width-hBorder-3*hSize-2*hSpace             vBorder+8*(vSpace+vSize) hSize vSize];
+obj.handles.exportTau.Position   = [width-hBorder-2*hSize-hSpace               vBorder+8*(vSpace+vSize) hSize vSize];
+obj.handles.prune.Position       = [width-hBorder-hSize                        vBorder+8*(vSpace+vSize) hSize vSize];
 
-obj.handles.rawData.Position     = [width-hBorder-3*hSize-2*hSpace             vBorder+9*(vSpace+vSize) hSize vSize];
-obj.handles.zop.Position         = [width-hBorder-2*hSize-hSpace               vBorder+9*(vSpace+vSize) hSize vSize];
-obj.handles.spectra.Position     = [width-hBorder-hSize                        vBorder+9*(vSpace+vSize) hSize vSize];
+obj.handles.statsTt.Position     = [width-hBorder-3*hSize-2*hSpace             vBorder+9*(vSpace+vSize) hSize vSize];
+obj.handles.statsAmp.Position    = [width-hBorder-2*hSize-hSpace               vBorder+9*(vSpace+vSize) hSize vSize];
+obj.handles.rays.Position        = [width-hBorder-hSize                        vBorder+9*(vSpace+vSize) hSize vSize];
 
-obj.handles.renameMog.Position   = [width-hBorder-3*hSize-2*hSpace             vBorder+10*(vSpace+vSize) hSize vSize];
-obj.handles.importMog.Position   = [width-hBorder-2*hSize-hSpace               vBorder+10*(vSpace+vSize) hSize vSize];
-obj.handles.mergeMogs.Position   = [width-hBorder-hSize                        vBorder+10*(vSpace+vSize) hSize vSize];
+obj.handles.rawData.Position     = [width-hBorder-3*hSize-2*hSpace             vBorder+10*(vSpace+vSize) hSize vSize];
+obj.handles.zop.Position         = [width-hBorder-2*hSize-hSpace               vBorder+10*(vSpace+vSize) hSize vSize];
+obj.handles.spectra.Position     = [width-hBorder-hSize                        vBorder+10*(vSpace+vSize) hSize vSize];
+
+obj.handles.renameMog.Position   = [width-hBorder-3*hSize-2*hSpace             vBorder+11*(vSpace+vSize) hSize vSize];
+obj.handles.importMog.Position   = [width-hBorder-2*hSize-hSpace               vBorder+11*(vSpace+vSize) hSize vSize];
+obj.handles.mergeMogs.Position   = [width-hBorder-hSize                        vBorder+11*(vSpace+vSize) hSize vSize];
 
 
 obj.handles.hp.Visible = 'on';

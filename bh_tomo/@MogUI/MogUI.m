@@ -97,6 +97,7 @@ classdef MogUI < handle
             obj.handles.textMultFac.FontSize = s;
             obj.handles.editMultFac.FontSize = s;
             obj.handles.checkUseAirShots = s;
+            obj.handles.showInfo.FontSize = s;
         end
         function updateBHlist(obj,varargin)
             boreholes = obj.bhUI.boreholes;
@@ -446,6 +447,78 @@ classdef MogUI < handle
                     obj.handles.textAirAfter.String = '';
                 end
             end
+        end
+        function showInfo(obj,varargin)
+            no = obj.handles.listMogs.Value;
+            if no<=0 || no>length(obj.mogs)
+                warndlg('No MOG selected')
+                return
+            end
+            mog = obj.mogs(no);
+
+            d = dialog('Position',[300 300 275 350],'Name','MOG Information');
+            
+            strings = {'Number of traces in MOG: '
+                'Number of samples per trace: '
+                'Sampling period'
+                'Time units: '
+                'Spatial units: '
+                'Number of picked traveltimes: '
+                'Number of picked amplitudes: '
+                'Estimated Tx amplitude (A_0): '
+                [char(916),' processed data: ']
+                'Prior MOG: '
+                'Posterior MOG: '
+                };
+            if ~isempty(mog.tau_params)
+                A0 = num2str(mog.tau_params.A0);
+            else
+                A0 = 'undef';
+            end
+            if mog.delta
+                if contains(mog.data.comment, 'createDt')
+                    delta = [char(916),'t'];
+                else
+                    delta = [char(916),char(964)];
+                end
+                prior = extractAfter(mog.data.comment,', Prior: ');
+                prior = extractBefore(prior,', Posterior: ');
+                posterior = extractAfter(mog.data.comment,', Posterior: ');
+            else
+                delta = 'False';
+                prior = 'undef';
+                posterior = 'undef';
+            end
+            vals = {num2str(mog.data.ntrace)
+                num2str(mog.data.nptsptrc)
+                num2str(mog.data.timec)
+                num2str(mog.data.cunits)
+                num2str(mog.data.tunits)
+                num2str(sum(mog.tt_done))
+                num2str(sum(mog.amp_done))
+                A0
+                delta
+                prior
+                posterior};
+            
+            for n=1:numel(strings)
+                uicontrol('Parent',d,...
+                    'Style','text',...
+                    'HorizontalAlignment','right',...
+                    'Position',[5 350-20-n*25 190 25],...
+                    'String',strings{n});
+                uicontrol('Parent',d,...
+                    'Style','text',...
+                    'HorizontalAlignment','left',...
+                    'Position',[200 350-20-n*25 45 25],...
+                    'String',vals{n});
+            end
+            uicontrol('Parent',d,...
+                'Style','pushbutton',...
+                'Position',[100 20 75 25],...
+                'String','Close',...
+                'Callback','delete(gcf)');
+%            uiwait(d);
         end
     end
 end

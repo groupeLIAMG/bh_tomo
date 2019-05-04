@@ -178,7 +178,8 @@ uiwait(f)
         
         newMog = Mog(hnameEdit.String); % create MOG with new ID
         newMog.data = refMog.data.getSubset(ind);
-        newMog.traces = refMog.traces(:,ind);
+        newMog.data.rdata = [];   % we do not store traces, useless here
+        newMog.traces = [];
         newMog.av = [];
         newMog.ap = [];
         newMog.Tx = refMog.Tx;

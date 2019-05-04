@@ -240,12 +240,12 @@ function QuitMenuItem_Callback(hObject, eventdata, handles)
 h=getappdata(handles.fig_bh_tomo_pick, 'h');
 if h.saved == false
 	ButtonName=questdlg(h.str.s236);
-	switch ButtonName,
-		case 'Yes',
+	switch ButtonName
+		case 'Yes'
 			SaveMenuItem_Callback(hObject, eventdata, handles)
-		case 'No',
-		case 'Cancel',
-			return
+		case 'No'
+		case 'Cancel'
+            return
 	end % switch
 end
 delete(handles.fig_bh_tomo_pick)
@@ -347,7 +347,7 @@ shift_lag = zeros(1,size(work,1));
 for nt=1:size(work,1)
 %    [c,lags] = xcorr(trace, traces(nt,:));
     c = xcorr(trace, work(nt,:));
-    [xcm, ixcm] = max(c);
+    [~, ixcm] = max(c);
     shift_lag(nt) = ixcm-ne;
 %    work(nt,:) = circshift(work(nt,:),[0 shift_lag(nt)]);
 end
@@ -863,7 +863,7 @@ if ( h.bins{h.bin_no}.no_it_align == 0 )
     %for n=1:length(snr)
     %    snr(n) = 1/rmsv(traces(n,1:win_snr));
     %end
-    [m, i] = max(h.snr(h.bins{h.bin_no}.no_trace));
+    [~, i] = max(h.snr(h.bins{h.bin_no}.no_trace));
     if ( get(handles.checkbox_1cycle,'Value')==1 || ...
             get(handles.checkbox_scale_fdom,'Value')==1 ) && ...
         ~isempty(h.data_1cycle) 
@@ -926,7 +926,7 @@ if ( h.bins{bin_no}.no_it_align == 0 )
 %    for n=1:length(snr)
 %        snr(n) = 1/rmsv(traces(n,1:win_snr));
 %    end
-    [m, i] = max(h.snr(h.bins{bin_no}.no_trace));
+    [~, i] = max(h.snr(h.bins{bin_no}.no_trace));
     if work1cycle
         pds = str2double(get(handles.edit_poids1cycle,'String'));
         tr2 = (h.data_1cycle(:, h.bins{bin_no}.no_trace))';

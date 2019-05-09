@@ -237,6 +237,12 @@ uiwait(f)
         newMog.in = refMog.in;
         
         if do_t0 == 1
+            if sum(refMog.tt_done) == 0
+                errordlg({['No traveltime picked in ',refMog.name],'Aborting'})
+                return
+            end
+            warndlg({'Merging with t0 correction applied';...
+                ['Updating picked tt in original MOGs will not be transfered to ',newMog.name]})
             newMog.tt = refMog.getCorrectedTravelTimes(obj.air);
             newMog.av = [];
             newMog.ap = [];
@@ -267,6 +273,10 @@ uiwait(f)
                             
                             newMog.fw = [newMog.fw mog.fw];
                             if do_t0 == 1
+                                if sum(mog.tt_done) == 0
+                                    errordlg({['No traveltime picked in ',mog.name],'Aborting'})
+                                    return
+                                end
                                 [tt,~] = mog.getCorrectedTravelTimes(obj.air);
                             else
                                 tt = mog.tt;
@@ -302,6 +312,7 @@ uiwait(f)
             warndlg({'Could not merge MOGs',ME.message})
             return
         end
+        
         newMog.traces = newMog.data.rdata;
         
         if erase==true

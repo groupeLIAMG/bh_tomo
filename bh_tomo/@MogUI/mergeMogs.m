@@ -198,7 +198,7 @@ uiwait(f)
             end
         end
         
-        do_t0 = ht0.Value;
+        do_t0corr = ht0.Value;
         
         % MERGE
         newMog = Mog(hnameEdit.String); % create MOG with new ID
@@ -236,7 +236,7 @@ uiwait(f)
         newMog.RxCosDir = refMog.RxCosDir;
         newMog.in = refMog.in;
         
-        if do_t0 == 1
+        if do_t0corr == 1
             if sum(refMog.tt_done) == 0
                 errordlg({['No traveltime picked in ',refMog.name],'Aborting'})
                 return
@@ -247,6 +247,7 @@ uiwait(f)
             newMog.av = [];
             newMog.ap = [];
             newMog.useAirShots = false;
+            newMog.data.rdata = [];
         else
             newMog.tt = refMog.tt;
             newMog.av = refMog.av;
@@ -261,7 +262,9 @@ uiwait(f)
                     for mog=obj.mogs
                         if ids(nc) == mog.ID
                             
-                            newMog.data.rdata = [newMog.data.rdata mog.data.rdata];
+                            if do_t0corr == 0
+                                newMog.data.rdata = [newMog.data.rdata mog.data.rdata];
+                            end
                             newMog.data.ntrace = newMog.data.ntrace + mog.data.ntrace;
                             newMog.data.Tx_x = [newMog.data.Tx_x mog.data.Tx_x];
                             newMog.data.Tx_y = [newMog.data.Tx_y mog.data.Tx_y];
@@ -272,7 +275,7 @@ uiwait(f)
                             newMog.data.tdata = [newMog.data.tdata mog.data.tdata];
                             
                             newMog.fw = [newMog.fw mog.fw];
-                            if do_t0 == 1
+                            if do_t0corr == 1
                                 if sum(mog.tt_done) == 0
                                     errordlg({['No traveltime picked in ',mog.name],'Aborting'})
                                     return
@@ -313,7 +316,9 @@ uiwait(f)
             return
         end
         
-        newMog.traces = newMog.data.rdata;
+        if do_t0corr == 0
+            newMog.traces = newMog.data.rdata;
+        end
         
         if erase==true
             keep = true(size(obj.mogs));
@@ -358,7 +363,7 @@ uiwait(f)
         no = hrefPopup.Value;
         refMog = obj.mogs(no);
         
-        do_t0 = ht0.Value;
+        do_t0corr = ht0.Value;
         
         ids = [];
         nc = 0;
@@ -367,7 +372,7 @@ uiwait(f)
                 continue
             end
             test1 = ( refMog.Tx==obj.mogs(nm).Tx && refMog.Rx==obj.mogs(nm).Rx );
-            if do_t0 == 1
+            if do_t0corr == 1
                 test2 = true;
                 test3 = true;
             else

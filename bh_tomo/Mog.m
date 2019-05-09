@@ -315,8 +315,10 @@ classdef Mog < handle
                     obj.fac_dt = 1;
                 end
             end
+            tt = obj.tt;
+            
             t0 = obj.fac_dt*t0;
-            tt = obj.fac_dt*obj.tt - t0;
+            tt(obj.tt_done) = obj.fac_dt*obj.tt(obj.tt_done) - t0(obj.tt_done);
         end
         function initialize(obj)
             if isempty(obj.data)

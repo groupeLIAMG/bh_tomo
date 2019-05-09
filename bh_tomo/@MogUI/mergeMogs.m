@@ -21,7 +21,7 @@ vScale = 1;
 if ispc
     vScale = 0.81;
 end
-width = 450*vScale;
+width = 500*vScale;
 height = 300*vScale;
 
 % get screen size
@@ -85,9 +85,16 @@ hkeep = uicontrol('Style','checkbox',...
     'Fontsize',fs,...
     'Parent',f);
 
+ht0 = uicontrol('Style','checkbox',...
+    'Units','points',...
+    'String','Apply t0 correction before merging',...
+    'Fontsize',fs,...
+    'Callback',@getCompat,...
+    'Parent',f);
+
 hname = uicontrol('Style','text',...
     'Units','points',...
-    'String','New MOG Name',...
+    'String','Name of new MOG',...
     'Fontsize',fs,...
     'HorizontalAlignment','center',...
     'Parent',f);
@@ -137,6 +144,7 @@ uiwait(f)
         href.Position = [2*hSpace height-vBorderTop hSize vSize];
         hrefPopup.Position = [2*hSpace height-vBorderTop-vSize hSize vSize];
         hkeep.Position = [2*hSpace height-vBorderTop-3*vSize hSize vSize];
+        ht0.Position = [2*hSpace height-vBorderTop-4*vSize hSize vSize];
         hname.Position = [2*hSpace height-vBorderTop-6*vSize hSize vSize];
         hnameEdit.Position = [2*hSpace height-vBorderTop-7*vSize hSize vSize];
         
@@ -190,14 +198,14 @@ uiwait(f)
             end
         end
         
+        do_t0 = ht0.Value;
+        
         % MERGE
         newMog = Mog(hnameEdit.String); % create MOG with new ID
         
         no = hrefPopup.Value;
         refMog = obj.mogs(no);
         newMog.data = refMog.data.copy();
-        newMog.av = refMog.av;
-        newMog.ap = refMog.ap;
         newMog.Tx = refMog.Tx;
         newMog.Rx = refMog.Rx;
         newMog.f_et = refMog.f_et;
@@ -206,7 +214,6 @@ uiwait(f)
         newMog.user_fac_dt = refMog.user_fac_dt;
         
         newMog.fw = refMog.fw;
-        newMog.tt = refMog.tt;
         newMog.et = refMog.et;
         newMog.tt_done = refMog.tt_done;
         newMog.ttTx = refMog.ttTx;
@@ -229,6 +236,18 @@ uiwait(f)
         newMog.RxCosDir = refMog.RxCosDir;
         newMog.in = refMog.in;
         
+        if do_t0 == 1
+            newMog.tt = refMog.getCorrectedTravelTimes(obj.air);
+            newMog.av = [];
+            newMog.ap = [];
+            newMog.useAirShots = false;
+        else
+            newMog.tt = refMog.tt;
+            newMog.av = refMog.av;
+            newMog.ap = refMog.ap;
+            newMog.useAirShots = refMog.useAirShots;
+        end
+        
         try
             for nc=1:size(tdata,1)
                 if tdata{nc,1}==true
@@ -247,7 +266,12 @@ uiwait(f)
                             newMog.data.tdata = [newMog.data.tdata mog.data.tdata];
                             
                             newMog.fw = [newMog.fw mog.fw];
-                            newMog.tt = [newMog.tt mog.tt];
+                            if do_t0 == 1
+                                [tt,~] = mog.getCorrectedTravelTimes(obj.air);
+                            else
+                                tt = mog.tt;
+                            end
+                            newMog.tt = [newMog.tt tt];
                             newMog.et = [newMog.et mog.et];
                             newMog.tt_done = [newMog.tt_done mog.tt_done];
                             newMog.ttTx = [newMog.ttTx mog.ttTx];
@@ -323,6 +347,8 @@ uiwait(f)
         no = hrefPopup.Value;
         refMog = obj.mogs(no);
         
+        do_t0 = ht0.Value;
+        
         ids = [];
         nc = 0;
         for nm=1:numel(obj.mogs)
@@ -330,28 +356,33 @@ uiwait(f)
                 continue
             end
             test1 = ( refMog.Tx==obj.mogs(nm).Tx && refMog.Rx==obj.mogs(nm).Rx );
-            test2 = false;
-            if isempty(refMog.av) && isempty(obj.mogs(nm).av)
+            if do_t0 == 1
                 test2 = true;
-            elseif ~isempty(refMog.av) && isempty(obj.mogs(nm).av)
-                test2 = false;
-            elseif isempty(refMog.av) && ~isempty(obj.mogs(nm).av)
-                test2 = false;
-            else
-                if refMog.av == obj.mogs(nm).av
-                    test2 = true;
-                end
-            end
-            test3 = false;
-            if isempty(refMog.ap) && isempty(obj.mogs(nm).ap)
                 test3 = true;
-            elseif ~isempty(refMog.ap) && isempty(obj.mogs(nm).ap)
-                test3 = false;
-            elseif isempty(refMog.ap) && ~isempty(obj.mogs(nm).ap)
-                test3 = false;
             else
-                if refMog.ap == obj.mogs(nm).ap
+                test2 = false;
+                if isempty(refMog.av) && isempty(obj.mogs(nm).av)
+                    test2 = true;
+                elseif ~isempty(refMog.av) && isempty(obj.mogs(nm).av)
+                    test2 = false;
+                elseif isempty(refMog.av) && ~isempty(obj.mogs(nm).av)
+                    test2 = false;
+                else
+                    if refMog.av == obj.mogs(nm).av
+                        test2 = true;
+                    end
+                end
+                test3 = false;
+                if isempty(refMog.ap) && isempty(obj.mogs(nm).ap)
                     test3 = true;
+                elseif ~isempty(refMog.ap) && isempty(obj.mogs(nm).ap)
+                    test3 = false;
+                elseif isempty(refMog.ap) && ~isempty(obj.mogs(nm).ap)
+                    test3 = false;
+                else
+                    if refMog.ap == obj.mogs(nm).ap
+                        test3 = true;
+                    end
                 end
             end
             

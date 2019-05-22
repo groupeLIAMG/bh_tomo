@@ -39,7 +39,7 @@ function varargout = bh_tomo_tt(varargin)
 
 % Edit the above text to modify the response to help bh_tomo_tt
 
-% Last Modified by GUIDE v2.5 30-Apr-2019 09:55:30
+% Last Modified by GUIDE v2.5 22-May-2019 15:56:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -63,7 +63,7 @@ end
 %
 % -------------------------------------------------------------------------
 %
-function bh_tomo_tt_OpeningFcn(hObject, eventdata, handles, varargin)
+function bh_tomo_tt_OpeningFcn(hObject, ~, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -96,7 +96,7 @@ end
 %
 % --- Outputs from this function are returned to the command line.
 %
-function varargout = bh_tomo_tt_OutputFcn(hObject, eventdata, handles)
+function varargout = bh_tomo_tt_OutputFcn(~, ~, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -108,19 +108,19 @@ varargout{1} = handles.output;
 %
 % -------------------------------------------------------------------------
 %
-function FileMenu_Callback(hObject, eventdata, handles)
+function FileMenu_Callback(~, ~, ~) %#ok<DEFNU>
 
 
 %
 % -------------------------------------------------------------------------
 %
-function OpenMenuItem_Callback(hObject, eventdata, handles)
+function OpenMenuItem_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 
 [h.no_mog,h.db_file,hh] = choisirMOG('UserData', h.db_file);
 delete(hh)
 if h.no_mog==0
-	return
+    return
 end
 set(handles.fig_bh_tomo_tt, 'Name', ['bh_tomo_tt - ',h.db_file])
 
@@ -129,30 +129,30 @@ mog = mogs(h.no_mog);
 h.init_data = true;
 clear mogs
 if isempty(mog.av)
-	av = [];
-	set(handles.radiobutton_av,'Enable','off')
-	h.init_av = false;
+    av = [];
+    set(handles.radiobutton_av,'Enable','off')
+    h.init_av = false;
 else
-	av = air(mog.av);
-	set(handles.radiobutton_av,'String',[h.str.s02,': ',av.name])
-	set(handles.radiobutton_av,'Enable','on')
-	h.init_av = true;
+    av = air(mog.av);
+    set(handles.radiobutton_av,'String',[h.str.s02,': ',av.name])
+    set(handles.radiobutton_av,'Enable','on')
+    h.init_av = true;
 end
 if isempty(mog.ap)
-	ap = [];
-	set(handles.radiobutton_ap,'Enable','off')
-	h.init_ap = false;
+    ap = [];
+    set(handles.radiobutton_ap,'Enable','off')
+    h.init_ap = false;
 else
-	ap = air(mog.ap);
-	set(handles.radiobutton_ap,'String',[h.str.s03,': ',ap.name])
-	set(handles.radiobutton_ap,'Enable','on')
-	h.init_ap = true;
+    ap = air(mog.ap);
+    set(handles.radiobutton_ap,'String',[h.str.s03,': ',ap.name])
+    set(handles.radiobutton_ap,'Enable','on')
+    h.init_ap = true;
 end
 
 set(handles.radiobutton_data,'String',[h.str.s23,': ',mog.name])
 
 h.data_vrp = false;
-if ~isempty(findstr(mog.data.csurvmod, 'VRP'))
+if ~isempty(strfind(mog.data.csurvmod, 'VRP'))
   h.data_vrp = true;
 end
 
@@ -182,14 +182,14 @@ radiobutton_data_Callback(hObject, eventdata, handles)
 %
 % -------------------------------------------------------------------------
 %
-function PrintMenuItem_Callback(hObject, eventdata, handles)
+function PrintMenuItem_Callback(~, ~, handles) %#ok<DEFNU>
 printdlg(handles.fig_bh_tomo_tt)
 
 
 %
 % -------------------------------------------------------------------------
 %
-function CloseMenuItem_Callback(hObject, eventdata, handles)
+function CloseMenuItem_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 %selection = questdlg(['Close ' get(handles.fig_bh_tomo_tt,'Name') '?'],...
 %                     ['Close ' get(handles.fig_bh_tomo_tt,'Name') '...'],...
 %                     'Yes','No','Yes');
@@ -198,14 +198,14 @@ function CloseMenuItem_Callback(hObject, eventdata, handles)
 %end
 h=getappdata(handles.fig_bh_tomo_tt, 'h');
 if h.saved == false
-	ButtonName=questdlg(h.str.s236);
-	switch ButtonName,
-		case 'Yes',
-			SaveMenuItem_Callback(hObject, eventdata, handles)
-		case 'No',
-		case 'Cancel',
-			return
-	end % switch
+    ButtonName=questdlg(h.str.s236);
+    switch ButtonName
+        case 'Yes'
+            SaveMenuItem_Callback(hObject, eventdata, handles)
+        case 'No'
+        case 'Cancel'
+            return
+    end % switch
 end
 delete(handles.fig_bh_tomo_tt)
 
@@ -213,7 +213,7 @@ delete(handles.fig_bh_tomo_tt)
 %
 % -------------------------------------------------------------------------
 %
-function action_CreateFcn(hObject, eventdata, handles)
+function action_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
 if ispc
     set(hObject,'BackgroundColor','white');
 else
@@ -224,28 +224,13 @@ end
 %
 % -------------------------------------------------------------------------
 %
-function action_Callback(hObject, eventdata, handles)
+function action_Callback(~, ~, ~) %#ok<DEFNU>
 
 %
 % -------------------------------------------------------------------------
 %
-function trace_simple_ButtonDownFcn(hObject, eventdata, handles)
+function trace_simple_ButtonDownFcn(~, ~, ~) %#ok<DEFNU>
 
-
-%
-% -------------------------------------------------------------------------
-%
-function rb_data_Callback(hObject, eventdata, handles)
-
-%
-% -------------------------------------------------------------------------
-%
-function rb_av_Callback(hObject, eventdata, handles)
-
-%
-% -------------------------------------------------------------------------
-%
-function rb_ap_Callback(hObject, eventdata, handles)
 
 %
 % -------------------------------------------------------------------------
@@ -256,7 +241,7 @@ set(off,'Value',0)
 %
 % -------------------------------------------------------------------------
 %
-function trace_traite_CreateFcn(hObject, eventdata, handles)
+function trace_traite_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -265,7 +250,7 @@ end
 %
 % -------------------------------------------------------------------------
 %
-function trace_traite_Callback(hObject, eventdata, handles)
+function trace_traite_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
 av = getappdata(handles.fig_bh_tomo_tt, 'av');
@@ -273,28 +258,22 @@ ap = getappdata(handles.fig_bh_tomo_tt, 'ap');
 no_trace = str2double(get(hObject,'string'));
 if isnan(no_trace)
     errordlg(h.str.s54,h.str.s45,'modal')
-	set(hObject,'string',num2str(h.no_trace))
-	return
+    set(hObject,'string',num2str(h.no_trace))
+    return
 end
-% nos = 1:mog.data.ntrace;
-% nos = nos(mog.in);
-% if isempty( find(no_trace==nos,1) )
-% 	errordlg('Trace was excluded after pruning',h.str.s45,'modal')
-% 	set(hObject,'string',num2str(h.no_trace))
-% 	return
-% end
+
 if (get(handles.radiobutton_data,'Value')==1) && no_trace>mog.data.ntrace
     errordlg([h.str.s55,num2str(mog.data.ntrace)],h.str.s45,'modal')
-	set(hObject,'string',num2str(h.no_trace))
-	return
+    set(hObject,'string',num2str(h.no_trace))
+    return
 elseif (get(handles.radiobutton_av,'Value')==1) && no_trace > av.data.ntrace
     errordlg([h.str.s55,num2str(av.data.ntrace)],h.str.s45,'modal')
-	set(hObject,'string',num2str(h.no_trace))
-	return
+    set(hObject,'string',num2str(h.no_trace))
+    return
 elseif (get(handles.radiobutton_ap,'Value')==1) && no_trace > ap.data.ntrace
     errordlg([h.str.s55,num2str(ap.data.ntrace)],h.str.s45,'modal')
-	set(hObject,'string',num2str(h.no_trace))
-	return
+    set(hObject,'string',num2str(h.no_trace))
+    return
 end
 h.no_trace = no_trace;
 setappdata(handles.fig_bh_tomo_tt, 'h', h)
@@ -311,6 +290,7 @@ if h.pick_et(h.no_trace) ~= -1
 else
     set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace))])
 end
+set(handles.radiobutton_pruned, 'Value', h.in(h.no_trace)==0)
 update_trace_simple(hObject, eventdata, handles)
 update_traces_contigues(hObject, eventdata, handles)
 update_positions_info(hObject, eventdata, handles)
@@ -334,12 +314,6 @@ if get(handles.checkbox_pickTx,'Value')==0
         m1 = max(abs(h.proc_data(:,h.no_trace)-dc));
         m2 = max(abs(mog.data.tdata(:,h.no_trace)));
         plot(handles.trace_simple, mog.data.timestp,mog.data.tdata(:,h.no_trace)*m1/m2,'color',[0 0.6 0],'LineStyle','-.')
-        if get(handles.filtre_ondelette,'Value')==1
-           % legend(handles.trace_simple,'detrended Rx','Rx','Tx')
-        else
-            %legend(handles.trace_simple,'Rx','Tx')
-        end
-        
     end
 
     grid(handles.trace_simple, 'on')
@@ -381,13 +355,8 @@ else
     m1 = max(abs(h.proc_data(:,h.no_trace)-dc));
     m2 = max(abs(mog.data.tdata(:,h.no_trace)));
     plot(handles.trace_simple, mog.data.timestp,mog.data.tdata(:,h.no_trace)*m1/m2,'color',[0 0.6 0])
-    if get(handles.filtre_ondelette,'Value')==1
-       % legend(handles.trace_simple,'detrended Rx','Rx','Tx')
-    else
-       % legend(handles.trace_simple,'Rx','Tx')
-	end
 
-	grid(handles.trace_simple, 'on')
+    grid(handles.trace_simple, 'on')
     xlabel(handles.trace_simple, [h.str.s22,' [',mog.data.tunits,']'])
     ylabel(handles.trace_simple, h.str.s21)
     update_t_lim(hObject, eventdata, handles)
@@ -408,58 +377,50 @@ h = getappdata(handles.fig_bh_tomo_tt, 'h');
 mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
 av = getappdata(handles.fig_bh_tomo_tt, 'av');
 ap = getappdata(handles.fig_bh_tomo_tt, 'ap');
-%axes(handles.traces_contigues)
-%b1=hsv(64);
-%b2=gray(64);
-%colormap([b2(1:32,:);b1;gray(32);b1;b2(33:64,:)])
+
 colormap ramac_cmap(16)
 tmin_axe=str2double(get(handles.t_min,'String'));
 tmax_axe=str2double(get(handles.t_max,'String'));
 if (get(handles.radiobutton_data,'Value')==1)
-  %    ind = (mog.data.Tx_z(h.no_trace) == mog.data.Tx_z);
   if ~h.data_vrp
     ind = false(size(mog.data.Tx_z));
-	ind(h.no_trace)=true;
-	nn=h.no_trace+1;
-	while nn<=mog.data.ntrace && ...
-			  mog.data.Tx_z(nn) == mog.data.Tx_z(h.no_trace)
-	  ind(nn)=true;
-	  nn=nn+1;
-	end
-	nn=h.no_trace-1;
-	while nn>0 && mog.data.Tx_z(nn) == mog.data.Tx_z(h.no_trace)
-	  ind(nn)=true;
-	  nn=nn-1;
-	end
+    ind(h.no_trace)=true;
+    nn=h.no_trace+1;
+    while nn<=mog.data.ntrace && ...
+              mog.data.Tx_z(nn) == mog.data.Tx_z(h.no_trace)
+      ind(nn)=true;
+      nn=nn+1;
+    end
+    nn=h.no_trace-1;
+    while nn>0 && mog.data.Tx_z(nn) == mog.data.Tx_z(h.no_trace)
+      ind(nn)=true;
+      nn=nn-1;
+    end
   else
-	ind = false(size(mog.data.Tx_z));
-	ind(h.no_trace)=true;
-	nn=h.no_trace+1;
-	while nn<=mog.data.ntrace && ...
-			   mog.data.Tx_x(nn) == mog.data.Tx_x(h.no_trace)
-	  ind(nn)=true;
-	  nn=nn+1;
-	end
-	nn=h.no_trace-1;
-	while nn>0 && mog.data.Tx_x(nn) == mog.data.Tx_x(h.no_trace)
-	  ind(nn)=true;
-	  nn=nn-1;
-	end
+    ind = false(size(mog.data.Tx_z));
+    ind(h.no_trace)=true;
+    nn=h.no_trace+1;
+    while nn<=mog.data.ntrace && ...
+               mog.data.Tx_x(nn) == mog.data.Tx_x(h.no_trace)
+      ind(nn)=true;
+      nn=nn+1;
+    end
+    nn=h.no_trace-1;
+    while nn>0 && mog.data.Tx_x(nn) == mog.data.Tx_x(h.no_trace)
+      ind(nn)=true;
+      nn=nn-1;
+    end
   end
-%  ind = ind & mog.in;
   no_traces = 1:mog.data.ntrace;
   ind2 = ind&h.done;
-  out = ~mog.in;
 elseif (get(handles.radiobutton_av,'Value')==1)
   ind = 1:av.data.ntrace;
   no_traces = ind;
   ind2 = av.tt_done;
-  out = false(size(ind));
 elseif (get(handles.radiobutton_ap,'Value')==1)
   ind = 1:ap.data.ntrace;
   no_traces = ind;
   ind2 = ap.tt_done;
-  out = false(size(ind));
 end
 
 imagesc(no_traces(ind), h.timestp, h.proc_data(:,ind),'Parent',handles.traces_contigues)
@@ -470,18 +431,21 @@ update_t_lim(hObject, eventdata, handles)
 hold(handles.traces_contigues, 'on')
 vapp = calculVapp(handles);
 if vapp~=0 && get(handles.radiobutton_data,'Value')==1 && ...
-		get(handles.montre_vapp,'Value')==1
+        get(handles.montre_vapp,'Value')==1
   l = sqrt((mog.data.Tx_x(ind)-mog.data.Rx_x(ind)).^2+...
-		   (mog.data.Tx_y(ind)-mog.data.Rx_y(ind)).^2+...
-		   (mog.data.Tx_z(ind)-mog.data.Rx_z(ind)).^2);
+           (mog.data.Tx_y(ind)-mog.data.Rx_y(ind)).^2+...
+           (mog.data.Tx_z(ind)-mog.data.Rx_z(ind)).^2);
   tvapp=l./vapp;
   plot(handles.traces_contigues, no_traces(ind),tvapp,'y:')
 end
-%tmp = (tmax_axe-1)*ones(size(no_traces(ind2)));
-if any(ind & out)
-	plot(handles.traces_contigues, no_traces(ind & out), tmax_axe-1,'ro','MarkerFaceColor','r');
+
+if get(handles.checkbox_proc_pruned, 'Value') == 0
+    out = ~h.in;
+    if any(ind & out)
+        plot(handles.traces_contigues, no_traces(ind & out), tmax_axe-1,'ro','MarkerFaceColor','r');
+    end
 end
-plot(handles.traces_contigues, h.no_trace,tmin_axe+1,'ys','MarkerFaceColor','y')
+plot(handles.traces_contigues, h.no_trace, tmin_axe+1,'ys','MarkerFaceColor','y')
 plot(handles.traces_contigues, no_traces(ind2),tmax_axe-ones(size(no_traces(ind2))),'gs','MarkerFaceColor','g')
 plot(handles.traces_contigues, no_traces(ind),h.pick(ind),'go')
 ind = ind & (h.pick_et ~= -1);
@@ -493,7 +457,7 @@ hold(handles.traces_contigues, 'off')
 %
 % -------------------------------------------------------------------------
 %
-function update_t_lim(hObject, eventdata, handles)
+function update_t_lim(~, ~, handles)
 tlim = [str2double(get(handles.t_min,'String')) str2double(get(handles.t_max,'String')) ];
 set(handles.trace_simple,'XLim',tlim)
 set(handles.traces_contigues, 'YLim', tlim)
@@ -501,7 +465,7 @@ set(handles.traces_contigues, 'YLim', tlim)
 %
 % -------------------------------------------------------------------------
 %
-function update_a_lim(hObject, eventdata, handles)
+function update_a_lim(~, ~, handles)
 alim = [str2double(get(handles.a_min,'String')) str2double(get(handles.a_max,'String')) ];
 set(handles.trace_simple,'YLim',alim)
 
@@ -509,7 +473,7 @@ set(handles.trace_simple,'YLim',alim)
 %
 % -------------------------------------------------------------------------
 %
-function t_min_CreateFcn(hObject, eventdata, handles)
+function t_min_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -517,13 +481,13 @@ end
 %
 % -------------------------------------------------------------------------
 %
-function t_min_Callback(hObject, eventdata, handles)
+function t_min_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 update_t_lim(hObject, eventdata, handles)
 
 %
 % -------------------------------------------------------------------------
 %
-function t_max_CreateFcn(hObject, eventdata, handles)
+function t_max_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -532,13 +496,13 @@ end
 %
 % -------------------------------------------------------------------------
 %
-function t_max_Callback(hObject, eventdata, handles)
+function t_max_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 update_t_lim(hObject, eventdata, handles)
 
 %
 % -------------------------------------------------------------------------
 %
-function a_min_CreateFcn(hObject, eventdata, handles)
+function a_min_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -546,13 +510,13 @@ end
 %
 % -------------------------------------------------------------------------
 %
-function a_min_Callback(hObject, eventdata, handles)
+function a_min_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 update_a_lim(hObject, eventdata, handles)
 
 %
 % -------------------------------------------------------------------------
 %
-function a_max_CreateFcn(hObject, eventdata, handles)
+function a_max_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -560,26 +524,21 @@ end
 %
 % -------------------------------------------------------------------------
 %
-function a_max_Callback(hObject, eventdata, handles)
+function a_max_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 update_a_lim(hObject, eventdata, handles)
 
 
 %
 % -------------------------------------------------------------------------
 %
-function a_zoom_CreateFcn(hObject, eventdata, handles)
-usewhitebg = 1;
-if usewhitebg
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
-else
-    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-end
+function a_zoom_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
+set(hObject,'BackgroundColor',[.9 .9 .9]);
 
 
 %
 % -------------------------------------------------------------------------
 %
-function a_zoom_Callback(hObject, eventdata, handles)
+function a_zoom_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 val = 10^get(hObject,'Value');
 set(handles.a_min,'String',-val);
 set(handles.a_max,'String', val);
@@ -588,7 +547,7 @@ update_trace_simple(hObject, eventdata, handles)
 %
 % -------------------------------------------------------------------------
 %
-function update_positions_info(hObject, eventdata, handles)
+function update_positions_info(~, ~, handles)
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 if (get(handles.radiobutton_data,'Value')==1)
     mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
@@ -599,7 +558,6 @@ if (get(handles.radiobutton_data,'Value')==1)
     Rx_y = mog.data.Rx_y(h.no_trace);
     Rx_z = mog.data.Rx_z(h.no_trace);
     Tx_d = mog.Tx_z_orig(h.no_trace);
-	in = mog.in;
 elseif (get(handles.radiobutton_av,'Value')==1)
     av = getappdata(handles.fig_bh_tomo_tt, 'av');
     Tx_x = av.data.Tx_x(h.no_trace);
@@ -613,7 +571,6 @@ elseif (get(handles.radiobutton_av,'Value')==1)
     else
         Tx_d = av.d_TxRx;
     end
-	in = av.in;
 elseif (get(handles.radiobutton_ap,'Value')==1)
     ap = getappdata(handles.fig_bh_tomo_tt, 'ap');
     Tx_x = ap.data.Tx_x(h.no_trace);
@@ -627,7 +584,6 @@ elseif (get(handles.radiobutton_ap,'Value')==1)
     else
         Tx_d = ap.d_TxRx;
     end
-	in = ap.in;
 end
 texte{1} = '';
 texte{2} = 'Positions Tx -- Rx';
@@ -635,9 +591,13 @@ texte{3} = '';
 texte{4} = '       x        y        z';
 texte{5} = ['Tx:   ',num2str(Tx_x,'%5.2f'),'   ',num2str(Tx_y, '%5.2f'),'   ',num2str(Tx_z,'%5.2f'),' (',num2str(Tx_d),')'];
 texte{6} = ['Rx:   ',num2str(Rx_x,'%5.2f'),'   ',num2str(Rx_y, '%5.2f'),'   ',num2str(Rx_z,'%5.2f')];
-texte{7} = [num2str(sum(in)), ' traces, (', num2str(size(h.proc_data,2)),' total)'];
+texte{7} = [num2str(sum(h.in)), ' unpruned traces, (', num2str(size(h.proc_data,2)),' total)'];
 texte{8} = '';
-texte{9} = [num2str(round(100*sum(h.done(in))/sum(in))),' % done'];
+if get(handles.checkbox_proc_pruned, 'Value') == 0
+    texte{9} = [num2str(round(100*sum(h.done(h.in))/sum(h.in))),' % done'];
+else
+    texte{9} = [num2str(round(100*sum(h.done)/numel(h.done))),' % done'];
+end
 set(handles.positionsTxRx,'String',texte)
 
 %
@@ -656,7 +616,7 @@ update_tout(hObject, eventdata, handles)
 set(handles.pushbutton_active_pointe,'Value',0)
 
 if get(handles.checkbox_interm_save,'Value')==1
-	sauve_mat(handles)
+    sauve_mat(handles)
 end
 
 %
@@ -665,13 +625,13 @@ end
 function pointe_contigues(hObject, eventdata, handles)
 
 if get(handles.action,'Value') == 1
-	if get(handles.radiobutton_tt,'Value') == 1
-		pointe_contigues_simple(hObject, eventdata, handles)
+    if get(handles.radiobutton_tt,'Value') == 1
+        pointe_contigues_simple(hObject, eventdata, handles)
     elseif get(handles.radiobutton_et,'Value') == 1
-		pointe_contigues_ecart_type(hObject, eventdata, handles)
+        pointe_contigues_ecart_type(hObject, eventdata, handles)
     else
         selectionne_contigues(hObject, eventdata, handles)
-	end
+    end
 elseif get(handles.action,'Value') == 2
   pointe_contigues_simple(hObject, eventdata, handles)
 end
@@ -686,9 +646,6 @@ if get(handles.checkbox_interm_save,'Value')==1, sauve_mat(handles), end
 function pointe_ecart_type(hObject, eventdata, handles)
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 
-% button = 1;
-% tcmp = 0;
-% acmp = 1;
 pointe_actif=1;
 xlim = get(handles.trace_simple,'XLim');
 ylim = get(handles.trace_simple,'YLim');
@@ -696,89 +653,70 @@ n_trace_traite = 0;
 tt = h.pick(h.no_trace);
 et = h.pick_et(h.no_trace);
 while pointe_actif
-	update_tout(hObject, eventdata, handles)
-	[t1,a,button] = ginput(1);
-	pushOnce = true;
-	while button ~= 2
-		if gca ~= handles.trace_simple || t1<xlim(1) || t1>xlim(2) || a<ylim(1) || a>ylim(2)
-			%pointe_actif=0;
-			setappdata(handles.fig_bh_tomo_tt, 'h', h)
-			return
-		end
-		if button==1
-			tt = t1;
-			update_images(hObject, eventdata, handles, tt, et)
-		elseif button==3
-			et = abs(t1-tt);
-			update_images(hObject, eventdata, handles, tt, et)
+    update_tout(hObject, eventdata, handles)
+    [t1,a,button] = ginput(1);
+    pushOnce = true;
+    while button ~= 2
+        if gca ~= handles.trace_simple || t1<xlim(1) || t1>xlim(2) || a<ylim(1) || a>ylim(2)
+            setappdata(handles.fig_bh_tomo_tt, 'h', h)
+            return
+        end
+        if button==1
+            tt = t1;
+            update_images(hObject, eventdata, handles, tt, et)
+        elseif button==3
+            et = abs(t1-tt);
+            update_images(hObject, eventdata, handles, tt, et)
         end
         if et ~= -1
             set(handles.text_tt_info,'String',['Picked Time: ',num2str(tt),' ± ',num2str(et)])
         else
             set(handles.text_tt_info,'String',['Picked Time: ',num2str(tt)])
         end
-		[t1,a,button] = ginput(1);
-		pushOnce=false;
-	end
-	% button == 2
-	if pushOnce
-		tt=-1;
-	end
-	h.done(h.no_trace) = true;
-	h.pick(h.no_trace) = tt;
-	h.pick_et(h.no_trace) = et;
-	
-	n_trace_traite = n_trace_traite+1;
-	if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
-		sauve_mat(handles)
-	end
-	
+        [t1,a,button] = ginput(1);
+        pushOnce=false;
+    end
+    if pushOnce
+        tt=-1;
+    end
+    h.done(h.no_trace) = true;
+    h.pick(h.no_trace) = tt;
+    h.pick_et(h.no_trace) = et;
+    
+    n_trace_traite = n_trace_traite+1;
+    if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
+        sauve_mat(handles)
+    end
+    
     if get(handles.checkbox_jump,'Value')==1
         next = prochaine_trace(handles, h.no_trace, h.no_trace+1);
     else
         next = h.no_trace+1;
     end
-	if  next == h.no_trace
-		pointe_actif=0;
-	else
-		h.no_trace = next;
-	end	
-% 	h.no_trace = h.no_trace+1;
-% 	if h.no_trace<size(h.proc_data,2) && sum(h.done)~=length(h.done)
-% 	  while h.done(h.no_trace)
-% 		h.no_trace = h.no_trace+1;
-% 		if h.no_trace>=length(h.done)
-% 		  break
-% 		end
-% 	  end
-% 	end
-% 	if h.no_trace > size(h.proc_data,2)
-% 	  h.no_trace = h.no_trace-1;
-% 	  pointe_actif=0;
-% 	end
-	set(handles.trace_traite,'String',num2str(h.no_trace))
-	setappdata(handles.fig_bh_tomo_tt, 'h', h)
-	tt = h.pick(h.no_trace);
-	et = h.pick_et(h.no_trace);
+    if  next == h.no_trace
+        pointe_actif=0;
+    else
+        h.no_trace = next;
+    end
+    set(handles.trace_traite,'String',num2str(h.no_trace))
+    setappdata(handles.fig_bh_tomo_tt, 'h', h)
+    tt = h.pick(h.no_trace);
+    et = h.pick_et(h.no_trace);
 end
 
-		
+        
 %
 % -------------------------------------------------------------------------
 %
 function pointe_simple(hObject, eventdata, handles)
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 
-%button = 1;
-%tcmp = 0;
-%acmp = 1;
-
 if get(handles.checkbox_pickTx,'Value') == 1
-	pick = h.pickTx;
-	done = h.doneTx;
+    pick = h.pickTx;
+    done = h.doneTx;
 else
-	pick = h.pick;
-	done = h.done;
+    pick = h.pick;
+    done = h.done;
 end
 
 pointe_actif=1;
@@ -789,86 +727,71 @@ tt = pick(h.no_trace);
 while pointe_actif
     update_tout(hObject, eventdata, handles)
     [t1,a,button] = ginput(1);
-    pushOnce=true;
+    pushOnce = true;
     while button ~= 2
         if gca ~= handles.trace_simple || t1<xlim(1) || t1>xlim(2) || a<ylim(1) || a>ylim(2)
-            %pointe_actif=0;
             setappdata(handles.fig_bh_tomo_tt, 'h', h)
             return
         end
         if button==1
-			tt = t1;
-			update_images(hObject, eventdata, handles, tt, -1)
+            tt = t1;
+            update_images(hObject, eventdata, handles, tt, -1)
         end
         set(handles.text_tt_info,'String',['Picked Time: ',num2str(tt)])
-		[t1,a,button] = ginput(1);
-		pushOnce=false;
-	end
-	if pushOnce
-		tt=-1;
-	end
-	% button == 2
-	done(h.no_trace) = true;
-	pick(h.no_trace) = tt;
-	
-	n_trace_traite = n_trace_traite+1;
-	if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
-		sauve_mat(handles)
+        [t1,a,button] = ginput(1);
+        pushOnce=false;
     end
-	
+    if pushOnce
+        tt = -1;
+    end
+    done(h.no_trace) = true;
+    pick(h.no_trace) = tt;
+    
+    n_trace_traite = n_trace_traite+1;
+    if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
+        sauve_mat(handles)
+    end
+    
     if get(handles.checkbox_jump,'Value')==1
         next = prochaine_trace(handles, h.no_trace, h.no_trace+1);
     else
         next = h.no_trace+1;
     end
-	if  next == h.no_trace
-		pointe_actif=0;
-	else
-		h.no_trace = next;
-	end	
+    if  next == h.no_trace
+        pointe_actif=0;
+    else
+        h.no_trace = next;
+    end    
 
-% 	h.no_trace = h.no_trace+1;
-% 	if h.no_trace<size(h.proc_data,2)
-% 	  while h.done(h.no_trace)
-% 		h.no_trace = h.no_trace+1;
-% 		if h.no_trace>=length(h.done)
-% 		  break
-% 		end
-% 	  end
-% 	end
-% 	if h.no_trace > size(h.proc_data,2)
-% 	  h.no_trace = h.no_trace-1;
-% 	  pointe_actif=0;
-% 	end
-	set(handles.trace_traite,'String',num2str(h.no_trace))
-	if get(handles.checkbox_pickTx,'Value') == 1
-		h.pickTx = pick;
-		h.doneTx = done;
-	else
-		h.pick = pick;
-		h.done = done;
-	end
-	setappdata(handles.fig_bh_tomo_tt, 'h', h)
-	tt = pick(h.no_trace);
+    set(handles.trace_traite,'String',num2str(h.no_trace))
+    if get(handles.checkbox_pickTx,'Value') == 1
+        h.pickTx = pick;
+        h.doneTx = done;
+    else
+        h.pick = pick;
+        h.done = done;
+    end
+    setappdata(handles.fig_bh_tomo_tt, 'h', h)
+    tt = pick(h.no_trace);
 end
 
 
 %
 % -------------------------------------------------------------------------
 %
-function pushbutton_active_pointe_Callback(hObject, eventdata, handles)
+function pushbutton_active_pointe_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 if get(hObject,'Value') == 1
     axes(handles.trace_simple)
-	pointe(hObject, eventdata, handles)
+    pointe(hObject, eventdata, handles)
 end
 
 %
 % -------------------------------------------------------------------------
 %
-function pushbutton_active_pointe_contigues_Callback(hObject, eventdata, handles)
+function pushbutton_active_pointe_contigues_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 if get(hObject,'Value') == 1
     axes(handles.traces_contigues)
-	pointe_contigues(hObject, eventdata, handles)
+    pointe_contigues(hObject, eventdata, handles)
 end
 
 
@@ -922,23 +845,21 @@ function update_images(hObject, eventdata, handles, tt, et)
 
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 update_trace_simple(hObject, eventdata, handles)
-%axes(handles.trace_simple)
 ylim = get(handles.trace_simple,'YLim');
 hold(handles.trace_simple, 'on')
 plot(handles.trace_simple, [tt tt],ylim,'g');
 if et ~= -1
-	plot(handles.trace_simple, [tt-et tt-et],ylim,'r');
-	plot(handles.trace_simple, [tt+et tt+et],ylim,'r');
+    plot(handles.trace_simple, [tt-et tt-et],ylim,'r');
+    plot(handles.trace_simple, [tt+et tt+et],ylim,'r');
 end
 hold(handles.trace_simple, 'off')
 
 update_traces_contigues(hObject, eventdata, handles)
-%axes(handles.traces_contigues)
 hold(handles.traces_contigues, 'on')
 plot(handles.traces_contigues, h.no_trace,tt,'go');
 if et ~= -1
-	plot(handles.traces_contigues, h.no_trace,tt-et,'ro');
-	plot(handles.traces_contigues, h.no_trace,tt+et,'ro');
+    plot(handles.traces_contigues, h.no_trace,tt-et,'ro');
+    plot(handles.traces_contigues, h.no_trace,tt+et,'ro');
 end
 hold(handles.traces_contigues, 'off')
 
@@ -946,20 +867,12 @@ hold(handles.traces_contigues, 'off')
 %
 % -------------------------------------------------------------------------
 %
-function pushbutton_trace_suivante_Callback(hObject, eventdata, handles)
+function pushbutton_trace_suivante_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
-if (get(handles.radiobutton_data,'Value')==1)
-	mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
-	in = mog.in;
-elseif (get(handles.radiobutton_av,'Value')==1)
-	av = getappdata(handles.fig_bh_tomo_tt, 'av');
-	in = av.in;
-elseif (get(handles.radiobutton_ap,'Value')==1)
-	ap = getappdata(handles.fig_bh_tomo_tt, 'ap');
-	in = ap.in;
-end
 nos = 1:size(h.proc_data,2);
-nos = nos(in);
+if get(handles.checkbox_proc_pruned, 'Value') == 0
+    nos = nos(h.in);
+end
 ind = find(h.no_trace == nos);
 if ind < length(nos)
     h.no_trace = nos(ind+1);
@@ -970,20 +883,12 @@ end
 %
 % -------------------------------------------------------------------------
 %
-function pushbutton_trace_precedente_Callback(hObject, eventdata, handles)
+function pushbutton_trace_precedente_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
-if (get(handles.radiobutton_data,'Value')==1)
-	mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
-	in = mog.in;
-elseif (get(handles.radiobutton_av,'Value')==1)
-	av = getappdata(handles.fig_bh_tomo_tt, 'av');
-	in = av.in;
-elseif (get(handles.radiobutton_ap,'Value')==1)
-	ap = getappdata(handles.fig_bh_tomo_tt, 'ap');
-	in = ap.in;
-end
 nos = 1:size(h.proc_data,2);
-nos = nos(in);
+if get(handles.checkbox_proc_pruned, 'Value') == 0
+    nos = nos(h.in);
+end
 ind = find(h.no_trace == nos);
 if ind > 1
     h.no_trace = nos(ind-1);
@@ -995,13 +900,13 @@ end
 %
 % -------------------------------------------------------------------------
 %
-function pushbutton_prochaine_trace_Callback(hObject, eventdata, handles)
+function pushbutton_prochaine_trace_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 next = prochaine_trace(handles, h.no_trace,1);
 if next ~= h.no_trace
-	h.no_trace = next;
-	setappdata(handles.fig_bh_tomo_tt, 'h', h)
-	update_tout(hObject, eventdata, handles)
+    h.no_trace = next;
+    setappdata(handles.fig_bh_tomo_tt, 'h', h)
+    update_tout(hObject, eventdata, handles)
 end
 
 
@@ -1011,29 +916,27 @@ end
 function next = prochaine_trace(handles, no_trace, debut)
 next = no_trace;
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
-if (get(handles.radiobutton_data,'Value')==1)
-	mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
-	in = mog.in;
-elseif (get(handles.radiobutton_av,'Value')==1)
-	av = getappdata(handles.fig_bh_tomo_tt, 'av');
-	in = av.in;
-elseif (get(handles.radiobutton_ap,'Value')==1)
-	ap = getappdata(handles.fig_bh_tomo_tt, 'ap');
-	in = ap.in;
+if get(handles.checkbox_proc_pruned, 'Value') == 0
+    for n=debut:size(h.proc_data,2)
+        if ~h.done(n) && h.in(n)
+            next = n;
+            break
+        end
+    end
+else
+    for n=debut:size(h.proc_data,2)
+        if ~h.done(n)
+            next = n;
+            break
+        end
+    end
 end
-for n=debut:size(h.proc_data,2)
-	if ~h.done(n) && in(n)
-		next = n;
-		break
-	end
-end
-
 
 
 %
 % -------------------------------------------------------------------------
 %
-function SaveMenuItem_Callback(hObject, eventdata, handles)
+function SaveMenuItem_Callback(~, ~, handles)
 sauve_mat(handles)
 
 
@@ -1047,17 +950,20 @@ mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
 av = getappdata(handles.fig_bh_tomo_tt, 'av');
 ap = getappdata(handles.fig_bh_tomo_tt, 'ap');
 if get(handles.radiobutton_data,'Value')==1
-	mog.tt = h.pick;
-	mog.et = h.pick_et;
-	mog.tt_done = h.done;
+    mog.tt = h.pick;
+    mog.et = h.pick_et;
+    mog.tt_done = h.done;
+    mog.in = h.in;
 elseif get(handles.radiobutton_av,'Value')==1
-	av.tt = h.pick;
-	av.et = h.pick_et;
-	av.tt_done = h.done;
+    av.tt = h.pick;
+    av.et = h.pick_et;
+    av.tt_done = h.done;
+    av.in = h.in;
 elseif get(handles.radiobutton_ap,'Value')==1
-	ap.tt = h.pick;
-	ap.et = h.pick_et;
-	ap.tt_done = h.done;
+    ap.tt = h.pick;
+    ap.et = h.pick_et;
+    ap.tt_done = h.done;
+    ap.in = h.in;
 end
 if strcmp(get(handles.checkbox_pickTx,'Enable'),'on')
     mog.ttTx = h.pickTx;
@@ -1071,7 +977,7 @@ setappdata(handles.fig_bh_tomo_tt, 'ap', ap)
 %
 % -------------------------------------------------------------------------
 %
-function HelpMenuItem_Callback(hObject, eventdata, handles)
+function HelpMenuItem_Callback(~, ~, handles) %#ok<DEFNU>
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 helpdlg(h.str.s61, h.str.s32)
 
@@ -1079,28 +985,24 @@ helpdlg(h.str.s61, h.str.s32)
 %
 % -------------------------------------------------------------------------
 %
-function filtre_median_Callback(hObject, eventdata, handles)
+function filtre_median_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 update_trace_simple(hObject, eventdata, handles)
 
 
 %
 % -------------------------------------------------------------------------
 %
-function pushbutton_plot_stats_Callback(hObject, eventdata, handles)
+function pushbutton_plot_stats_Callback(~, ~, handles) %#ok<DEFNU>
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
 
 if strcmp(mog.data.tunits,'ns')==1
-	if ~isempty(mog.ttTx)
-		t0 = mog.ttTx;
-	elseif ~(h.init_av & h.init_ap) %#ok<AND2>
+    if ~isempty(mog.ttTx)
+        t0 = mog.ttTx;
+    elseif ~(h.init_av & h.init_ap) %#ok<AND2>
         warndlg(h.str.s59, h.str.s53);
         t0 = zeros(1,mog.data.ntrace);
-        %t0av = 0;
-        %t0ap = 0;
     else
-        %[t0, t0av, t0ap] = get_t0(hObject, eventdata, handles);
-        %t0 = get_t0(hObject, eventdata, handles);
         av = getappdata(handles.fig_bh_tomo_tt, 'av');
         ap = getappdata(handles.fig_bh_tomo_tt, 'ap');
         if mog.data.synthetique==1
@@ -1111,8 +1013,12 @@ if strcmp(mog.data.tunits,'ns')==1
             [t0, fac_dt_av, fac_dt_ap] = corr_t0(mog.data.ntrace, av, ap, true);
         end
         
-        if ~isempty(av), av.fac_dt = fac_dt_av; end
-        if ~isempty(ap), ap.fac_dt = fac_dt_ap; end
+        if ~isempty(av)
+            av.fac_dt = fac_dt_av;
+        end
+        if ~isempty(ap)
+            ap.fac_dt = fac_dt_ap;
+        end
         if mog.user_fac_dt == 0
             if fac_dt_av~=1 && fac_dt_ap ~= 1
                 mog.fac_dt = 0.5*(fac_dt_av+fac_dt_ap);
@@ -1136,18 +1042,18 @@ ind2 = (mog.tt ~= -1);
 ind = mog.tt_done & ind2 & mog.in;
 
 if get(handles.action,'Value')==1  % pointe avec ecart-type
-  tt = mog.tt(ind);
-  et = mog.et(ind);
-  if sum(et==-1) > 0
-	no = 1:length(ind);
-	disp([h.str.s60, ': traces'])
-    no = no(ind&(mog.et==-1));
-	disp(no)
-	warndlg(h.str.s60, h.str.s53);
-  end
+    tt = mog.tt(ind);
+    et = mog.et(ind);
+    if sum(et==-1) > 0
+        no = 1:length(ind);
+        disp([h.str.s60, ': traces'])
+        no = no(ind&(mog.et==-1));
+        disp(no)
+        warndlg(h.str.s60, h.str.s53);
+    end
 else
-  tt = mog.tt(ind);
-  et = zeros(size(tt));
+    tt = mog.tt(ind);
+    et = zeros(size(tt));
 end
 
 tt = tt*mog.fac_dt;
@@ -1155,8 +1061,8 @@ et = et*mog.fac_dt;
 t0 = t0*mog.fac_dt;
 
 hyp = sqrt((mog.data.Tx_x(ind)-mog.data.Rx_x(ind)).^2+...
-		   (mog.data.Tx_y(ind)-mog.data.Rx_y(ind)).^2+...
-		   (mog.data.Tx_z(ind)-mog.data.Rx_z(ind)).^2);
+           (mog.data.Tx_y(ind)-mog.data.Rx_y(ind)).^2+...
+           (mog.data.Tx_z(ind)-mog.data.Rx_z(ind)).^2);
 dz = mog.data.Rx_z(ind)-mog.data.Tx_z(ind);
 theta = 180/pi*asin(dz./hyp);
 
@@ -1188,7 +1094,7 @@ if sum(ind2)>0
     disp('Apparent velocity higher that 0.3: traces no')
     no2 = 1:length(ind2);
     no2 = no2(ind2);
-	disp([no2' vapp(ind2)'])
+    disp([no2' vapp(ind2)'])
 end
 
 subplot(323)
@@ -1259,35 +1165,35 @@ no = no(iHyp);
 npts = round(length(hyp)/20);
 out = [];
 for n=1:19
-	t=tt((1+(n-1)*npts):n*npts);
-	tm = mean(t);
-	ts = std(t);
-	i = t<tm-3*ts | t>tm+3*ts;
-	if any(i)
-		nn = no((1+(n-1)*npts):n*npts);
-		out = [out nn(i)]; %#ok<AGROW>
-	end
+    t=tt((1+(n-1)*npts):n*npts);
+    tm = mean(t);
+    ts = std(t);
+    i = t<tm-3*ts | t>tm+3*ts;
+    if any(i)
+        nn = no((1+(n-1)*npts):n*npts);
+        out = [out nn(i)]; %#ok<AGROW>
+    end
 end
 t=tt((1+19*npts):end);
 tm = mean(t);
 ts = std(t);
 i = t<tm-2*ts | t>tm+2*ts;
 if any(i)
-	nn = no((1+19*npts):end);
-	out = [out nn(i)];
+    nn = no((1+19*npts):end);
+    out = [out nn(i)];
 end
 if ~isempty(out)
-	out = sort(out)';
-	disp('outliers - 3 sigma')
-	disp(out)
+    out = sort(out)';
+    disp('outliers - 3 sigma')
+    disp(out)
 end
 
 %
 % -------------------------------------------------------------------------
 %
-function filtre_ondelette_Callback(hObject, eventdata, handles)
+function filtre_ondelette_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 if get(handles.radiobutton_data,'Value') == 0
-	return
+    return
 end
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
@@ -1297,10 +1203,10 @@ if ~h.init_data
     return
 end
 if get(hObject,'Value')==0
-	if get(handles.radiobutton_data,'Value')==1
-		h.proc_data = mog.traces;
+    if get(handles.radiobutton_data,'Value')==1
+        h.proc_data = mog.traces;
         h.timestp = mog.data.timestp;
-	end
+    end
 else
   if isempty( mog.fw )
     mog.fw = filtrage_wavelet2(mog.traces);
@@ -1320,17 +1226,13 @@ update_tout(hObject, eventdata, handles)
 %
 % -------------------------------------------------------------------------
 %
-function boutons_trace_contigues_SelectionChangeFcn(hObject, eventdata, handles)
+function boutons_trace_contigues_SelectionChangeFcn(~, ~, ~) %#ok<DEFNU>
 
 
 %
 % -------------------------------------------------------------------------
 %
-function radiobutton_av_Callback(hObject, eventdata, handles)
-% if get(handles.radiobutton_data,'Value')==0 & ...
-% 		get(handles.radiobutton_ap,'Value')==0
-% 	return
-% end
+function radiobutton_av_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
 av = getappdata(handles.fig_bh_tomo_tt, 'av');
@@ -1340,17 +1242,20 @@ if h.init_av == 0
 end
 
 if get(handles.radiobutton_data,'Value')==1
-	mog.tt = h.pick;
-	mog.et = h.pick_et;
-	mog.tt_done = h.done;
+    mog.tt = h.pick;
+    mog.et = h.pick_et;
+    mog.tt_done = h.done;
+    mog.in = h.in;
 elseif get(handles.radiobutton_ap,'Value')==1
-	ap.tt = h.pick;
-	ap.et = h.pick_et;
-	ap.tt_done = h.done;
+    ap.tt = h.pick;
+    ap.et = h.pick_et;
+    ap.tt_done = h.done;
+    ap.in = h.in;
 end
 h.pick = av.tt;
 h.pick_et = av.et;
 h.done = av.tt_done;
+h.in = av.in;
 
 h.no_trace = 1;
 set(handles.trace_traite,'String',num2str(h.no_trace))
@@ -1371,11 +1276,7 @@ update_tout(hObject, eventdata, handles)
 %
 % -------------------------------------------------------------------------
 %
-function radiobutton_ap_Callback(hObject, eventdata, handles)
-% if get(handles.radiobutton_data,'Value')==0 & ...
-% 		get(handles.radiobutton_av,'Value')==0
-% 	return
-% end
+function radiobutton_ap_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
 av = getappdata(handles.fig_bh_tomo_tt, 'av');
@@ -1385,17 +1286,20 @@ if h.init_ap == 0
 end
 
 if get(handles.radiobutton_data,'Value')==1
-	mog.tt = h.pick;
-	mog.et = h.pick_et;
-	mog.tt_done = h.done;
+    mog.tt = h.pick;
+    mog.et = h.pick_et;
+    mog.tt_done = h.done;
+    mog.in = h.in;
 elseif get(handles.radiobutton_av,'Value')==1
-	av.tt = h.pick;
-	av.et = h.pick_et;
-	av.tt_done = h.done;
+    av.tt = h.pick;
+    av.et = h.pick_et;
+    av.tt_done = h.done;
+    av.in = h.in;
 end
 h.pick = ap.tt;
 h.pick_et = ap.et;
 h.done = ap.tt_done;
+h.in = ap.in;
 
 h.no_trace = 1;
 set(handles.trace_traite,'String',num2str(h.no_trace))
@@ -1417,10 +1321,6 @@ update_tout(hObject, eventdata, handles)
 % -------------------------------------------------------------------------
 %
 function radiobutton_data_Callback(hObject, eventdata, handles)
-% if get(handles.radiobutton_av,'Value')==0 & ...
-% 		get(handles.radiobutton_ap,'Value')==0
-% 	return
-% end
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
 av = getappdata(handles.fig_bh_tomo_tt, 'av');
@@ -1430,17 +1330,20 @@ if h.init_data == 0
 end
 
 if get(handles.radiobutton_av,'Value')==1
-	av.tt = h.pick;
-	av.et = h.pick_et;
-	av.tt_done = h.done;
+    av.tt = h.pick;
+    av.et = h.pick_et;
+    av.tt_done = h.done;
+    av.in = h.in;
 elseif get(handles.radiobutton_ap,'Value')==1
-	ap.tt = h.pick;
-	ap.et = h.pick_et;
-	ap.tt_done = h.done;
+    ap.tt = h.pick;
+    ap.et = h.pick_et;
+    ap.tt_done = h.done;
+    ap.in = h.in;
 end
 h.pick = mog.tt;
 h.pick_et = mog.et;
 h.done = mog.tt_done;
+h.in = mog.in;
 
 nos = 1:mog.data.ntrace;
 nos = nos(mog.in);
@@ -1469,60 +1372,55 @@ h = getappdata(handles.fig_bh_tomo_tt, 'h');
 mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
 
 pointe_actif=1;
-%xlim = get(handles.traces_contigues,'XLim');
-%ylim = get(handles.traces_contigues,'YLim');
 n_trace_traite = 0;
 while pointe_actif
-	update_tout(hObject, eventdata, handles)
-	[nt,tt,button] = ginput(1);
-	xlim = get(handles.traces_contigues,'XLim');
-	ylim = get(handles.traces_contigues,'YLim');
-	while button ~= 2
-		if gca ~= handles.traces_contigues || nt<xlim(1) || nt>xlim(2) ...
-				  || tt<ylim(1) || tt>ylim(2)
-			%pointe_actif=0;
-			setappdata(handles.fig_bh_tomo_tt, 'h', h)
-			return
-		end
-		h.no_trace = round(nt);
+    update_tout(hObject, eventdata, handles)
+    [nt,tt,button] = ginput(1);
+    xlim = get(handles.traces_contigues,'XLim');
+    ylim = get(handles.traces_contigues,'YLim');
+    while button ~= 2
+        if gca ~= handles.traces_contigues || nt<xlim(1) || nt>xlim(2) ...
+                  || tt<ylim(1) || tt>ylim(2)
+            setappdata(handles.fig_bh_tomo_tt, 'h', h)
+            return
+        end
+        h.no_trace = round(nt);
         h.done(h.no_trace) = true;
-		if button==1
-			h.pick(h.no_trace) = tt;			
-		elseif button==3% && mog.in(h.no_trace)
-			h.pick(h.no_trace) = -1;
-			h.pick_et(h.no_trace) = -1;
-		end
-		set(handles.trace_traite,'String',num2str(h.no_trace))
-		setappdata(handles.fig_bh_tomo_tt, 'h', h)
-		update_tout(hObject, eventdata, handles)
+        if button==1
+            h.pick(h.no_trace) = tt;            
+        elseif button==3
+            h.pick(h.no_trace) = -1;
+            h.pick_et(h.no_trace) = -1;
+        end
+        set(handles.trace_traite,'String',num2str(h.no_trace))
+        setappdata(handles.fig_bh_tomo_tt, 'h', h)
+        update_tout(hObject, eventdata, handles)
         set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace))])
-		n_trace_traite = n_trace_traite+1;
-		if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
-			sauve_mat(handles)
-		end
-		[nt,tt,button] = ginput(1);
-	end
-	% button == 2
-	if h.data_vrp == 0
-		while  h.no_trace<=mog.data.ntrace && ...
-				mog.data.Tx_z(round(nt)) == mog.data.Tx_z(h.no_trace)
-			h.no_trace = h.no_trace+1;
-		end
-	else
-		while  h.no_trace<=mog.data.ntrace && ...
-				mog.data.Tx_x(round(nt)) == mog.data.Tx_x(h.no_trace)
-			h.no_trace = h.no_trace+1;
-		end
-	end
-	if h.no_trace > mog.data.ntrace
-		h.no_trace = h.no_trace-1;
-		%pointe_actif=0;
-		setappdata(handles.fig_bh_tomo_tt, 'h', h)
-		return
-	end
-		
-	set(handles.trace_traite,'String',num2str(h.no_trace))
-	setappdata(handles.fig_bh_tomo_tt, 'h', h)
+        n_trace_traite = n_trace_traite+1;
+        if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
+            sauve_mat(handles)
+        end
+        [nt,tt,button] = ginput(1);
+    end
+    if h.data_vrp == 0
+        while  h.no_trace<=mog.data.ntrace && ...
+                mog.data.Tx_z(round(nt)) == mog.data.Tx_z(h.no_trace)
+            h.no_trace = h.no_trace+1;
+        end
+    else
+        while  h.no_trace<=mog.data.ntrace && ...
+                mog.data.Tx_x(round(nt)) == mog.data.Tx_x(h.no_trace)
+            h.no_trace = h.no_trace+1;
+        end
+    end
+    if h.no_trace > mog.data.ntrace
+        h.no_trace = h.no_trace-1;
+        setappdata(handles.fig_bh_tomo_tt, 'h', h)
+        return
+    end
+        
+    set(handles.trace_traite,'String',num2str(h.no_trace))
+    setappdata(handles.fig_bh_tomo_tt, 'h', h)
 end
 
 
@@ -1534,8 +1432,6 @@ h = getappdata(handles.fig_bh_tomo_tt, 'h');
 mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
 
 pointe_actif=1;
-%xlim = get(handles.traces_contigues,'XLim');
-%ylim = get(handles.traces_contigues,'YLim');
 n_trace_traite = 0;
 while pointe_actif==1
   update_tout(hObject, eventdata, handles)
@@ -1543,55 +1439,52 @@ while pointe_actif==1
   xlim = get(handles.traces_contigues,'XLim');
   ylim = get(handles.traces_contigues,'YLim');
   while button ~= 2
-	if gca ~= handles.traces_contigues || nt<xlim(1) || nt>xlim(2) ...
-			  || tt<ylim(1) || tt>ylim(2)
-	  %pointe_actif=0;
-	  setappdata(handles.fig_bh_tomo_tt, 'h', h)
-	  return
-	end
-	h.no_trace = round(nt);
-	h.done(h.no_trace) = true;
-	if button==1
-	  if h.pick(h.no_trace) == -1
-		warndlg(h.str.s62, h.str.s53)
-	  else
-		h.pick_et(h.no_trace) = abs(h.pick(h.no_trace)-tt);
-	  end
-	elseif button==3 && mog.in(h.no_trace)
-	  h.pick_et(h.no_trace) = -1;
-	end
-	set(handles.trace_traite,'String',num2str(h.no_trace))
-	setappdata(handles.fig_bh_tomo_tt, 'h', h)
-	update_tout(hObject, eventdata, handles)
+    if gca ~= handles.traces_contigues || nt<xlim(1) || nt>xlim(2) ...
+              || tt<ylim(1) || tt>ylim(2)
+      setappdata(handles.fig_bh_tomo_tt, 'h', h)
+      return
+    end
+    h.no_trace = round(nt);
+    h.done(h.no_trace) = true;
+    if button==1
+      if h.pick(h.no_trace) == -1
+        warndlg(h.str.s62, h.str.s53)
+      else
+        h.pick_et(h.no_trace) = abs(h.pick(h.no_trace)-tt);
+      end
+    elseif button==3 && mog.in(h.no_trace)
+      h.pick_et(h.no_trace) = -1;
+    end
+    set(handles.trace_traite,'String',num2str(h.no_trace))
+    setappdata(handles.fig_bh_tomo_tt, 'h', h)
+    update_tout(hObject, eventdata, handles)
     if h.pick_et(h.no_trace) ~= -1
         set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace)),' ± ',num2str(h.pick_et(h.no_trace))])
     else
         set(handles.text_tt_info,'String',['Picked Time: ',num2str(h.pick(h.no_trace))])
     end
 
-	n_trace_traite = n_trace_traite+1;
-	if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
-	  sauve_mat(handles)
-	end
-	[nt,tt,button] = ginput(1);
+    n_trace_traite = n_trace_traite+1;
+    if rem(n_trace_traite,50)==0 && get(handles.checkbox_interm_save,'Value')==1
+      sauve_mat(handles)
+    end
+    [nt,tt,button] = ginput(1);
   end
-  % button == 2
   if h.data_vrp == 0
-	while  h.no_trace<=mog.data.ntrace && ...
-		  mog.data.Tx_z(round(nt)) == mog.data.Tx_z(h.no_trace)
-	  h.no_trace = h.no_trace+1;
-	end
+    while  h.no_trace<=mog.data.ntrace && ...
+          mog.data.Tx_z(round(nt)) == mog.data.Tx_z(h.no_trace)
+      h.no_trace = h.no_trace+1;
+    end
   else
-	while  h.no_trace<=mog.data.ntrace && ...
-		  mog.data.Tx_x(round(nt)) == mog.data.Tx_x(h.no_trace)
-	  h.no_trace = h.no_trace+1;
-	end
+    while  h.no_trace<=mog.data.ntrace && ...
+          mog.data.Tx_x(round(nt)) == mog.data.Tx_x(h.no_trace)
+      h.no_trace = h.no_trace+1;
+    end
   end
   if h.no_trace > mog.data.ntrace
-	h.no_trace = h.no_trace-1;
-	%pointe_actif=0;
-	setappdata(handles.fig_bh_tomo_tt, 'h', h)
-	return
+    h.no_trace = h.no_trace-1;
+    setappdata(handles.fig_bh_tomo_tt, 'h', h)
+    return
   end
   
   set(handles.trace_traite,'String',num2str(h.no_trace))
@@ -1606,25 +1499,22 @@ function selectionne_contigues(hObject, eventdata, handles)
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
 pointe_actif=1;
-%xlim = get(handles.traces_contigues,'XLim');
-%ylim = get(handles.traces_contigues,'YLim');
 while pointe_actif
-	update_tout(hObject, eventdata, handles)
-	[nt,tt,button] = ginput(1);
-	xlim = get(handles.traces_contigues,'XLim');
-	ylim = get(handles.traces_contigues,'YLim');
-	while button == 1 %#ok<ALIGN>
-		if gca ~= handles.traces_contigues || nt<xlim(1) || nt>xlim(2) ...
-				  || tt<ylim(1) || tt>ylim(2)
-			%pointe_actif=0;
-			setappdata(handles.fig_bh_tomo_tt, 'h', h)
-			return
-		end
-		h.no_trace = round(nt);
-		set(handles.trace_traite,'String',num2str(h.no_trace))
-		setappdata(handles.fig_bh_tomo_tt, 'h', h)
-		update_tout(hObject, eventdata, handles)
-		[nt,tt,button] = ginput(1);
+    update_tout(hObject, eventdata, handles)
+    [nt,tt,button] = ginput(1);
+    xlim = get(handles.traces_contigues,'XLim');
+    ylim = get(handles.traces_contigues,'YLim');
+    while button == 1
+        if gca ~= handles.traces_contigues || nt<xlim(1) || nt>xlim(2) ...
+                  || tt<ylim(1) || tt>ylim(2)
+            setappdata(handles.fig_bh_tomo_tt, 'h', h)
+            return
+        end
+        h.no_trace = round(nt);
+        set(handles.trace_traite,'String',num2str(h.no_trace))
+        setappdata(handles.fig_bh_tomo_tt, 'h', h)
+        update_tout(hObject, eventdata, handles)
+        [nt,tt,button] = ginput(1);
     end
     if button == 3
         if h.data_vrp == 0
@@ -1651,9 +1541,9 @@ while pointe_actif
             end
         end
     end
-		
-	set(handles.trace_traite,'String',num2str(h.no_trace))
-	setappdata(handles.fig_bh_tomo_tt, 'h', h)
+        
+    set(handles.trace_traite,'String',num2str(h.no_trace))
+    setappdata(handles.fig_bh_tomo_tt, 'h', h)
 end
 
 
@@ -1661,7 +1551,7 @@ end
 %
 % -------------------------------------------------------------------------
 %
-function pushbutton_reinit_trace_Callback(hObject, eventdata, handles)
+function pushbutton_reinit_trace_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 h.pick(h.no_trace) = -1;
 h.pick_et(h.no_trace) = -1;
@@ -1674,39 +1564,38 @@ update_tout(hObject, eventdata, handles)
 % -------------------------------------------------------------------------
 %
 function vapp=calculVapp(handles)
-%h = getappdata(handles.fig_bh_tomo_tt, 'h');
 mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
 
 ind2 = (mog.tt ~= -1);
 ind = mog.tt_done & ind2 & mog.in;
 if sum(ind)==0
-  vapp = 0;
-  return
+    vapp = 0;
+    return
 end
 hyp = sqrt((mog.data.Tx_x(ind)-mog.data.Rx_x(ind)).^2+...
-		   (mog.data.Tx_y(ind)-mog.data.Rx_y(ind)).^2+...
-		   (mog.data.Tx_z(ind)-mog.data.Rx_z(ind)).^2);
+           (mog.data.Tx_y(ind)-mog.data.Rx_y(ind)).^2+...
+           (mog.data.Tx_z(ind)-mog.data.Rx_z(ind)).^2);
 if get(handles.action,'Value')==1  % pointe avec ecart-type
-  tt = mog.tt(ind);
-  et = mog.et(ind);
+    tt = mog.tt(ind);
+    et = mog.et(ind);
 else
-  tt = mog.tt(ind);
-  et = zeros(size(tt));
+    tt = mog.tt(ind);
+    et = zeros(size(tt));
 end
 
 vapp = hyp./tt;
 if et==0
-  vapp=mean(vapp);
+    vapp = mean(vapp);
 else
-  w=1./et;
-  vapp = sum(vapp.*w)/sum(w);
+    w = 1./et;
+    vapp = sum(vapp.*w)/sum(w);
 end
 
 
 %
 % -------------------------------------------------------------------------
 %
-function montre_vapp_Callback(hObject, eventdata, handles)
+function montre_vapp_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 update_traces_contigues(hObject, eventdata, handles)
 
 
@@ -1726,7 +1615,7 @@ set(handles.boutons_trace_contigues, 'Title',  str.s07);
 set(handles.radiobutton_tt,          'String', str.s08);
 set(handles.radiobutton_et,          'String', str.s09);
 set(handles.radiobutton_sl,          'String', str.s10);
-set(handles.pushbutton_plot_stats,              'String', str.s11);
+set(handles.pushbutton_plot_stats,   'String', str.s11);
 set(handles.uipanel1,                'Title',  str.s13);
 set(handles.trace_traitee_label,     'String', str.s14);
 set(handles.pushbutton_trace_precedente,        'String', str.s15);
@@ -1745,7 +1634,7 @@ set(handles.checkbox_interm_save,    'String', str.s56);
 %set(handles.,          'String', str.s);
 
 
-function ImportMenuItem_Callback(hObject, eventdata, handles)
+function ImportMenuItem_Callback(~, ~, handles) %#ok<DEFNU>
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 
 [file,rep] = uigetfile('*.tt',h.str.s216);
@@ -1754,47 +1643,40 @@ if isequal(file,0) || isequal(rep,0)
 end
 new_tt = load([rep,file]);
 if size(new_tt,1) > length(h.pick) || max(new_tt(:,1)) > length(h.pick)
-	uiwait(errordlg(h.str.s217))
-	return
+    uiwait(errordlg(h.str.s217))
+    return
 end
 if size(new_tt,2) == 2
-	ind = new_tt(:,1);
-	h.done(ind) = true;
-	h.pick(ind) = new_tt(:,2);
+    ind = new_tt(:,1);
+    h.done(ind) = true;
+    h.pick(ind) = new_tt(:,2);
 elseif size(new_tt,2) == 3
-	ind = new_tt(:,1);
-	h.done(ind) = true;
-	h.pick(ind) = new_tt(:,2);
-	h.pick_et(ind) = new_tt(:,3);
+    ind = new_tt(:,1);
+    h.done(ind) = true;
+    h.pick(ind) = new_tt(:,2);
+    h.pick_et(ind) = new_tt(:,3);
 else
-	uiwait(errordlg(h.str.s217))
-	return
+    uiwait(errordlg(h.str.s217))
+    return
 end
 setappdata(handles.fig_bh_tomo_tt, 'h', h)
 
 
-function checkbox_interm_save_Callback(hObject, eventdata, handles)
+function checkbox_interm_save_Callback(~, ~, ~) %#ok<DEFNU>
 
 
-function trace_traitee_label_CreateFcn(hObject, eventdata, handles)
+function trace_traitee_label_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
 set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 
 
-% --- Executes on button press in pushbutton_plot_stats.
-%function pushbutton9_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton_plot_stats (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-%display('ici')
-
 
 % --- Executes on key press with focus on fig_bh_tomo_tt or any of its controls.
-function fig_bh_tomo_tt_WindowKeyPressFcn(hObject, eventdata, handles)
+function fig_bh_tomo_tt_WindowKeyPressFcn(hObject, eventdata, handles) %#ok<DEFNU>
 % hObject    handle to fig_bh_tomo_tt (see GCBO)
 % eventdata  structure with the following fields (see FIGURE)
-%	Key: name of the key that was pressed, in lower case
-%	Character: character interpretation of the key(s) that was pressed
-%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+%    Key: name of the key that was pressed, in lower case
+%    Character: character interpretation of the key(s) that was pressed
+%    Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
 
 if eventdata.Key == 's'
@@ -1803,69 +1685,58 @@ elseif eventdata.Key == 'a'
     trace_precedente_Callback(hObject, eventdata, handles)
 elseif eventdata.Key == 't'
     axes(handles.trace_simple)
-	pointe(hObject, eventdata, handles)
+    pointe(hObject, eventdata, handles)
 end
 
 
 % --- Executes on button press in dynALim.
-function dynALim_Callback(hObject, eventdata, handles)
-% hObject    handle to dynALim (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of dynALim
+function dynALim_Callback(~, ~, ~) %#ok<DEFNU>
 
 
 % --- Executes on button press in checkbox_pickTx.
-function checkbox_pickTx_Callback(hObject, eventdata, handles)
+function checkbox_pickTx_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 update_tout(hObject, eventdata, handles)
 
 
 % --- Executes on button press in checkbox_jump.
-function checkbox_jump_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_jump (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox_jump
+function checkbox_jump_Callback(~, ~, ~) %#ok<DEFNU>
 
 
 % --- Executes on button press in pushbutton_reinit_traces.
-function pushbutton_reinit_traces_Callback(hObject, eventdata, handles)
+function pushbutton_reinit_traces_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 h = getappdata(handles.fig_bh_tomo_tt, 'h');
 mog = getappdata(handles.fig_bh_tomo_tt, 'mog');
 av = getappdata(handles.fig_bh_tomo_tt, 'av');
 ap = getappdata(handles.fig_bh_tomo_tt, 'ap');
 if (get(handles.radiobutton_data,'Value')==1)
-  %    ind = (mog.data.Tx_z(h.no_trace) == mog.data.Tx_z);
   if ~h.data_vrp
     ind = false(size(mog.data.Tx_z));
-	ind(h.no_trace)=true;
-	nn=h.no_trace+1;
-	while nn<=mog.data.ntrace && ...
-			  mog.data.Tx_z(nn) == mog.data.Tx_z(h.no_trace)
-	  ind(nn)=true;
-	  nn=nn+1;
-	end
-	nn=h.no_trace-1;
-	while nn>0 && mog.data.Tx_z(nn) == mog.data.Tx_z(h.no_trace)
-	  ind(nn)=true;
-	  nn=nn-1;
-	end
+    ind(h.no_trace)=true;
+    nn=h.no_trace+1;
+    while nn<=mog.data.ntrace && ...
+              mog.data.Tx_z(nn) == mog.data.Tx_z(h.no_trace)
+      ind(nn)=true;
+      nn=nn+1;
+    end
+    nn=h.no_trace-1;
+    while nn>0 && mog.data.Tx_z(nn) == mog.data.Tx_z(h.no_trace)
+      ind(nn)=true;
+      nn=nn-1;
+    end
   else
-	ind = false(size(mog.data.Tx_z));
-	ind(h.no_trace)=true;
-	nn=h.no_trace+1;
-	while nn<=mog.data.ntrace && ...
-			   mog.data.Tx_x(nn) == mog.data.Tx_x(h.no_trace)
-	  ind(nn)=true;
-	  nn=nn+1;
-	end
-	nn=h.no_trace-1;
-	while nn>0 && mog.data.Tx_x(nn) == mog.data.Tx_x(h.no_trace)
-	  ind(nn)=true;
-	  nn=nn-1;
-	end
+    ind = false(size(mog.data.Tx_z));
+    ind(h.no_trace)=true;
+    nn=h.no_trace+1;
+    while nn<=mog.data.ntrace && ...
+               mog.data.Tx_x(nn) == mog.data.Tx_x(h.no_trace)
+      ind(nn)=true;
+      nn=nn+1;
+    end
+    nn=h.no_trace-1;
+    while nn>0 && mog.data.Tx_x(nn) == mog.data.Tx_x(h.no_trace)
+      ind(nn)=true;
+      nn=nn-1;
+    end
   end
   ind = ind & mog.in;
   no_traces = 1:mog.data.ntrace;
@@ -1883,3 +1754,17 @@ h.pick_et(trace_no) = -1;
 h.done(trace_no) = 0;
 setappdata(handles.fig_bh_tomo_tt,'h',h)
 update_tout(hObject, eventdata, handles)
+
+
+% --- Executes on button press in radiobutton_pruned.
+function radiobutton_pruned_Callback(hObject, eventdata, handles) %#ok<DEFNU>
+h = getappdata(handles.fig_bh_tomo_tt, 'h');
+h.in(h.no_trace) = get(hObject, 'Value')==0;
+setappdata(handles.fig_bh_tomo_tt,'h',h)
+update_traces_contigues(hObject, eventdata, handles)
+
+
+function checkbox_proc_pruned_Callback(hObject, eventdata, handles) %#ok<DEFNU>
+update_positions_info(hObject, eventdata, handles)
+update_traces_contigues(hObject, eventdata, handles)
+

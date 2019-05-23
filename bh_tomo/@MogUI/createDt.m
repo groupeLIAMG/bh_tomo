@@ -216,8 +216,7 @@ uiwait(f)
         
         newMog = Mog(hnameEdit.String); % create MOG with new ID
         newMog.data = refMog.data.getSubset(ind);
-        newMog.data.rdata = [];   % we do not store traces, useless here
-        newMog.traces = [];
+        newMog.traces = refMog.traces;
         newMog.av = [];
         newMog.ap = [];
         newMog.Tx = refMog.Tx;
@@ -372,6 +371,9 @@ uiwait(f)
             warndlg('No Common Tx-Rx Found')
             return
         end
+        
+        newMog.data.rdata = [];   % we discard the traces, they are useless
+        newMog.traces = [];
         
         % append new MOG
         obj.mogs(end+1) = newMog;

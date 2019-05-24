@@ -114,13 +114,13 @@ uiwait(f)
 
     function resizeUI(varargin)
         f.Visible = 'off';
-        
+
         width = f.Position(3);
         height = f.Position(4);
-        
+
         hSize = width/2.5;
         hSpace = width/25;
-        
+
         vFac = 0.8*height/500;
         if vFac<1
             vFac = 1;
@@ -131,23 +131,23 @@ uiwait(f)
         vSize = 22*vFac;
         vBorderTop = 50*vFac;
         vBorder = 20*vFac;
-        
+
         href.Position = [2*hSpace height-vBorderTop hSize vSize];
         hrefPopup.Position = [2*hSpace height-vBorderTop-vSize hSize vSize];
-        
+
         hoff.Position = [2*hSpace height-vBorderTop-2.5*vSize hSize vSize];
         hoffEdit.Position = [3*hSpace+hSize height-vBorderTop-2.5*vSize hSize vSize];
 
         hname.Position = [2*hSpace height-vBorderTop-4*vSize hSize vSize];
         hnameEdit.Position = [3*hSpace+hSize height-vBorderTop-4*vSize hSize vSize];
-        
+
         hcompat.Position = [3*hSpace+hSize height-vBorderTop hSize vSize];
         hcompatList.Position = [3*hSpace+hSize height-vBorderTop-vSize hSize vSize];
-        
+
         hcancel.Position = [2*hSpace vBorder hSize vSize];
-        
+
         hdone.Position = [3*hSpace+hSize vBorder hSize vSize];
-        
+
         f.Visible = 'on';
 
     end
@@ -158,7 +158,7 @@ uiwait(f)
 
     function done(varargin)
 
-        if strcmp(hcompatList.String,'-')==1 
+        if strcmp(hcompatList.String,'-')==1
             warndlg('No MOG compatible')
             return
         end
@@ -166,7 +166,7 @@ uiwait(f)
             warndlg('Enter a name for new MOG')
             return
         end
-        
+
         % Check if traveltimes were picked
         no = hrefPopup.Value;
         refMog = obj.mogs(no);
@@ -175,11 +175,9 @@ uiwait(f)
             warndlg(['Traveltimes were not picked for ',refMog.name])
             return
         end
-        
+
         newMog = Mog(hnameEdit.String); % create MOG with new ID
         newMog.data = refMog.data.getSubset(ind);
-        newMog.data.rdata = [];   % we do not store traces, useless here
-        newMog.traces = [];
         newMog.av = [];
         newMog.ap = [];
         newMog.Tx = refMog.Tx;
@@ -188,7 +186,7 @@ uiwait(f)
         newMog.type = refMog.type;
         newMog.fac_dt = 1;
         newMog.user_fac_dt = 0;
-        
+
         newMog.fw = refMog.fw;
         newMog.tt = refMog.tt(ind);
         newMog.et = refMog.et(ind);
@@ -212,7 +210,7 @@ uiwait(f)
         newMog.TxCosDir = refMog.TxCosDir(ind,:);
         newMog.RxCosDir = refMog.RxCosDir(ind,:);
         newMog.in = refMog.in(ind);
-        
+
 %         debut = obj.mogs(end).no_traces(end);
 %         newMog.no_traces = debut + (1:newMog.data.ntrace);
 %         newMog.sorted = false;
@@ -220,23 +218,23 @@ uiwait(f)
         newMog.no_traces = refMog.no_traces(ind);
         newMog.sorted = refMog.sorted;
         newMog.delta = true;
-        
+
         id = ids(hcompatList.Value);
         for mog=obj.mogs
             if id == mog.ID
                 break
             end
         end
-        
+
         newMog.data.comment = ['made by MogUI.createDa, Prior: ',refMog.name,', Posterior: ',mog.name];
-        
+
         maxOffset = str2double(hoffEdit.String);
-        
+
         refTau = newMog.tauApp;
         newMog.tauApp(:) = -1;
         newMog.amp_done(:) = false;
         nFound = 0;
-        
+
         h = waitbar(0,'1','Name','Looking for Common Tx-Rx Pairs',...
             'CreateCancelBtn',...
             'setappdata(gcbf,''canceling'',1)');
@@ -263,17 +261,20 @@ uiwait(f)
                 end
             end
         end
-        
+
         delete(h)       % DELETE the waitbar; don't try to CLOSE it.
-        
+
         if nFound == 0
             warndlg('No Common Tx-Rx Found')
             return
         end
-        
+
+        newMog.data.rdata = [];   % we discard the traces, they are now useless
+        newMog.traces = [];
+
         % append new MOG
         obj.mogs(end+1) = newMog;
-            
+
         obj.notify('mogAdded')
         closeWindow()
     end
@@ -283,22 +284,22 @@ uiwait(f)
 
         ids = [];
         nc = 1;
-        compat{nc} = obj.mogs(no).name; 
+        compat{nc} = obj.mogs(no).name;
         ids(nc) = obj.mogs(no).ID;
         for nm=1:numel(obj.mogs)
             if nm==no
                 continue
             end
             test1 = ( refMog.Tx==obj.mogs(nm).Tx && refMog.Rx==obj.mogs(nm).Rx );
-            
+
             test2 = refMog.data.TxOffset==obj.mogs(nm).data.TxOffset && ...
                 refMog.data.RxOffset==obj.mogs(nm).data.RxOffset;
-            
+
             test3 = refMog.type == obj.mogs(nm).type;
-            
+
             if test1 && test2 && test3
                 nc = nc+1;
-                compat{nc} = obj.mogs(nm).name; 
+                compat{nc} = obj.mogs(nm).name;
                 ids(nc) = obj.mogs(nm).ID;
             end
         end
@@ -311,4 +312,3 @@ uiwait(f)
 
     end
 end
-

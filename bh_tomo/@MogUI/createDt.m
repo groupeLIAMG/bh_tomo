@@ -320,6 +320,9 @@ uiwait(f)
                     delete(h)
                     return
                 end
+                if all(newMog.traces(:,n1)==0)
+                    continue
+                end
                 % Report current estimate in the waitbar's message field
                 waitbar(n1/newMog.data.ntrace,h,sprintf('Trace no %d: Found %d Pairs',n1,nFound))
                 for n2=1:mog.data.ntrace
@@ -333,6 +336,9 @@ uiwait(f)
 
                         trc1 = newMog.traces(:,n1);
                         trc2 = mog.traces(:,n2);
+                        if all(trc2==0)
+                            break
+                        end
                         ns0 = round(t0new(n1)/mog.data.timec);
                         ns1 = round(t0mog(n2)/mog.data.timec);
                         dns = ns0-ns1;

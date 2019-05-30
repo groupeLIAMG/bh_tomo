@@ -231,6 +231,7 @@ uiwait(f)
         maxOffset = str2double(hoffEdit.String);
 
         refTau = newMog.tauApp;
+        refDone = newMog.amp_done;
         newMog.tauApp(:) = -1;
         newMog.amp_done(:) = false;
         nFound = 0;
@@ -243,6 +244,9 @@ uiwait(f)
         for n1=1:newMog.data.ntrace
             if getappdata(h,'canceling')
                 break
+            end
+            if refDone(n1) == false
+                continue
             end
             % Report current estimate in the waitbar's message field
             waitbar(n1/newMog.data.ntrace,h,sprintf('Trace no %d: Found %d Pairs',n1,nFound))

@@ -272,8 +272,23 @@ f.Visible = 'on';
                 warndlg('Mog removed from model, reinitializing grid')
                 hmodel.models(n).grid = Grid.empty;
             end
-
         end
+        
+        if numel(auto_pick) >= deletedMog
+            found = -1;
+            for n=1:numel(auto_pick)
+                if auto_pick(n).no_mog == deletedMog
+                    found = n;
+                    break;
+                end
+            end
+            if found ~= -1
+                ind=1:numel(auto_pick);
+                ind = ind~=found;
+                auto_pick = auto_pick(ind);
+            end
+        end
+        
         updateMogInfo()
         updateModelInfo()
     end

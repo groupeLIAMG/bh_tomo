@@ -46,7 +46,7 @@ classdef CovarianceUI < handle
         function createList(obj,varargin)
             [~,ll]=enumeration('CovarianceModels');
             l=cell(numel(ll)-1,1); % we don't want nugget (last in enum list)
-            for n=1:numel(ll)-1;
+            for n=1:numel(ll)-1
                 l{n}=ll{n};
             end
             obj.handles.hlist = uicontrol('Style','popupmenu',...
@@ -66,8 +66,10 @@ classdef CovarianceUI < handle
             obj.handles.hlist.Value = int8(t);
         end
         function setVisible(obj,v)
-            obj.handles.hp.Visible = v;
-            obj.handles.hlist.Visible = v;
+            if isprop(obj, 'handles')
+                obj.handles.hp.Visible = v;
+                obj.handles.hlist.Visible = v;
+            end
         end
         function refresh(obj)
             obj.handles.editRangeX.String = num2str(obj.range(1));

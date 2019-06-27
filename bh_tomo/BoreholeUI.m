@@ -484,6 +484,9 @@ classdef BoreholeUI < handle
                 cont = load([rep,file]);
                 [acont.x,acont.y,acont.z,~] = Borehole.project(obj.boreholes(no).fdata,...
                     cont(:,1),obj.boreholes(no).name);
+                acont.x = acont.x(:);
+                acont.y = acont.y(:);
+                acont.z = acont.z(:);
                 acont.valeur = cont(:,2);
                 if size(cont,2)==3
                     acont.variance = cont(:,3);

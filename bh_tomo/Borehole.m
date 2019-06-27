@@ -184,7 +184,7 @@ classdef Borehole < handle
             % x:     x coordinates of measurement points [1 x n2]
             % y:     y coordinates of measurement points [1 x n2]
             % z:     elevation of measurement points [1 x n2]
-            % c:     direction cosines at meas .points [n2 x 3], pointing
+            % c:     direction cosines at meas. points [n2 x 3], pointing
             %           downwards
             %
             

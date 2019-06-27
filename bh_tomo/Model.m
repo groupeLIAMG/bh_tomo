@@ -11,6 +11,7 @@ classdef Model < handle
         amp_covar    % covariance model - amplitudes
         inv_res      % inversion results
         tlinv_res    % time-lapse inversion results
+        nf_sat       % nanofluid saturation
     end
     
     methods

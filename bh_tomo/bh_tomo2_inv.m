@@ -1413,13 +1413,22 @@ f.Visible = 'on';
             return
         end
         no = hpreviousInv.Value;
-        if model.inv_res(no).param.tomoAtt==0
+        if model.inv_res(no).param.tomoAtt==0 && model.inv_res(no).param.delta == true
+            t = 100*model.inv_res(no).tomo.s ./ model.inv_res(no).param.delta_prev_m;
+            cb_title = '% change in slowness';
+        elseif model.inv_res(no).param.tomoAtt==0 && model.inv_res(no).param.delta == false
             t = 1./model.inv_res(no).tomo.s;
+            cb_title = 'Velocity';
+        elseif model.inv_res(no).param.delta == true
+            t = 100*model.inv_res(no).tomo.s ./ model.inv_res(no).param.delta_prev_m;
+            cb_title = '% change in attenuation';
         else
             t = model.inv_res(no).tomo.s;
+            cb_title = 'Attenuation';
         end
         nf=figure;
         ax=axes('Parent',nf);
+        cmap = eval(hcmap.String{hcmap.Value});
         if strcmp(model.grid.type,'3D')==1
             gv = GridViewer(model.grid);
             gv.createSliders('Parent',nf);
@@ -1428,12 +1437,15 @@ f.Visible = 'on';
         else
             if hhideUnvisited.Value == 1
                 rd = full(sum(model.inv_res(no).tomo.L));
-                t(rd == 0) = nan;                
+                t(rd == 0) = nan;
+                cmap = [0.5 0.5 0.5; cmap];
             end
             gridViewer.plotTomo(t,model.inv_res(no).name,'Distance [m]','Elevation [m]',ax)
         end
-        colorbar('peer',ax)
-        colormap(ax,hcmap.String{hcmap.Value})
+        hcb = colorbar('peer',ax);
+        hcb.Label.String = cb_title;
+        hcb.Label.FontSize = 12;
+        colormap(ax,cmap)
     end
     function deletePrevious(varargin)
         if isempty(model)
@@ -1507,7 +1519,10 @@ f.Visible = 'on';
         
         param = [];
         param.selectedMogs = hlistMog.Value;
-        cmap = hcmap.String{hcmap.Value};
+        cmap = eval(hcmap.String{hcmap.Value});
+        if hhideUnvisited.Value == 1
+            cmap = [0.5 0.5 0.5; cmap];
+        end
         clim = [];
         
         if htypeData.Value==1
@@ -1786,8 +1801,14 @@ f.Visible = 'on';
             return
         end
         
-        if param.tomoAtt==0
+        if  param.tomoAtt==0 && param.delta==true
+            model.grid.toXdmf(100*tomo.s ./ param.delta_prev_m,...
+            '% change in slowness',[rep,file])
+        elseif param.tomoAtt==0 && param.delta == false
             model.grid.toXdmf(1./tomo.s,'Velocity',[rep,file])
+        elseif param.delta==true
+            model.grid.toXdmf(100*tomo.s ./ param.delta_prev_m,...
+                '% change in attenuation',[rep,file])
         else
             model.grid.toXdmf(tomo.s,'Attenuation',[rep,file])
         end
@@ -1797,10 +1818,20 @@ f.Visible = 'on';
         if isempty(tomo)
             return
         end
-        if param.tomoAtt==0
+        if param.tomoAtt==0 && param.delta==true
+            t = 100*tomo.s ./ param.delta_prev_m;
+        elseif param.tomoAtt==0 && param.delta == false
             t = 1./tomo.s;
+        elseif param.delta==true
+            t = 100*tomo.s ./ param.delta_prev_m;
         else
             t = tomo.s;
+        end
+        cmap = eval(hcmap.String{hcmap.Value});
+        if hhideUnvisited.Value == 1
+            rd = full(sum(tomo.L));
+            t(rd == 0) = nan;
+            cmap = [0.5 0.5 0.5; cmap];
         end
         
         nf=figure;
@@ -1820,12 +1851,16 @@ f.Visible = 'on';
             gridViewer.plotTomo(t,'','Distance [m]','Elevation [m]',ax)
         end
         hb=colorbar('peer',ax);
-        colormap(nf,hcmap.String{hcmap.Value})
+        colormap(nf,cmap)
         
         load([rep,file],'mogs')
         d = mogs(hlistMog.Value).data;
-        if param.tomoAtt==0
+        if param.tomoAtt==0 && param.delta==true
+            units = '% change in slowness';
+        elseif param.tomoAtt==0 && param.delta==false
             units = [d.cunits,'/',d.tunits];
+        elseif  param.delta==true
+            units = '% change in attenuation';
         else
             units = ['Np/',d.cunits];
         end
@@ -1961,20 +1996,20 @@ f.Visible = 'on';
             return
         end
         if param.tomoAtt == 0
-            [data,idata,delta] = Model.getModelData(model,[rep,file],'tt',param.selectedMogs);
-            [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'tt');
+            [data,idata,~] = Model.getModelData(model,[rep,file],'tt',param.selectedMogs);
+            [depth,~,~] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'tt');
             data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
         else
             switch htypeData.Value
                 case 2
-                    [data,idata,delta] = Model.getModelData(model,[rep,file],'amp',param.selectedMogs);
-                    [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'tt');
+                    [data,idata,~] = Model.getModelData(model,[rep,file],'amp',param.selectedMogs);
+                    [depth,~,~] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'tt');
                 case 3
-                    [data,idata,delta] = Model.getModelData(model,[rep,file],'fce',param.selectedMogs);
-                    [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'fce');
+                    [data,idata,~] = Model.getModelData(model,[rep,file],'fce',param.selectedMogs);
+                    [depth,~,~] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'fce');
                 case 4
-                    [data,idata,delta] = Model.getModelData(model,[rep,file],'hyb',param.selectedMogs);
-                    [depth,~,delta] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'hyb');
+                    [data,idata,~] = Model.getModelData(model,[rep,file],'hyb',param.selectedMogs);
+                    [depth,~,~] = Model.getModelData(model,[rep,file],'depth',param.selectedMogs,[],'hyb');
             end
             data = [model.grid.Tx(idata,:) model.grid.Rx(idata,:) data];
         end

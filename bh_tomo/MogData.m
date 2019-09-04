@@ -602,15 +602,15 @@ classdef MogData < handle
             tTx_z = 0;
             tRx_z = 0;
             if ~isempty(tline)
-                if strcmpi(tline(1:3),'VRP'),
+                if strcmpi(tline(1:3),'VRP')
                     %vrp = 1;
                     ic = strfind(tline,'=');
                     count = length(tline);
                     sscanf(tline(ic(1)+1:count),'%f');
                     sscanf(tline(ic(2)+1:count),'%f');
                     tRx_z = sscanf(tline(ic(3)+1:count),'%f');
-                elseif strcmpi(tline(1:3),'ZOP'),
-                elseif strcmpi(tline(1:3),'MOG'),
+                elseif strcmpi(tline(1:3),'ZOP')
+                elseif strcmpi(tline(1:3),'MOG')
                     %mog = 1;
                     ic = strfind(tline,'=');
                     count = length(tline);

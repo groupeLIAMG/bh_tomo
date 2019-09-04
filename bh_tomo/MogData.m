@@ -137,7 +137,11 @@ classdef MogData < handle
             s.rnomfreq = obj.rnomfreq;
             s.csurvmod = obj.csurvmod;
             s.timec = obj.timec;
-            s.rdata = obj.rdata(:,ind);
+            if ~isempty(obj.rdata)  % rdata is empty for merged MOGs (MOGs with picked tt)
+                s.rdata = obj.rdata(:,ind);
+            else
+                s.rdata = [];
+            end
             s.timestp = obj.timestp;
             s.Tx_x = obj.Tx_x(ind);
             s.Tx_y = obj.Tx_y(ind);

@@ -11,8 +11,8 @@ tomo.rays = {};
 tomo.L = [];
 tomo.invData = [];
 
-[t0_obs,ind0,delta] = Model.getModelData(model,p.db_file,p.typeData,p.mog_no0);
-[t1_obs,ind1,delta] = Model.getModelData(model,p.db_file,p.typeData,p.mog_no1);
+[t0_obs,ind0,~] = Model.getModelData(model,p.db_file,p.typeData,p.mog_no0);
+[t1_obs,ind1,~] = Model.getModelData(model,p.db_file,p.typeData,p.mog_no1);
 Tx0=model.grid.Tx(ind0,:);
 Rx0=model.grid.Rx(ind0,:);
 Tx1=model.grid.Tx(ind1,:);
@@ -22,7 +22,7 @@ if p.tomoAtt == 1
     no=t0_obs(:,3);
     ind = zeros(size(no));
     for n=1:length(no)
-        nn=find(no(n) == model.inv_res(p.L_tomo_no).tomo.no_trace0);
+        nn=find(no(n) == model.tlinv_res(p.L_tomo_no).tomo.no_trace0);
         if isempty(nn)
             errordlg('Inconsistency between baseline traveltime and amplitude datasets', ...
                 'Inconsistent data','modal')
@@ -30,12 +30,12 @@ if p.tomoAtt == 1
         end
         ind(n)=nn;
     end
-    L0 = model.inv_res(p.L_tomo_no).tomo.L0(ind,:);
+    L0 = model.tlinv_res(p.L_tomo_no).tomo.L0(ind,:);
     
     no=t1_obs(:,3);
     ind = zeros(size(no));
     for n=1:length(no)
-        nn=find(no(n) == model.inv_res(p.L_tomo_no).tomo.no_trace);
+        nn=find(no(n) == model.tlinv_res(p.L_tomo_no).tomo.no_trace);
         if isempty(nn)
             errordlg('Inconsistency between repeat traveltime and amplitude datasets', ...
                 'Inconsistent data','modal')
@@ -43,7 +43,7 @@ if p.tomoAtt == 1
         end
         ind(n)=nn;
     end
-    L1 = model.inv_res(p.L_tomo_no).tomo.L(ind,:);
+    L1 = model.tlinv_res(p.L_tomo_no).tomo.L(ind,:);
 else
     L0 = model.grid.getForwardStraightRays(ind0);
     L1 = model.grid.getForwardStraightRays(ind1);

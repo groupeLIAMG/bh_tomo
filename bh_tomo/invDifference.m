@@ -12,8 +12,8 @@ tomo.invData = [];
 
 ref_mog_no = model.inv_res(p.ref_inv_no).param.selectedMogs;
 
-[t0_obs,ind0,delta] = Model.getModelData(model,p.db_file,p.typeData,ref_mog_no);
-[t1_obs,ind1,delta] = Model.getModelData(model,p.db_file,p.typeData,p.mog_no);
+[t0_obs,ind0,~] = Model.getModelData(model,p.db_file,p.typeData,ref_mog_no);
+[t1_obs,ind1,~] = Model.getModelData(model,p.db_file,p.typeData,p.mog_no);
 
 TxRx0 = [model.grid.Tx(ind0,:) model.grid.Rx(ind0,:)];
 TxRx1 = [model.grid.Tx(ind1,:) model.grid.Rx(ind1,:)];
@@ -33,7 +33,7 @@ if p.tomoAtt==1
     no=t1_obs(i1,3);
     ind = zeros(size(no));
     for n=1:length(no)
-        nn=find(no(n) == model.inv_res(p.L_tomo_no).tomo.no_trace);
+        nn=find(no(n) == model.tlinv_res(p.L_tomo_no).tomo.no_trace);
         if isempty(nn)
             errordlg('Inconsistency between traveltime and amplitude datasets', ...
                 'Inconsistent data','modal')
@@ -41,7 +41,7 @@ if p.tomoAtt==1
         end
         ind(n)=nn;
     end
-    L = model.inv_res(p.L_tomo_no).tomo.L(ind,:);
+    L = model.tlinv_res(p.L_tomo_no).tomo.L(ind,:);
 else
     L = L0;
 end
@@ -136,7 +136,7 @@ for noIter=1:p.max_it
         end
             
     else
-            
+
         if ~isempty(gh)
             gv.plotTomo(s,['Repeat Survey: Attenuation - Iteration ',num2str(noIter)],...
                 'Distance [m]','Elevation [m]',gh{4})

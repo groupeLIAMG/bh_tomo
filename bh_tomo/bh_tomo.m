@@ -333,7 +333,7 @@ f.Visible = 'on';
         end
         file=file2;
         rep=rep2;
-        save([rep,file],'names_mog','mogs','air','boreholes','models','auto_pick')
+        save([rep,file],'names_mog','mogs','air','boreholes','models','auto_pick','-v7.3')
         hdbname.String = char(file);
     end
 

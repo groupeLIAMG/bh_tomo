@@ -187,7 +187,7 @@ f.Visible = 'on';
         hmog.mogs = tmp.mogs;
         hmodel.models = tmp.models;
         
-        auto_pick = tmp.auto_pick; %#ok<SETNU>
+        auto_pick = tmp.auto_pick; 
         
         htextinfo.String{3} = ['Database: ',file];
         updateBHinfo()
@@ -214,7 +214,7 @@ f.Visible = 'on';
         boreholes = hborehole.boreholes; %#ok<NASGU>
         mogs = hmog.mogs; %#ok<NASGU>
         air = hmog.air; %#ok<NASGU>
-        save(db_file,'names_mog','mogs','air','boreholes','models','auto_pick')
+        save(db_file,'names_mog','mogs','air','boreholes','models','auto_pick','-v7.3')
         saved = true;
         delete(hw)
     end
@@ -234,7 +234,7 @@ f.Visible = 'on';
         boreholes = hborehole.boreholes; %#ok<NASGU>
         mogs = hmog.mogs; %#ok<NASGU>
         air = hmog.air; %#ok<NASGU>
-        save(db_file,'names_mog','mogs','air','boreholes','models','auto_pick')
+        save(db_file,'names_mog','mogs','air','boreholes','models','auto_pick','-v7.3')
         saved = true;
         delete(hw)
     end

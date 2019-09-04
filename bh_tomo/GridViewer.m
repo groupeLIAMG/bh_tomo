@@ -57,7 +57,7 @@ classdef GridViewer < handle
         function plotTomo2D(obj,tomo,ti,xl,yl,axes)
             imagesc(obj.x,obj.z,reshape(tomo,length(obj.z),length(obj.x)),'Parent',axes)
             set(axes,'DataAspectRatio',[1 1 1],'YDir','normal')
-            title(axes,ti,'FontSize',14)
+            title(axes,ti,'FontSize',14,'Interpreter','none')
             xlabel(axes,xl,'FontSize',12)
             if ~isempty(yl)
                 ylabel(axes,yl,'FontSize',12)
@@ -93,7 +93,7 @@ classdef GridViewer < handle
                     'Parent',axes);
             end
             set(axes,'DataAspectRatio',[1 1 1],'YDir','normal')
-            title(axes,ti,'FontSize',14)
+            title(axes,ti,'FontSize',14,'Interpreter','none')
             xlabel(axes,xl,'FontSize',12)
             if ~isempty(yl)
                 zlabel(axes,yl,'FontSize',12)

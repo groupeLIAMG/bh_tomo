@@ -107,9 +107,7 @@ else
 end
 
 [Dx,Dy,Dz] = grid.derivative(param.order);
-if param.delta == true
-    dt = data(:,7);
-end
+
 for noIter=1:param.numItStraight + param.numItCurved
     
     if ~isempty(th)
@@ -126,10 +124,10 @@ for noIter=1:param.numItStraight + param.numItCurved
     else
         l_moy = mean(tomo.s);
     end
-    if param.delta == false
-        mta = sum(L*l_moy,2);
-        dt = data(:,7) - mta;
-    end
+    
+    mta = sum(L*l_moy,2);
+    dt = data(:,7) - mta;
+
     if noIter==1
         s_o = l_moy * ones(size(L,2),1);
     end

@@ -112,6 +112,7 @@ classdef Model < handle
                 delta = true;
             elseif any(check)
                 errordlg('Parameter delta of selected mogs are not consistent')
+                delta = nan;
                 return
             end
             

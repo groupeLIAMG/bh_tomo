@@ -156,7 +156,9 @@ hlistMog = uicontrol('Style','listbox',...
     'Units','normalized',...
     'HorizontalAlignment','center',...
     'Position',[0.516 vSpace 0.47 4*vSize+4*vSpace],...
-    'Parent',pdata);
+    'Parent',pdata,...
+    'callback',@listMOGchanged);
+
 uicontrol('Style','text',...
     'String','Select Mog',...
     'FontSize',fs,...
@@ -408,7 +410,7 @@ vSizeTot = nLines*22 + 2*5;
 vSize = 22/vSizeTot;
 vSpace = 5/vSizeTot;
 
-uicontrol('Style','text',...
+hlStraight = uicontrol('Style','text',...
     'String','Straight Rays',...
     'Units','normalized',...
     'HorizontalAlignment','right',...
@@ -419,7 +421,7 @@ hnStraight = uicontrol('Style','edit',...
     'Units','normalized',...
     'Position',[0.34 vSpace 0.15 vSize],...
     'Parent',pnumit);
-uicontrol('Style','text',...
+hlCurved = uicontrol('Style','text',...
     'String','Curved Rays',...
     'Units','normalized',...
     'HorizontalAlignment','right',...
@@ -1557,15 +1559,8 @@ f.Visible = 'on';
         param.numItStraight = str2double(hnStraight.String);
         param.numItCurved = str2double(hnCurved.String);
         
-        if huseRays.Value == 0 && delta==true
-           warndlg('Inversion of ? data requires using rays of reference model')
-           return
-        end
-        
         if delta && param.numItCurved>0
-            warndlg('Number of curved rays iterations set to 0 for ? data')
             param.numItCurved = 0;
-            hnCurved.String = '0';
         end
         
         if param.tomoAtt == 1 && param.numItCurved > 0
@@ -1579,9 +1574,6 @@ f.Visible = 'on';
         L = [];
         rays = {};
         no_previous = hpreviousInv.Value;
-        if ~isempty(model.inv_res)
-            param.delta_prev_m = model.inv_res(no_previous).tomo.s;
-        end
         if huseRays.Value == 1
             % check if grids are compatible
             gx = 0.5*(model.grid.grx(1:end-1)+model.grid.grx(2:end));
@@ -1621,8 +1613,18 @@ f.Visible = 'on';
                     L = sqrt(Lx.^2 + Lz.^2);
                 end
             end
+        elseif delta
+            warndlg('Using straight rays for ? inversion','Warning')
+            L = model.grid.getForwardStraightRays(idata);
         end
-        
+        if ~isempty(model.inv_res)
+            param.delta_prev_m = model.inv_res(no_previous).tomo.s;
+            if numel(param.delta_prev_m) ~= size(L,2)
+                warndlg('Baseline inversion incompatible with data - Aborting','Warning','modal')
+                return
+            end
+        end
+
         width = f.Position(3);
         height = f.Position(4);        
         vFac = 1;
@@ -2078,5 +2080,35 @@ f.Visible = 'on';
         
         colormap(h2,p)
         set(get(h1,'Children'),'FaceColor',[0 0 1])
+    end
+    function listMOGchanged(varargin)
+        selectedMogs = hlistMog.Value;
+        if htypeData.Value==1
+            [~,~,delta] = Model.getModelData(model,[rep,file],'tt',selectedMogs);
+        else
+            switch htypeData.Value
+                case 2
+                    [~,~,delta] = Model.getModelData(model,[rep,file],'amp',selectedMogs);
+                case 3
+                    [~,~,delta] = Model.getModelData(model,[rep,file],'fce',selectedMogs);
+                case 4
+                    [~,~,delta] = Model.getModelData(model,[rep,file],'hyb',selectedMogs);
+            end
+        end
+        if isnan(delta)
+            return
+        end
+        if delta
+            
+            hlStraight.Visible = 'off';
+            hlCurved.Visible = 'off';
+            hnCurved.Visible = 'off';
+            pprevious.Title = 'Baseline Inversion';
+        else
+            hlStraight.Visible = 'on';
+            hlCurved.Visible = 'on';
+            hnCurved.Visible = 'on';
+            pprevious.Title = 'Previous Inversion';
+        end
     end
 end

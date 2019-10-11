@@ -45,6 +45,7 @@ classdef Mog < handle
         useAirShots
         traces
         delta
+        t0_merged
     end
     properties (SetAccess=private)
         ID
@@ -104,6 +105,7 @@ classdef Mog < handle
                 obj.useAirShots = 0;
                 obj.traces = [];
                 obj.delta = false;
+                obj.t0_merged = [];
             elseif isstruct(n)
                 if isfield(n, 'name')
                     obj.name = n.name;
@@ -202,6 +204,7 @@ classdef Mog < handle
                     obj.useAirShots = 0;
                 end
                 obj.delta = false;
+                obj.t0_merged = [];
             elseif isa(n, 'Mog')
                 obj.name = n.name;
                 obj.data = MogData(n.data);
@@ -266,6 +269,7 @@ classdef Mog < handle
 
                 obj.useAirShots = n.useAirShots;
                 obj.delta = n.delta;
+                obj.t0_merged = n.t0_merged;
             else
                 error('Invalid input')
             end

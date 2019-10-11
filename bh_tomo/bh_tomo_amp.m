@@ -241,10 +241,16 @@ h.iFmax_centroid = length(f(ind));
 ind = f<=h.Fmin_centroid;
 h.iFmin_centroid = length(f(ind));
 h.data_pick_min = mog.tt-mog.et;
+if ~isempty(mog.t0_merged)
+    h.data_pick_min = h.data_pick_min + mog.t0_merged;
+end
 h.data_pick_min(mog.tt==-1) = -1;
 ind = mog.amp_tmin == -1;
 ind2 = mog.tt ~= -1;
 mog.amp_tmin(ind&ind2) = mog.tt(ind&ind2)-mog.et(ind&ind2);
+if ~isempty(mog.t0_merged)
+    mog.amp_tmin(ind&ind2) = mog.amp_tmin(ind&ind2) + mog.t0_merged(ind&ind2);
+end
 
 set(handles.edit_omega, 'String', mog.data.antennas( regexp(mog.data.antennas,'\d') ))
 
@@ -307,7 +313,8 @@ mog = getappdata(handles.fig_bh_amp, 'mog');
 axes(handles.trace)
 
 if get(handles.filtre_ondelette,'Value')==1
-  plot(mog.data.timestp, mog.traces(:,h.no_trace), 'color',[0.8 0.8 0.8])
+  m = mean(mog.traces(:,h.no_trace));
+  plot(mog.data.timestp, mog.traces(:,h.no_trace)-m, 'color',[0.8 0.8 0.8])
   hold on
   plot(mog.data.timestp, h.proc_data(:,h.no_trace))
 else
@@ -318,22 +325,24 @@ end
 ylim=get(handles.trace,'YLim');
 update_t_lim(hObject, eventdata, handles)
 if mog.tt_done(h.no_trace) & h.data_pick_min(h.no_trace) ~= -1 %#ok<AND2>
-  plot([h.data_pick_min(h.no_trace) ...
-		h.data_pick_min(h.no_trace)], ylim,...
-	   'color',[0.8 0.8 0.8])
-  plot([h.data_pick_min(h.no_trace)+h.fen_App ...
-		h.data_pick_min(h.no_trace)+h.fen_App], ylim,...
-	   'color',[0.8 0.8 0.8])
+    x = [h.data_pick_min(h.no_trace) ...
+        h.data_pick_min(h.no_trace)+h.fen_App ...
+        h.data_pick_min(h.no_trace)+h.fen_App ...
+		h.data_pick_min(h.no_trace)];
+    y = kron(ylim, [1 1]);
+    p = patch(x, y, [0.85 0.325 0.098]);
+    p.EdgeColor = 'none';
+    p.FaceAlpha = 0.4;
 end
 
 grid on
 xlabel([h.str.s22,' [',mog.data.tunits,']'])
 ylabel(h.str.s21)
 if length(mog.amp_tmin)>=h.no_trace
-  plot([mog.amp_tmin(h.no_trace) mog.amp_tmin(h.no_trace)],ylim,'g');
+  plot([mog.amp_tmin(h.no_trace) mog.amp_tmin(h.no_trace)],ylim,'color',[0.466 0.674 0.118]);
 end
 if length(mog.amp_tmax)>=h.no_trace
-  plot([mog.amp_tmax(h.no_trace) mog.amp_tmax(h.no_trace)],ylim,'g');
+  plot([mog.amp_tmax(h.no_trace) mog.amp_tmax(h.no_trace)],ylim,'color',[0.466 0.674 0.118]);
 end
 hold off
 
@@ -358,20 +367,22 @@ Rx_y = mog.data.Rx_y(h.no_trace);
 Rx_z = mog.data.Rx_z(h.no_trace);
 no_db = mog.no_traces(h.no_trace);
 texte{1} = '';
-texte{2} = ['Positions Tx -- Rx (db # ',num2str(no_db),')'];
+texte{2} = ['MOG: ',mog.name];
 texte{3} = '';
-texte{4} = '       x        y        z';
-texte{5} = ['Tx:   ',num2str(Tx_x,'%5.2f'),'   ',num2str(Tx_y, '%5.2f'),'   ',num2str(Tx_z,'%5.2f')];
-texte{6} = ['Rx:   ',num2str(Rx_x,'%5.2f'),'   ',num2str(Rx_y, '%5.2f'),'   ',num2str(Rx_z,'%5.2f')];
-texte{7} = [num2str(sum(mog.in)), ' traces, (', num2str(size(h.proc_data,2)),' total)'];%[num2str(size(h.proc_data,2)),' traces'];
-texte{8} = '';
+texte{4} = ['Positions Tx -- Rx (db # ',num2str(no_db),')'];
+texte{5} = '';
+texte{6} = '       x        y        z';
+texte{7} = ['Tx:   ',num2str(Tx_x,'%5.2f'),'   ',num2str(Tx_y, '%5.2f'),'   ',num2str(Tx_z,'%5.2f')];
+texte{8} = ['Rx:   ',num2str(Rx_x,'%5.2f'),'   ',num2str(Rx_y, '%5.2f'),'   ',num2str(Rx_z,'%5.2f')];
+texte{9} = [num2str(sum(mog.in)), ' traces, (', num2str(size(h.proc_data,2)),' total)'];%[num2str(size(h.proc_data,2)),' traces'];
+texte{10} = '';
 if get(handles.type_analyse,'Value')==1 || get(handles.type_analyse,'Value')==2
-texte{9} = [h.str.s87,': ',num2str(round(mog.fcentroid(h.no_trace)/h.ffac)),' MHz'];
-texte{10} = [h.str.s88,': ',num2str(round(mog.scentroid(h.no_trace)/(h.ffac^2))),' MHz'];
+    texte{11} = [h.str.s87,': ',num2str(round(mog.fcentroid(h.no_trace)/h.ffac)),' MHz'];
+    texte{12} = [h.str.s88,': ',num2str(round(mog.scentroid(h.no_trace)/(h.ffac^2))),' MHz'];
 elseif get(handles.type_analyse,'Value')==3
-	texte{9} = [h.str.s83,': ',num2str(round(mog.App(h.no_trace)))];
+	texte{11} = [h.str.s83,': ',num2str(round(mog.App(h.no_trace)))];
 else
-	texte{9} = [h.str.s243,': ',num2str(round(mog.App(h.no_trace)))];
+	texte{11} = [h.str.s243,': ',num2str(round(mog.App(h.no_trace)))];
 end
 set(handles.info,'String',texte)
 

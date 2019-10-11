@@ -243,7 +243,7 @@ uiwait(f)
             end
             warndlg({'Merging with t0 correction applied';...
                 ['Updating picked tt in original MOGs will not be transfered to ',newMog.name]})
-            newMog.tt = refMog.getCorrectedTravelTimes(obj.air);
+            [newMog.tt,newMog.t0_merged] = refMog.getCorrectedTravelTimes(obj.air);
             newMog.av = [];
             newMog.ap = [];
             newMog.useAirShots = false;
@@ -264,6 +264,8 @@ uiwait(f)
                             
                             if do_t0corr == 0
                                 newMog.data.rdata = [newMog.data.rdata mog.data.rdata];
+                            else
+                                newMog.traces = [newMog.traces mog.traces];
                             end
                             newMog.data.ntrace = newMog.data.ntrace + mog.data.ntrace;
                             newMog.data.Tx_x = [newMog.data.Tx_x mog.data.Tx_x];
@@ -280,7 +282,8 @@ uiwait(f)
                                     errordlg({['No traveltime picked in ',mog.name],'Aborting'})
                                     return
                                 end
-                                [tt,~] = mog.getCorrectedTravelTimes(obj.air);
+                                [tt,t0] = mog.getCorrectedTravelTimes(obj.air);
+                                newMog.t0_merged = [newMog.t0_merged t0];
                             else
                                 tt = mog.tt;
                             end

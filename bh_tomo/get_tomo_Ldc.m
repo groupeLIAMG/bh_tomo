@@ -98,21 +98,6 @@ if ~isempty(db_file)
 	end
 	set(handles.text_db,'String',file)
 
-%     load(db_file,'models')
-%     noms_models = {};
-%     for n=1:length(models)
-%         noms_models{n} = char( models(n).name );
-%     end
-%     set(handles.popupmenu_pannneaux,'String',noms_models)
-% 
-%     if isfield(models(1), 'inv_res')
-%         noms_inv_res = {};
-%         for n=1:length(models(1).inv_res)
-%             noms_inv_res{n} = char( models(1).inv_res(n).name );
-%         end
-%         set(handles.popupmenu_inv_res,'String',noms_inv_res)        
-%     end
-%%%%%%%%%%%%%%%%%%%%%%  YH
     noms_models = {};
     noms_inv_res = {};
   	load(db_file,'models')
@@ -167,22 +152,6 @@ end
 set(handles.text_db,'String',file)
 db_file = [rep,file];
 
-% load([rep,file],'models')
-% noms_models = {};
-% for n=1:length(models)
-%     noms_models{n} = char( models(n).name );
-% end
-% set(handles.popupmenu_pannneaux,'String',noms_models)
-% if isfield(models(1), 'inv_res')
-%     noms_inv_res = {};
-%     for n=1:length(models(1).inv_res)
-%         noms_inv_res{n} = char( models(1).inv_res(n).name );
-%     end
-%     set(handles.popupmenu_inv_res,'String',noms_inv_res)
-% else
-%     %warning
-% end
-%%%%%%%%%%%%%%%%%%%% YH     
 noms_models = {};
 noms_inv_res = {};
 load(db_file,'models')
@@ -191,7 +160,7 @@ if nb_models > 0
     for n=1:nb_models
         noms_models{n} = char(models(n).name );
     end
-    if isfield(models(1), 'inv_res')        
+    if isfield(models(1), 'inv_res') || isprop(models(1), 'inv_res')
         for n=1:length(models(1).inv_res)
             noms_inv_res{n} = char(models(1).inv_res(n).name );
         end
@@ -216,25 +185,12 @@ function popupmenu_pannneaux_Callback(hObject, eventdata, handles)
 no = get(hObject,'Value');
 db_file = getappdata(handles.fig_get_Ldc,'db_file');
 
-% load(db_file,'models')
-% if isfield(models(no), 'inv_res')
-%     noms_inv_res = {};
-%     for n=1:length(models(no).inv_res)
-%         noms_inv_res{n} = char( models(no).inv_res(n).name );
-%     end
-%     set(handles.popupmenu_inv_res,'String',noms_inv_res)
-% else
-%     str = get_str_locale();
-%     uiwait(warndlg(str.s183))
-% end
-%%%%%%%%%%%%%%%%%%%% YH
- 
 load(db_file,'models')
 nb_models = length(models);
 noms_inv_res = {};
 if nb_models > 0
     if no <= nb_models
-        if isfield(models(no), 'inv_res')
+        if isfield(models(no), 'inv_res') || isprop(models(no), 'inv_res')
             for n=1:length(models(no).inv_res)
                 noms_inv_res{n} = char( models(no).inv_res(n).name );
             end
@@ -261,16 +217,11 @@ no1 = get(handles.popupmenu_pannneaux,'Value');
 no2 = get(handles.popupmenu_inv_res,'Value');
 db_file = getappdata(handles.fig_get_Ldc,'db_file');
 
-% load(db_file,'models')
-% handles.output = models(no1).inv_res(no2).tomo;
-% handles.second_output = {models(no1).name; models(no1).inv_res(no2).name};
-
-%%%%%%%%%%%%%%%%%YH
 load(db_file,'models')
 nb_models = length(models);
 if nb_models > 0
     if no1 <= nb_models
-        if isfield(models(no1), 'inv_res')
+        if isfield(models(no1), 'inv_res') || isprop(models(no1), 'inv_res')
             if isempty(models(no1).inv_res)
                 handles.output = [];
                 handles.second_output = {models(no1).name; '?'};

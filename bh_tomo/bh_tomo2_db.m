@@ -260,16 +260,17 @@ f.Visible = 'on';
         eventData = varargin{2};
         deletedMog = eventData.number;
         for n=1:length(hmodel.models)
+            ind = hmodel.models(n).mogs~=deletedMog;
+            hmodel.models(n).mogs = hmodel.models(n).mogs(ind);
             for nn=1:length(hmodel.models(n).mogs)
                 if hmodel.models(n).mogs(nn) > deletedMog
                     hmodel.models(n).mogs(nn) = hmodel.models(n).mogs(nn)-1;
                 end
             end
-            ind = hmodel.models(n).mogs~=deletedMog;
-            hmodel.models(n).mogs = hmodel.models(n).mogs(ind);
             if ~all(ind)
                 % model contained deleted mog, we should rebuild de grid
-                warndlg('Mog removed from model, reinitializing grid')
+                warndlg(['Mog removed from model ',hmodel.models(n).name,...
+                    ', reinitializing grid'])
                 hmodel.models(n).grid = Grid.empty;
             end
         end
@@ -289,6 +290,7 @@ f.Visible = 'on';
             end
         end
         
+        hmodel.updateListMog()
         updateMogInfo()
         updateModelInfo()
     end

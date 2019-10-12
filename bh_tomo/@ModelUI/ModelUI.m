@@ -64,6 +64,21 @@ classdef ModelUI < handle
             obj.handles.removeMOG.FontSize = s;
             obj.handles.listMOGs.FontSize = s;
         end
+        function updateListMog(obj,varargin)
+            no = obj.handles.listModels.Value;
+            if no>0 && no<=numel(obj.models)
+                names_mog = cell(1,length(obj.models(no).mogs));
+                for n=1:length(obj.models(no).mogs)
+                    if isempty(obj.mogUI.mogs( obj.models(no).mogs(n) ).date)
+                        names_mog{n} = obj.mogUI.mogs( obj.models(no).mogs(n) ).name;
+                    else
+                        names_mog{n} = [obj.mogUI.mogs( obj.models(no).mogs(n) ).name,' - ',...
+                            obj.mogUI.mogs( obj.models(no).mogs(n) ).date];
+                    end
+                end
+                obj.handles.listMOGs.String = names_mog;
+            end
+        end
     end
    
     methods (Access=private)
@@ -275,21 +290,6 @@ classdef ModelUI < handle
                 obj.handles.listModels.Value = value;
             end
             obj.updateListMog()
-        end
-        function updateListMog(obj,varargin)
-            no = obj.handles.listModels.Value;
-            if no>0 && no<=numel(obj.models)
-                names_mog = cell(1,length(obj.models(no).mogs));
-                for n=1:length(obj.models(no).mogs)
-                    if isempty(obj.mogUI.mogs( obj.models(no).mogs(n) ).date)
-                        names_mog{n} = obj.mogUI.mogs( obj.models(no).mogs(n) ).name;
-                    else
-                        names_mog{n} = [obj.mogUI.mogs( obj.models(no).mogs(n) ).name,' - ',...
-                            obj.mogUI.mogs( obj.models(no).mogs(n) ).date];
-                    end
-                end
-                obj.handles.listMOGs.String = names_mog;
-            end
         end
         
     end

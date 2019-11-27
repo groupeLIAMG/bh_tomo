@@ -271,33 +271,38 @@ f.Visible = 'on';
                 traces(:,nt) = filtfilt(b,a,traces(:,nt));
             end
         end
+        
+        method = hpsdPopup.Value;
+        if method==1
+            estimator = @(x) pwelch(x,[],[],[],Fs);
+        else
+            ordre = method;
+            estimator = @(x) pburg(x,ordre,nfft,Fs);
+        end
+        [tmp, freq] = estimator(traces(:,1));
+        Pxx = zeros(length(tmp), size(traces,2));
+
         if hdfreqCheck.Value == 1
-            [tmp,freq] = pburg(traces(:,1),2,nfft,Fs);
             fdom = zeros(size(traces,2), 1);
-            Pxx = zeros(length(tmp), size(traces,2));
             
             min_fdom = str2double(hdfminEdit.String) * fac_f;
             max_fdom = str2double(hdfmaxEdit.String) * fac_f;
             
             for nt=1:size(traces,2)
-                [fdom(nt), Pxx(:,nt)] = get_fdom(traces(:,nt), dt, f0, min_fdom, max_fdom);
+                if isfinite(traces(:,nt))
+                    [fdom(nt), Pxx(:,nt)] = get_fdom(traces(:,nt), dt, f0, min_fdom, max_fdom, estimator);
+                else
+                    fdom(nt) = 0;
+                    Pxx(:,nt) = 0;
+                end
             end
         else
-            method = hpsdPopup.Value;
-            if method==1
-                [tmp, freq] = pwelch(traces(:,1),[],[],[],Fs);
-                Pxx = zeros(length(tmp), size(traces,2));
-                Pxx(:,1) = tmp;
-                for nt=2:size(traces,2)
-                    Pxx(:,nt) = pwelch(traces(:,nt),[],[],[],Fs);
-                end
-            else
-                ordre = method;
-                [tmp,freq] = pburg(traces(:,1),ordre,nfft,Fs);
-                Pxx = zeros(length(tmp), size(traces,2));
-                Pxx(:,1) = tmp;
-                for nt=2:size(traces,2)
-                    Pxx(:,nt) = pburg(traces(:,nt),ordre,nfft,Fs);
+            Pxx(:,1) = tmp;
+            for nt=2:size(traces,2)
+                if isfinite(traces(:,nt))
+                    Pxx(:,nt) = estimator(traces(:,nt));
+                else
+                    Pxx(:,nt) = 0;
                 end
             end
         end

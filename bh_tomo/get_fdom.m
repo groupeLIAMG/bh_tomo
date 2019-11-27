@@ -29,16 +29,22 @@ if nargin >= 5
 		upper = varargin{2};
 	end
 end
+ordre = 5;
+if nargin >= 6
+    estimator = varargin{3};
+else
+    nfft = 2^(1+nextpow2(length(trace)));
+    ordre = 2;
+    estimator = @(x) pburg(x,ordre,nfft,1/dt);
+end
 
-nfft = 2^(1+nextpow2(length(trace)));
-ordre = 2;
-[Pxx,freq] = pburg(trace,ordre,nfft,1/dt);
-[Pmax,ifreq] = max(Pxx);
+[Pxx,freq] = estimator(trace);
+[~,ifreq] = max(Pxx);
 fdom = freq(ifreq);
 while ( fdom<lower || fdom>upper ) && ordre<5
     ordre = ordre+1;
     [Pxx,freq] = pburg(trace,ordre,nfft,1/dt);
-    [Pmax,ifreq] = max(Pxx);
+    [~,ifreq] = max(Pxx);
     fdom = freq(ifreq);
 end
 if fdom == 0 || ( ordre == 4 && ( fdom<lower || fdom>upper ) )

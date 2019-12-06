@@ -241,16 +241,16 @@ h.iFmax_centroid = length(f(ind));
 ind = f<=h.Fmin_centroid;
 h.iFmin_centroid = length(f(ind));
 h.data_pick_min = mog.tt-mog.et;
-if ~isempty(mog.t0_merged)
-    h.data_pick_min = h.data_pick_min + mog.t0_merged;
-end
+%if ~isempty(mog.t0_merged)
+%    h.data_pick_min = h.data_pick_min + mog.t0_merged;
+%end
 h.data_pick_min(mog.tt==-1) = -1;
 ind = mog.amp_tmin == -1;
 ind2 = mog.tt ~= -1;
 mog.amp_tmin(ind&ind2) = mog.tt(ind&ind2)-mog.et(ind&ind2);
-if ~isempty(mog.t0_merged)
-    mog.amp_tmin(ind&ind2) = mog.amp_tmin(ind&ind2) + mog.t0_merged(ind&ind2);
-end
+%if ~isempty(mog.t0_merged)
+%    mog.amp_tmin(ind&ind2) = mog.amp_tmin(ind&ind2) + mog.t0_merged(ind&ind2);
+%end
 
 set(handles.edit_omega, 'String', mog.data.antennas( regexp(mog.data.antennas,'\d') ))
 

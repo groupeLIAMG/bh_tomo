@@ -321,6 +321,12 @@ uiwait(f)
         
         if do_t0corr == 0
             newMog.traces = newMog.data.rdata;
+        else
+            dt = newMog.data.timestp(2) - newMog.data.timestp(1);
+            t_shift = round(newMog.t0_merged / dt);
+            for nt=1:numel(t_shift)
+                newMog.traces(:,nt) = circshift(newMog.traces(:,nt), -t_shift(nt));
+            end
         end
         
         if erase==true

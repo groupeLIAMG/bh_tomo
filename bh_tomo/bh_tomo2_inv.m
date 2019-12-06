@@ -848,21 +848,21 @@ f.Visible = 'on';
         hBorder = 15;
         width = f.Position(3);
         height = f.Position(4);
-        
+
         vFac = 1;
         if ispc
             vFac = 0.81*vFac;
         end
 %        vFac = 0.95;
-        
+
         vSize = 22*vFac;
         vSpace = 5*vFac;
         vBorder = 10*vFac;
-        
+
         axBorder = 60;%haxes1.Position(2);
         rBorder = 2*hBorder;
         hSize = 420;
-        
+
         vSize2 = 5*vSize+6*vSpace;
         vPos = height-1.5*vBorder-vSize2;
         pdata.Position = [hBorder vPos hSize vSize2];
@@ -870,23 +870,23 @@ f.Visible = 'on';
         vSize2 = 3*vSize+4*vSpace;
         vPos = vPos-vBorder-vSize2;
         pgrid.Position = [hBorder vPos hSize vSize2];
-        
+
         vSize2 = 2.75*vSize+3*vSpace;
         vPos = vPos-vBorder-vSize2;
         pprevious.Position = [hBorder vPos hSize vSize2];
-        
+
         vSize2 = 19*vSize+20*vSpace;
         vPos = vPos-vBorder-vSize2;
         pinv.Position = [hBorder vPos hSize vSize2];
-        
+
         vSize2 = height-2*axBorder-4*vSize;
         hSize2 = width-(hBorder+hSize+axBorder+rBorder);
-        
+
         hmessage.Position = [hBorder+hSize+axBorder height-2*vSize hSize2 vSize];
         pfig.Position = [hBorder+hSize+axBorder height-4.25*vSize hSize2 1.5*vSize+2*vSpace];
-        
+
         haxes1.Position = [hBorder+hSize+axBorder axBorder hSize2 vSize2];
-        
+
         f.Visible = 'on';
     end
 
@@ -912,7 +912,7 @@ f.Visible = 'on';
         if isempty(model)
             return
         end
-        
+
         if isempty(tomo)
             % save current model even if empty tomo,
             %    in case previous inversion were removed
@@ -922,7 +922,7 @@ f.Visible = 'on';
             saved = true;
             return
         end
-            
+
         switch htypeData.Value
             case 1
                 dType = '-vel';
@@ -941,7 +941,7 @@ f.Visible = 'on';
             case 2
                 cov = '-LSQR';
         end
-        nameDefault = ['tomo(',tomo.date,')',dType,cov];  
+        nameDefault = ['tomo(',tomo.date,')',dType,cov];
         prompt = {'Inversion name:                                                               '};
         title = 'Save inversion results';
         nblines = 1;
@@ -951,7 +951,7 @@ f.Visible = 'on';
         else
             return
         end
-        
+
         if isempty(model.inv_res)
             no_inv_res = 1;
         else
@@ -974,20 +974,20 @@ f.Visible = 'on';
         model.inv_res(no_inv_res).name = name;
         model.inv_res(no_inv_res).tomo = tomo;
         model.inv_res(no_inv_res).param = param;
-        
+
         hw = warndlg(['Saving ',file]);
         load([rep,file],'models')
         models(modelNo) = model; %#ok<NASGU>
         save([rep,file],'models','-append')
         saved = true;
         delete(hw)
-        
+
         names = cell(numel(model.inv_res),1);
         for n=1:numel(model.inv_res)
             names{n} = model.inv_res(n).name;
         end
         hpreviousInv.String = names;
-        
+
     end
     function openFile(varargin)
         [modelNo,file2,rep2] = chooseModel(rep,file);
@@ -1007,7 +1007,7 @@ f.Visible = 'on';
             errordlg('Grid not created, inversion cannot be computed')
             return
         end
-        
+
         %
         % Reset UI
         %
@@ -1026,7 +1026,7 @@ f.Visible = 'on';
         hlistMog.Max = numel(model.mogs);
         hlistMog.Value = 1:numel(model.mogs);
         hmodelName.String = model.name;
-        
+
         if ~isempty(model.inv_res)
             nr = cell(numel(model.inv_res),1);
             for n=1:numel(model.inv_res)
@@ -1039,7 +1039,7 @@ f.Visible = 'on';
         hpreviousInv.String = nr;
         hpreviousInv.Value = 1;
         huseRays.Value = 0;
-        
+
         hxmin.String = num2str(model.grid.grx(1));
         hxmax.String = num2str(model.grid.grx(end));
         hdx.String = num2str(model.grid.dx());
@@ -1058,7 +1058,7 @@ f.Visible = 'on';
         hzmax.String = num2str(model.grid.grz(end));
         hdz.String = num2str(model.grid.dz());
         hncells.String = [num2str(model.grid.getNumberOfCells()),' Cells'];
-        
+
         htypeData.Value = 1;
         gridViewer = GridViewer(model.grid);
         if strcmp(model.grid.type, '3D')
@@ -1093,16 +1093,16 @@ f.Visible = 'on';
         end
     end
     function fillCovarUI()
-        
+
         delete(cmUI)
         delete(cmXiUI)
         delete(cmTiltUI)
-        
+
         nLines = 9;
         vSizeTot = nLines*22 + (nLines+1)*5;
         vSize = 22/vSizeTot;
         vSpace = 5/vSizeTot;
-        
+
         if strcmp(model.grid.type, '3D')
             hsillText.Position = [0.01 vSpace 0.21 vSize];
             hthetaZtext.Position = [0.01 2*vSpace+vSize 0.21 vSize];
@@ -1131,13 +1131,13 @@ f.Visible = 'on';
             hrangeYtext.Visible = 'off';
             hrangeXtext.Visible = 'on';
         end
-        
+
         hvar.Visible = 'on';
-        
+
         hstructList.Value = 1;
         nStruct = numel(cm.covar);
         sname = cell(nStruct,1);
-        
+
         if strcmp(model.grid.type,'3D')
             cmUIpos = [0.23 0.5*vSpace 0.23 7*vSize+8*vSpace];
         else
@@ -1151,7 +1151,7 @@ f.Visible = 'on';
                 'Position',cmUIpos,...
                 'Parent',pparams);
             cmUI(n).setVisible('off');
-            
+
             cmUI(n).createList('Units','normalized',...
                 'Position',[0.23 8*vSpace+7*vSize 0.23 vSize],...
                 'Parent',pparams);
@@ -1161,7 +1161,7 @@ f.Visible = 'on';
         end
         hstructList.String = sname;
         cmUI(1).setVisible('on');
-        
+
         httNugget.String = num2str(cm.nugget_d);
         hmodelNugget.String = num2str(cm.nugget_m);
         hxiNugget.String = num2str(cm.nugget_xi);
@@ -1169,7 +1169,7 @@ f.Visible = 'on';
         hvariance.Value = cm.use_c0;
         helliptical.Value = cm.use_xi;
         htilted.Value = cm.use_tilt;
-        
+
 
         if ~isempty(cm.covar_xi)
             nStruct = numel(cm.covar_xi);
@@ -1220,7 +1220,7 @@ f.Visible = 'on';
                         'Parent',pparams);
                 end
                 cmTiltUI(n).setVisible('off');
-                
+
                 cmTiltUI(n).createList('Units','normalized',...
                     'Position',[0.74 8*vSpace+7*vSize 0.23 vSize],...
                     'Parent',pparams);
@@ -1240,7 +1240,7 @@ f.Visible = 'on';
             hxiText.Visible = 'on';
             hxiNugget.Visible = 'on';
             htilted.Enable = 'on';
-                        
+
             cmXiUI(hstructList.Value).setVisible('on');
 
         else
@@ -1335,7 +1335,7 @@ f.Visible = 'on';
         if htypeData.Value ~= previousTypeData
             % type was really changed
             if previousTypeData == 1 && htypeInv.Value == 1
-                
+
                 if isempty(model.amp_covar.covar)
                     warndlg({'Covariance model parameters not defined for Attenuation',...
                         'Use Covariance Model Estmation Module',...
@@ -1343,14 +1343,14 @@ f.Visible = 'on';
                     htypeData.Value = previousTypeData;
                     return
                 end
-                
+
                 model.tt_covar = cm;
                 cm = model.amp_covar;
                 hvar.String = 'Attenuation';
                 hcmin.String = num2str(cminAmp);
                 hcmax.String = num2str(cmaxAmp);
             elseif htypeData.Value == 1
-                
+
                 if isempty(model.amp_covar.covar)
                     warndlg({'Covariance model parameters not defined for Slowness',...
                         'Use Covariance Model Estmation Module',...
@@ -1358,7 +1358,7 @@ f.Visible = 'on';
                     htypeData.Value = previousTypeData;
                     return
                 end
-                
+
                 model.amp_covar = cm;
                 cm = model.tt_covar;
                 hvar.String = 'Slowness';
@@ -1460,7 +1460,7 @@ f.Visible = 'on';
         nos=1:numel(model.inv_res);
         ind = nos~=no;
         model.inv_res = model.inv_res(ind);
-        
+
         if isempty(model.inv_res)
             hpreviousInv.Value = 1;
             hpreviousInv.String = {'-'};
@@ -1518,7 +1518,7 @@ f.Visible = 'on';
         end
 
         hmessage.String = 'Initializing process ...';
-        
+
         param = [];
         param.selectedMogs = hlistMog.Value;
         cmap = eval(hcmap.String{hcmap.Value});
@@ -1526,7 +1526,7 @@ f.Visible = 'on';
             cmap = [0.5 0.5 0.5; cmap];
         end
         clim = [];
-        
+
         if htypeData.Value==1
             param.tomoAtt = 0;
             [data,idata,delta] = Model.getModelData(model,[rep,file],'tt',param.selectedMogs);
@@ -1554,21 +1554,21 @@ f.Visible = 'on';
             warndlg('Empty data')
             return
         end
-        
+
         param.delta = delta;
         param.numItStraight = str2double(hnStraight.String);
         param.numItCurved = str2double(hnCurved.String);
-        
+
         if delta && param.numItCurved>0
             param.numItCurved = 0;
         end
-        
+
         if param.tomoAtt == 1 && param.numItCurved > 0
             warndlg('Number of curved rays iterations set to 0 for attenuation tomography')
             param.numItCurved = 0;
             hnCurved.String = '0';
         end
-        
+
         param.saveInvData = 1;
         param.useCont = huseCont.Value;
         L = [];
@@ -1589,7 +1589,7 @@ f.Visible = 'on';
                 errordlg('Rays of previous inversion not compatible with current grid')
                 return
             end
-            
+
             ind = [];
             for n=1:size(data,1)
                 ii = find( model.inv_res(no_previous).tomo.no_trace==data(n,9) );
@@ -1602,7 +1602,7 @@ f.Visible = 'on';
             end
             L = model.inv_res(no_previous).tomo.L(ind,:);
             %rays = rays{ind};
-            
+
             if htypeInv.Value == 1
                 if model.inv_res(no_previous).param.cm.use_xi==1 && cm.use_xi==0
                     % we need to transform matrix L
@@ -1614,10 +1614,10 @@ f.Visible = 'on';
                 end
             end
         elseif delta
-            warndlg('Using straight rays for ? inversion','Warning')
+            warndlg('Using straight rays for delta inversion','Warning')
             L = model.grid.getForwardStraightRays(idata);
         end
-        if ~isempty(model.inv_res)
+        if ~isempty(model.inv_res) && param.delta==true
             param.delta_prev_m = model.inv_res(no_previous).tomo.s;
             if numel(param.delta_prev_m) ~= size(L,2)
                 warndlg('Baseline inversion incompatible with data - Aborting','Warning','modal')
@@ -1626,7 +1626,7 @@ f.Visible = 'on';
         end
 
         width = f.Position(3);
-        height = f.Position(4);        
+        height = f.Position(4);
         vFac = 1;
         if ispc
             vFac = 0.81*vFac;
@@ -1641,7 +1641,7 @@ f.Visible = 'on';
 
         if htypeInv.Value==1
             % Geostat
-            
+
             param.doSim = hdoSim.Value;
             param.nSim = str2double(hnSim.String);
             if htilted.Value==1
@@ -1690,13 +1690,13 @@ f.Visible = 'on';
             haxes2.Visible = 'off';
             haxes3.Visible = 'off';
             gh = {clim; cmap; haxes1; ''; ''; hhideUnvisited.Value; hshowTxRx.Value};
-            
+
             tomo = invLSQR(param,data,idata,model.grid,L,hmessage,gh,gridViewer);
         end
         if isempty(tomo)
             return
         end
-        
+
         if isempty(tomo.rays)
             tomo.rays = rays;
         end
@@ -1711,7 +1711,7 @@ f.Visible = 'on';
                 tomo.date = d;
             end
         end
-        
+
         saved = false;
     end
 
@@ -1797,12 +1797,12 @@ f.Visible = 'on';
         end
     end
     function exportTomo(varargin)
-        
+
         [file, rep] = uiputfile('*.xmf','Export Results');
         if isequal(file,0)
             return
         end
-        
+
         if  param.tomoAtt==0 && param.delta==true
             model.grid.toXdmf(100*tomo.s ./ param.delta_prev_m,...
             '% change in slowness',[rep,file])
@@ -1814,7 +1814,7 @@ f.Visible = 'on';
         else
             model.grid.toXdmf(tomo.s,'Attenuation',[rep,file])
         end
-        
+
     end
     function showTomo(varargin)
         if isempty(tomo)
@@ -1835,7 +1835,7 @@ f.Visible = 'on';
             t(rd == 0) = nan;
             cmap = [0.5 0.5 0.5; cmap];
         end
-        
+
         nf=figure;
         if isfield(tomo,'xi')
             ax=subplot(1,2,1,'Parent',nf);
@@ -1843,7 +1843,7 @@ f.Visible = 'on';
         else
             ax=axes('Parent',nf);
         end
-        
+
         if strcmp(model.grid.type,'3D')==1
             gv = GridViewer(model.grid);
             gv.createSliders('Parent',nf);
@@ -1854,7 +1854,7 @@ f.Visible = 'on';
         end
         hb=colorbar('peer',ax);
         colormap(nf,cmap)
-        
+
         load([rep,file],'mogs')
         d = mogs(hlistMog.Value).data;
         if param.tomoAtt==0 && param.delta==true
@@ -1867,7 +1867,7 @@ f.Visible = 'on';
             units = ['Np/',d.cunits];
         end
         set(get(hb,'Title'),'String',units,'FontSize',12)
-        
+
         if isfield(tomo,'xi')
             if param.tomoAtt==0
                 titre = 'V_x';
@@ -1913,18 +1913,18 @@ f.Visible = 'on';
         end
         nf=figure;
         ax=axes('Parent',nf);
-        
+
         rmin = 1.001*min(tomo.invData(end).res);
         rmax = 1.001*max(tomo.invData(end).res);
         rmax = max(abs([rmin rmax]));
         rmin = -rmax;
         c = [0 0 1;0.8 0.8 0.8;1 0 0];
         c = interp1((-1:1)',c,(-1:0.02:1)');
-        
+
         m = (size(c,1)-1)/(rmax-rmin);
         b = 1-rmin*m;
         p = m*tomo.invData(end).res(1)+b;
-        
+
         if strcmp(model.grid.type,'3D')
             couleur = interp1(c,p);
             plot3(ax,tomo.rays{1}(:,1),tomo.rays{1}(:,2),tomo.rays{1}(:,3),...
@@ -1951,7 +1951,7 @@ f.Visible = 'on';
                 elseif p<1
                     p=1;
                 end
-                    
+
                 couleur = interp1(c,p);
                 plot(ax,tomo.rays{n}(:,1),tomo.rays{n}(:,end),'Color',couleur)
             end
@@ -2024,28 +2024,28 @@ f.Visible = 'on';
         for n=1:nIt
             rms(n) = rmsv(tomo.invData(n).res);
         end
-        
-        
+
+
         figure
         subplot(2,2,1)
         plot(1:nIt, rms,'o')
         set(gca, 'XLim', [0 nIt+1])
         ylabel('||res||')
         xlabel('Iteration')
-        
+
         res = tomo.invData(nIt).res;
         subplot(2,2,2)
         plot(theta, res,'o')
         xlabel('Angle w/r to horizontal [deg]')
         ylabel('Residuals')
-        
+
         vres = var(res);
         h1=subplot(2,2,3);
         hist(res,30)
         xlabel('Residuals')
         ylabel('Count')
         title(['\sigma^2 = ', num2str(vres)])
-        
+
         dTx = sort(unique(depth(:,1)));
         dRx = sort(unique(depth(:,2)));
         imdata = nan(length(dTx),length(dRx));
@@ -2057,27 +2057,27 @@ f.Visible = 'on';
                 end
             end
         end
-        
+
         p = [0 0 1;1 1 1;1 0 0];
         p = interp1((-1:1)',p,(-1:0.02:1)');
-        
+
         z=imdata;
         z(isnan(imdata))=0;
         z(~isnan(imdata))=1;
-        
+
         h2=subplot(2,2,4);
         imagesc(dRx,dTx,imdata);
         set(gca,'color',[0.8 0.8 0.8]);
         alpha(z);
         axis image;
-        
+
         ca = caxis;
         caxis([-max(abs(ca)) max(abs(ca))])
-        
+
         xlabel('Rx depth')
         ylabel('Tx depth')
         colorbar
-        
+
         colormap(h2,p)
         set(get(h1,'Children'),'FaceColor',[0 0 1])
     end
@@ -2099,7 +2099,7 @@ f.Visible = 'on';
             return
         end
         if delta
-            
+
             hlStraight.Visible = 'off';
             hlCurved.Visible = 'off';
             hnCurved.Visible = 'off';

@@ -3,18 +3,20 @@ function tomo = invLSQR(param,data,idata,grid,L,th,gh,gv)
 %
 % input
 %   param : struct variable with the following members
-%       use_cont:  use constraints (1) or not (0)
-%       tomo_amp:  invert traveltimes (0) or amplitudes (1)
-%       nbreitrd:  number of straight ray iterations to perform
-%       nbreitrc:  number of curved ray iterations to perform
-%       alpha:     Lagrangian of second derivative smoothing
-%       saveInvData: save intermediate inversion results (1) or not (0)
-%       dv_max:    max velocity variation per iteration (0<dv_max<1)
-%       radar:     1 if we invert gpr data, 0 for seismic/acoustic data
-%       nbreiter:  LSQR -> max number of iterations
-%       tol:       LSQR -> tolerance on objective function
-%       gradmin:   LSQR -> min gradient on objective function
-%       correlmin: LSQR -> min correlation from one iteration to the next
+%       use_cont:       use constraints (1) or not (0)
+%       tomoAtt:        invert traveltimes (0) or amplitudes (1)
+%       numItStraight:  number of straight ray iterations to perform
+%       numItCurved:    number of curved ray iterations to perform
+%       wCont:          constraints weight
+%       order:          order of smoothing operator (1 or 2)
+%       alphax:         Lagrangian of derivative smoothing
+%       alphay:         Lagrangian of derivative smoothing
+%       alphaz:         Lagrangian of derivative smoothing
+%       saveInvData:    save intermediate inversion results (1) or not (0)
+%       dv_max:         max velocity variation per iteration (0<dv_max<1)
+%       delta:          invert time-lapse delta data
+%       nbreiter:       LSQR -> max number of iterations
+%       tol:            LSQR -> tolerance on objective function
 %
 %   data: matrix nDataPts x 9, with the following columns
 %       Tx_x Tx_y Tx_z Rx_x Rx_y Rx_z travel_time trav_time_variance ray_number
@@ -22,7 +24,7 @@ function tomo = invLSQR(param,data,idata,grid,L,th,gh,gv)
 %         Tx and Rx should be in the (x,z) plane.  If not, swap one pair
 %         of coordinate axes.
 %
-%   idata: 
+%   idata: boolean vector of data to invert
 %
 %   grid: grid object, with the following members
 %       grx:     X coordinates of grid cell edges
@@ -147,11 +149,18 @@ for noIter=1:param.numItStraight + param.numItCurved
     [x,~,~,~,resvec,lsvec] = lsqr(A,b,param.tol,param.nbreiter);
     
     if param.delta == false
-        if max(abs(s_o./(x+l_moy) - 1))>param.dv_max
-            fac = min(abs( (s_o/(param.dv_max+1)-l_moy)./x ));
+        
+        if max(abs(x./s_o)) > param.dv_max
+            fac = param.dv_max / max(abs(x./s_o));
             x = fac*x;
             s_o = x+l_moy;
         end
+        
+%         if max(abs(s_o./(x+l_moy) - 1))>param.dv_max
+%             fac = min(abs( (s_o/(param.dv_max+1)-l_moy)./x ));
+%             x = fac*x;
+%             s_o = x+l_moy;
+%         end
     else
         if max(abs(x))>param.dv_max
             x = x * param.dv_max/max(abs(x));

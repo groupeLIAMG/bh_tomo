@@ -13,6 +13,12 @@ classdef Grid2D < Grid
     methods
         % Constructor
         function obj = Grid2D(grx,grz,varargin)
+            % grid = Grid2D(grx, grz, nthreads)
+            %
+            %   grx: node coordinates along horizontal direction
+            %   grz: node coordinates along vertical direction
+            %   nthreads: (optional) number of threads to traveltime
+            %              computation (1 by default)
             if nargin>0
                 obj.grx = grx(:);
                 obj.grz = grz(:);
